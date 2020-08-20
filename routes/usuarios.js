@@ -1,0 +1,29 @@
+const { Router } = require('express');
+const { check } = require('express-validator');
+const { validarCampos } = require('../middlewares/validar-campos');
+const { listar, crear } = require('../controllers/usuarios');
+const { validarJWT } = require('../middlewares/validar-jwt');
+
+const router = Router();
+
+router.get('/', validarJWT, listar);
+
+router.post('/',
+    [
+        validarJWT,
+        check('usuario', 'El usuario es obligatorio').notEmpty(),
+        check('clave', 'La clave es obligatorio').notEmpty(),
+        check('debe_cambiar_clave_inicio_sesion', 'Debe cambiar clave es obligatorio').notEmpty(),        
+        validarCampos
+    ], crear);
+
+// router.put('/:id',
+//     [
+//         validarJWT,
+//         check('nombre', 'El nombre es obligatorio').notEmpty(),
+//         check('clave', 'La clave es obligatorio').notEmpty(),
+//         check('correo', 'Tiene que ser un email').isEmail(),
+//         validarCampos
+//     ], actualizar);
+
+module.exports = router;
