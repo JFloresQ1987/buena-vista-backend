@@ -13,7 +13,7 @@ const login = async (req, res=respone) => {
         const modeloDB = await Usuario.findOne({ usuario });
 
         if(!modeloDB){
-            return res.status(404).json({
+            return res.status(400).json({
                 ok: false,
                 msg: 'Usuario y/o clave incorrectos.'
             });
@@ -38,7 +38,7 @@ const login = async (req, res=respone) => {
     } catch (error) {
         
         console.log(error);
-        res.status(401).json({
+        res.status(500).json({
             ok: false,
             msg: 'Token no es correcto.'
         });
@@ -47,13 +47,16 @@ const login = async (req, res=respone) => {
 
 const renovar_token = async (req, res=respone) => {
     
-    const uid = req.uid;    
+    const id = req.id;    
     
-    const token = await generarJWT(uid);
+    const token = await generarJWT(id);
+
+    const usuario = await Usuario.findById({ _id: id });
     
     res.json({
         ok: true,
-        token
+        token,
+        usuario
     });
 }
 
