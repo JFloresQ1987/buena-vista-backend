@@ -29,7 +29,7 @@ const fileUpload = (req, res = response) => {
     file.mv(path, (err) => {
 
         if (err)
-            return res.json({
+            return res.status(500).json({
                 ok: false,
                 msg: 'Error al subir el documento.'
             });
@@ -48,7 +48,14 @@ const readFile = (req, res) => {
     const documento = req.params.documento;
     const path_documento = path.join(__dirname, `../images/${documento}`);
 
-    res.sendFile(path_documento);
+    res.sendFile(path_documento, (err) => {
+
+        if (err)
+            return res.status(500).json({
+                ok: false,
+                msg: 'Error al leer el documento.'
+            });
+    });
 }
 
 module.exports = {

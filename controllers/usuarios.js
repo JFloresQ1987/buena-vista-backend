@@ -1,6 +1,5 @@
 const { response } = require('express');
 const bcrypt = require('bcryptjs');
-
 const Usuario = require('../models/usuario');
 
 const listar = async(req, res) => {
@@ -15,19 +14,17 @@ const listar = async(req, res) => {
 
 const crear = async(req, res = response) => {
 
-    const { usuario, clave, correo } = req.body;
+    const { usuario, clave } = req.body;
 
     try {
 
-        const existe_registro = await Usuario.findOne({ usuario });
+        const existe_usuario = await Usuario.findOne({ usuario });
 
-        if (existe_registro) {
-
+        if (existe_usuario)
             return res.status(400).json({
                 ok: false,
                 msg: 'El usuario ya esta registrado.'
             });
-        }
 
         const modelo = new Usuario(req.body);
 

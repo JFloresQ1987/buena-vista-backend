@@ -46,6 +46,10 @@ const schema = {
         type: String,
         required: true
     },
+    avatar: {
+        type: String,
+        default: ''
+    }
 };
 
 const PersonaSchema = Schema(Object.assign(schema, schemaBase, schemaAuditoria));

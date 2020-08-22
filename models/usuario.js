@@ -22,6 +22,11 @@ const schema = {
         type: Boolean,
         required: true,
         default: false
+    },
+    persona: {
+        type: Schema.Types.ObjectId,
+        ref: 'Persona',
+        required: true
     }
 };
 
