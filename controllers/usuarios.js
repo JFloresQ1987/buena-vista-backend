@@ -3,10 +3,9 @@ const bcrypt = require('bcryptjs');
 
 const Usuario = require('../models/usuario');
 
-const listar = async (req, res) => {
+const listar = async(req, res) => {
 
-    const modelo = await Usuario.find({ "es_borrado": false }
-        , 'usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente');
+    const modelo = await Usuario.find({ "es_borrado": false }, 'usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente');
 
     res.json({
         ok: true,
@@ -14,15 +13,15 @@ const listar = async (req, res) => {
     })
 }
 
-const crear = async (req, res = response) => {
+const crear = async(req, res = response) => {
 
     const { usuario, clave, correo } = req.body;
 
     try {
 
-        const existe_usuario = await Usuario.findOne({ usuario });
+        const existe_registro = await Usuario.findOne({ usuario });
 
-        if (existe_usuario) {
+        if (existe_registro) {
 
             return res.status(400).json({
                 ok: false,

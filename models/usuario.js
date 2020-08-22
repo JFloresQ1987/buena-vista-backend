@@ -1,12 +1,14 @@
 const { Schema, model } = require('mongoose');
+const { schemaBase } = require('./base');
+const { schemaAuditoria } = require('./auditoria');
 
-const UsuarioSchema = Schema({
-    
+const schema = {
+
     usuario: {
         type: String,
         required: true,
         unique: true
-    },    
+    },
     clave: {
         type: String,
         required: true
@@ -20,22 +22,14 @@ const UsuarioSchema = Schema({
         type: Boolean,
         required: true,
         default: false
-    },
-    es_vigente: {
-        type: Boolean,
-        required: true,
-        default: true
-    },
-    es_borrado: {
-        type: Boolean,
-        required: true,
-        default: false
     }
-});
+};
 
-UsuarioSchema.method('toJSON', function () {
+const UsuarioSchema = Schema(Object.assign(schema, schemaBase, schemaAuditoria));
+
+UsuarioSchema.method('toJSON', function() {
     const { __v, _id, clave, ...object } = this.toObject();
-    
+
     object.id = _id;
     return object;
 })
