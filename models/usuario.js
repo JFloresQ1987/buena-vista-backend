@@ -27,6 +27,10 @@ const schema = {
         type: Schema.Types.ObjectId,
         ref: 'Persona',
         required: true
+    },
+    rol: {
+        type: [String],
+        default: []
     }
 };
 

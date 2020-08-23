@@ -2,7 +2,7 @@ const { Router } = require('express');
 const { check } = require('express-validator');
 const { validarCampos } = require('../middlewares/validar-campos');
 const { listar, crear } = require('../controllers/usuarios');
-const { validarJWT } = require('../middlewares/validar-jwt');
+const { validarJWT, validarAuthorization } = require('../middlewares/validar-jwt');
 
 const { fake } = require('../controllers/test');
 
@@ -14,6 +14,7 @@ router.get('/', validarJWT, listar);
 
 router.post('/', [
     validarJWT,
+    validarAuthorization,
     check('usuario', 'El usuario es obligatorio').notEmpty(),
     check('clave', 'La clave es obligatorio').notEmpty(),
     check('debe_cambiar_clave_inicio_sesion', 'Debe cambiar clave es obligatorio').notEmpty(),

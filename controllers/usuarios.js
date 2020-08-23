@@ -16,6 +16,8 @@ const crear = async(req, res = response) => {
 
     const { usuario, clave } = req.body;
 
+    // console.log('entroo 1')
+
     try {
 
         const existe_usuario = await Usuario.findOne({ usuario });

@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const Usuario = require('../models/usuario');
 const { generarJWT } = require('../helpers/jwt');
+const { getMenu } = require('../helpers/sidebar');
 
 const login = async(req, res = respone) => {
 
@@ -32,7 +33,7 @@ const login = async(req, res = respone) => {
 
         res.json({
             ok: true,
-            token
+            token,
         });
 
     } catch (error) {
@@ -54,10 +55,13 @@ const renovar_token = async(req, res = respone) => {
     const usuario = await Usuario.findById({ _id: id })
         .populate('persona', 'nombre apellido_paterno apellido_materno fecha_nacimiento es_masculino correo_electronico avatar');
 
+    // console.log(usuario.rol)
+
     res.json({
         ok: true,
         token,
-        usuario
+        usuario,
+        menu: getMenu(usuario.rol)
     });
 }
 
