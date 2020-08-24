@@ -1,6 +1,6 @@
 const { Schema, model } = require('mongoose');
-const { schemaBase } = require('./base');
-const { schemaAuditoria } = require('./auditoria');
+const { schemaBase } = require('../../base');
+const { schemaAuditoria } = require('../../auditoria');
 
 const schema = {
 

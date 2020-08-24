@@ -8,6 +8,6 @@ const router = Router();
 router.use(expressFileupload());
 
 router.get('/:documento', readFile);
-router.put('/:id',validarJWT, fileUpload);
+router.put('/:id', validarJWT, fileUpload);
 
 module.exports = router;

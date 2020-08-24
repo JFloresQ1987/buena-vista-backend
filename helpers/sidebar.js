@@ -1,14 +1,21 @@
 const getMenu = (rol) => {
 
     const menu = [{
-        opcion: 'Home',
-        icono: 'mdi mdi-gauge',
-        submenu: [
-            { opcion: 'Dashboard', url: '/dashboard' }
-        ]
-    }];
-
-    // console.log(rol)
+            opcion: 'Home',
+            icono: 'mdi mdi-gauge',
+            submenu: [
+                { opcion: 'Dashboard', url: '/dashboard' }
+            ]
+        },
+        {
+            opcion: 'Registro',
+            icono: 'mdi mdi-gauge',
+            submenu: [
+                { opcion: 'Socios', url: '/registro/gestion/socio' },
+                { opcion: 'Créditos', url: '/registro/gestion/credito' }
+            ]
+        }
+    ];
 
     if (rol.includes('Administrador')) {
         // menu[1].submenu.unshift({});

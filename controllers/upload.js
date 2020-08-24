@@ -24,7 +24,7 @@ const fileUpload = (req, res = response) => {
         });
 
     const nombre_documento = `${uuidv4()}.${extension}`;
-    const path = `./images/${nombre_documento}`;
+    const path = `./documents/${nombre_documento}`;
 
     file.mv(path, (err) => {
 
@@ -46,7 +46,7 @@ const fileUpload = (req, res = response) => {
 const readFile = (req, res) => {
 
     const documento = req.params.documento;
-    const path_documento = path.join(__dirname, `../images/${documento}`);
+    const path_documento = path.join(__dirname, `../documents/${documento}`);
 
     res.sendFile(path_documento, (err) => {
 

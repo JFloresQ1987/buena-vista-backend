@@ -1,5 +1,5 @@
 const { response } = require('express');
-const Persona = require('../models/persona');
+const Persona = require('../../../models/core/registro/persona');
 
 const listar = async(req, res) => {
 
