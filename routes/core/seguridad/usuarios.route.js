@@ -1,8 +1,8 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
 const { validarCampos } = require('../../../middlewares/validar-campos');
-const { listar, crear } = require('../../../controllers/core/seguridad/usuarios');
 const { validarJWT, validarAuthorization } = require('../../../middlewares/validar-jwt');
+const { listar, crear } = require('../../../controllers/core/seguridad/usuarios.controller');
 
 const { fake } = require('../../../controllers/test');
 

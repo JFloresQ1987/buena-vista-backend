@@ -54,7 +54,11 @@ const schema = {
     avatar: {
         type: String,
         default: ''
-    }
+    },
+    comentario: {
+        type: [String],
+        default: []
+    },
 };
 
 const PersonaSchema = Schema(Object.assign(schema, schemaBase, schemaAuditoria));

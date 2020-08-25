@@ -1,17 +1,18 @@
 const getMenu = (rol) => {
 
-    const menu = [{
-            opcion: 'Home',
-            icono: 'mdi mdi-gauge',
-            submenu: [
-                { opcion: 'Dashboard', url: '/dashboard' }
-            ]
-        },
+    const menu = [
+        /*{
+                    opcion: 'Home',
+                    icono: 'mdi mdi-gauge',
+                    submenu: [
+                        { opcion: 'Dashboard', url: '/dashboard' }
+                    ]
+                },*/
         {
             opcion: 'Registro',
             icono: 'mdi mdi-gauge',
             submenu: [
-                { opcion: 'Socios', url: '/registro/gestion/socio' },
+                { opcion: 'Socio', url: '/registro/gestion/socio' },
                 { opcion: 'Créditos', url: '/registro/gestion/credito' }
             ]
         }

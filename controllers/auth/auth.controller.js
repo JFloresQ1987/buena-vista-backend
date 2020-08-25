@@ -1,9 +1,8 @@
 const { response } = require('express');
 const bcrypt = require('bcryptjs');
-
-const Usuario = require('../../models/core/seguridad/usuario');
 const { generarJWT } = require('../../helpers/jwt');
 const { getMenu } = require('../../helpers/sidebar');
+const Usuario = require('../../models/core/seguridad/usuario.model');
 
 const login = async(req, res = respone) => {
 
