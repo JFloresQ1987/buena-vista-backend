@@ -56,7 +56,7 @@ const schema = {
         default: ''
     },
     comentario: {
-        type: [String],
+        type: [Object],
         default: []
     },
 };

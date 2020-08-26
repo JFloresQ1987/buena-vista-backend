@@ -1,5 +1,6 @@
 const { response } = require('express');
 const Persona = require('../../../models/core/registro/persona.model');
+const dayjs = require('dayjs');
 
 const listar = async(req, res) => {
 
@@ -27,8 +28,18 @@ const crear = async(req, res = response) => {
             });
         }
 
+        // console.log(now.format());
+
         const modelo = new Persona(req.body);
-        modelo.comentario = [comentario];
+        const now = dayjs();
+
+        modelo.comentario = [{
+            tipo: 'Nuevo',
+            usuario: req.header('usuario'),
+            nombre: req.header('nombre'),
+            fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
+            comentario
+        }];
         await modelo.save();
 
         res.json({
@@ -51,11 +62,15 @@ const buscar_por_documento_identidad = async(req, res) => {
     try {
 
         const documento_identidad = req.params.documento_identidad;
-        const modelo = await Persona.findOne({ "documento_identidad": documento_identidad, "es_borrado": false });
+        const persona = await Persona.findOne({ "documento_identidad": documento_identidad, "es_borrado": false });
+
+        // const now = dayjs();
+
+        // console.log(now.format('DD/MM/YYYY hh:mm:ss a'));
 
         res.json({
             ok: true,
-            modelo
+            persona
         })
     } catch (error) {
 
