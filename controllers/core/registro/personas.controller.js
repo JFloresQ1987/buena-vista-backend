@@ -35,8 +35,9 @@ const crear = async(req, res = response) => {
 
         modelo.comentario = [{
             tipo: 'Nuevo',
-            usuario: req.header('usuario'),
-            nombre: req.header('nombre'),
+            usuario: req.header('id_usuario_sesion'),
+            usuario: req.header('usuario_sesion'),
+            nombre: req.header('nombre_sesion'),
             fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
             comentario
         }];
