@@ -1,31 +1,36 @@
-const { response } = require('express');
-const bcrypt = require('bcryptjs');
-const Usuario = require('../../../models/core/seguridad/usuario.model');
+const { response } = require("express");
+const bcrypt = require("bcryptjs");
+const Usuario = require("../../../models/core/seguridad/usuario.model");
+const Persona = require("../../../models/core/registro/persona.model");
 
-const listar = async(req, res) => {
+const listar = async (req, res) => {
+    //const modelo = await Usuario.find({ "es_borrado": false }, 'usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente')
+    const usuarios = await Usuario.find(
+        { es_borrado: false },
+        "usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente"
+    ).populate('persona','nombre apellido_paterno apellido_materno');
 
-    const modelo = await Usuario.find({ "es_borrado": false }, 'usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente');
+    const total = await Usuario.find({ es_borrado: false }).count();
 
     res.json({
         ok: true,
-        modelo
-    })
-}
+        usuarios,
+        total,
+    });
+};
 
-const crear = async(req, res = response) => {
-
+const crear = async (req, res = response) => {
     const { usuario, clave } = req.body;
 
     // console.log('entroo 1')
 
     try {
-
         const existe_usuario = await Usuario.findOne({ usuario });
 
         if (existe_usuario)
             return res.status(400).json({
                 ok: false,
-                msg: 'El usuario ya esta registrado.'
+                msg: "El usuario ya esta registrado.",
             });
 
         const modelo = new Usuario(req.body);
@@ -37,18 +42,16 @@ const crear = async(req, res = response) => {
 
         res.json({
             ok: true,
-            modelo
-        })
-
+            modelo,
+        });
     } catch (error) {
-
         console.log(error);
         res.status(500).json({
             ok: false,
-            msg: 'Error inesperado.'
+            msg: "Error inesperado.",
         });
     }
-}
+};
 
 // const actualizar = async (req, res = response) => {
 
@@ -107,5 +110,5 @@ const crear = async(req, res = response) => {
 
 module.exports = {
     listar,
-    crear
-}
+    crear,
+};

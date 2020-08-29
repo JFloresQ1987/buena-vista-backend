@@ -48,7 +48,7 @@ const validarAuthorization = async(req, res, next) => {
 
         // console.log(modelo.rol.includes('Administrador'))
 
-        if (modelo.rol.includes('Administrador2'))
+        if (modelo.rol.includes('Administrador'))
             next();
         else
             res.status(400).json({
