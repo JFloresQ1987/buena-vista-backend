@@ -3,14 +3,53 @@ const Persona = require('../../../models/core/registro/persona.model');
 const dayjs = require('dayjs');
 
 const listar = async(req, res) => {
-
+    
     const modelo = await Persona.find({ "es_borrado": false });
-
+    
     res.json({
         ok: true,
         modelo
     })
 }
+
+
+const actualizar = async (req, res = response) => {
+
+    const id = req.params.id;
+    const uid = req.uid;
+ 
+    try {
+        
+        const persona = await Persona.findById(id) 
+             
+         if (!persona) {
+                return res.status(404).json({
+                    ok: false,
+                    msg: 'Persona no encontrada'
+                })
+        }           
+               
+        const cambiosPersona = {
+            ...req.body,            
+            usuario: uid
+        }
+        const personaActualizada = await Persona.findByIdAndUpdate(id, cambiosPersona, {new: true})
+        //console.log(personaActualizada);
+        res.json({
+            ok: true,
+            msg:'Actualizar socio',
+            persona: personaActualizada
+        })        
+    } catch (error) {
+
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Hable con el Adm12'
+        })
+    } 
+}
+
 
 const crear = async(req, res = response) => {
 
@@ -82,8 +121,31 @@ const buscar_por_documento_identidad = async(req, res) => {
     }
 }
 
+const buscar_id = async(req, res) => {
+
+    try {
+
+        const id = req.params.id;
+        const persona = await Persona.findById(id);
+
+        res.json({
+            ok: true,
+            persona
+        })
+    } catch (error) {
+
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error inesperado.'
+        });
+    }
+}
+
 module.exports = {
     listar,
     crear,
-    buscar_por_documento_identidad
+    actualizar,
+    buscar_por_documento_identidad,
+    buscar_id
 }
