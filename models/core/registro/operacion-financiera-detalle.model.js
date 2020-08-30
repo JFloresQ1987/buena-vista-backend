@@ -4,10 +4,18 @@ const { schemaAuditoria } = require('../../auditoria');
 
 const modelo = {
 
+    // concepto: {
+    //     type: String,
+    //     required: true,
+    //     default: ''
+    // },
     estado: {
         type: String,
         required: true,
-        default: ''
+        jsonSchema: {
+            enum: ["Previgente", "Vigente", "Pagado", "Anulado"],
+        },
+        default: 'Previgente'
     },
     numero_cuota: {
         type: Number,
@@ -16,12 +24,12 @@ const modelo = {
     },
     fecha_cuota: {
         type: String,
-        required: true,
+        // required: true,
         default: ''
     },
     fecha_plazo_cuota: {
         type: String,
-        required: true,
+        // required: true,
         default: ''
     },
     monto_gasto: {
@@ -69,12 +77,12 @@ const modelo = {
         required: true,
         default: 0
     },
-    monto_interes_ahorro: {
+    monto_interes_ganado: {
         type: Number,
         required: true,
         default: 0
     },
-    monto_retiro_interes_ahorro: {
+    monto_retiro_interes_ganado: {
         type: Number,
         required: true,
         default: 0
@@ -84,11 +92,20 @@ const modelo = {
         required: true,
         default: 0
     },
-    comentario: {
-        type: String,
-        required: true,
-        default: ''
+    pagos: {
+        type: [Object],
+        default: []
     },
+    // monto_redondeo: {
+    //     type: Number,
+    //     required: true,
+    //     default: 0
+    // },
+    // monto_saldo_capital: {
+    //     type: Number,
+    //     required: true,
+    //     default: 0
+    // },
     operacion_financiera: {
         type: Schema.Types.ObjectId,
         ref: 'OperacionFinanciera',
@@ -98,11 +115,21 @@ const modelo = {
         type: Schema.Types.ObjectId,
         ref: 'Persona',
         required: true
-    }
+    },
+    // analista: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'Persona',
+    //     required: true
+    // }
+    // grupo_banca_comunal: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'GrupoBancaComunal',
+    //     required: true
+    // }
 };
 
 const schema = Schema(
-    Object.assign(modelo, schemaBase, schemaAuditoria), { collection: 'operaciones_financieras' });
+    Object.assign(modelo, schemaBase, schemaAuditoria), { collection: 'operaciones_financieras_detalle' });
 
 schema.method('toJSON', function() {
     const { __v, _id, ...object } = this.toObject();
@@ -111,4 +138,4 @@ schema.method('toJSON', function() {
     return object;
 })
 
-module.exports = model('OperacionFinanciera', schema);
+module.exports = model('OperacionFinancieraDetalle', schema);

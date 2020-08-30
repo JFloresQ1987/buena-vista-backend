@@ -7,12 +7,28 @@ const modelo = {
     tipo: {
         type: String,
         required: true,
+        jsonSchema: {
+            enum: ["CD", "CM", "PEX", "BC"],
+        },
         default: ''
     },
+    color: {
+        type: String,
+        required: true,
+        jsonSchema: {
+            enum: ["inverse", "info", "primary", "danger", "warning", "success"],
+        },
+        default: ''
+    },
+    // configuracion: {},
+    // programacion: {},
     estado: {
         type: String,
         required: true,
-        default: ''
+        jsonSchema: {
+            enum: ["Previgente", "Vigente", "Pagado", "Anulado"],
+        },
+        default: 'Previgente'
     },
     numero_ciclo: {
         type: Number,
@@ -21,19 +37,19 @@ const modelo = {
     },
     fecha_inicio: {
         type: String,
-        required: true,
+        // required: true,
         default: ''
     },
     fecha_fin: {
         type: String,
-        required: true,
+        // required: true,
         default: ''
     },
-    gasto_administrativo: {
-        type: Number,
-        required: true,
-        default: 0
-    },
+    // gasto_administrativo: {
+    //     type: Number,
+    //     required: true,
+    //     default: 0
+    // },
     tasa_aporte_inicial: {
         type: Number,
         required: true,
@@ -49,26 +65,40 @@ const modelo = {
         required: true,
         default: 0
     },
-    tasa_aporte_interes: {
+    tasa_interes: {
         type: Number,
         required: true,
         default: 0
     },
-    tasa_aporte_mora: {
+    tasa_mora: {
         type: Number,
         required: true,
         default: 0
+    },
+    se_desembolso_prestamo: {
+        type: Boolean,
+        required: false,
+        default: false
     },
     comentario: {
-        type: String,
-        required: true,
-        default: ''
+        type: [Object],
+        default: []
     },
     persona: {
         type: Schema.Types.ObjectId,
         ref: 'Persona',
         required: true
-    }
+    },
+    // analista: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'Persona',
+    //     required: true
+    // }
+    // grupo_banca_comunal: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'GrupoBancaComunal',
+    //     required: true
+    // }
 };
 
 const schema = Schema(
