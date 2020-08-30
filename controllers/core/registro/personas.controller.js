@@ -3,9 +3,9 @@ const Persona = require('../../../models/core/registro/persona.model');
 const dayjs = require('dayjs');
 
 const listar = async(req, res) => {
-    
+
     const modelo = await Persona.find({ "es_borrado": false });
-    
+
     res.json({
         ok: true,
         modelo
@@ -13,33 +13,33 @@ const listar = async(req, res) => {
 }
 
 
-const actualizar = async (req, res = response) => {
+const actualizar = async(req, res = response) => {
 
     const id = req.params.id;
     const uid = req.uid;
- 
+
     try {
-        
-        const persona = await Persona.findById(id) 
-             
-         if (!persona) {
-                return res.status(404).json({
-                    ok: false,
-                    msg: 'Persona no encontrada'
-                })
-        }           
-               
+
+        const persona = await Persona.findById(id)
+
+        if (!persona) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Persona no encontrada'
+            })
+        }
+
         const cambiosPersona = {
-            ...req.body,            
+            ...req.body,
             usuario: uid
         }
-        const personaActualizada = await Persona.findByIdAndUpdate(id, cambiosPersona, {new: true})
-        //console.log(personaActualizada);
+        const personaActualizada = await Persona.findByIdAndUpdate(id, cambiosPersona, { new: true })
+            //console.log(personaActualizada);
         res.json({
             ok: true,
-            msg:'Actualizar socio',
+            msg: 'Actualizar socio',
             persona: personaActualizada
-        })        
+        })
     } catch (error) {
 
         console.log(error);
@@ -47,7 +47,7 @@ const actualizar = async (req, res = response) => {
             ok: false,
             msg: 'Hable con el Adm12'
         })
-    } 
+    }
 }
 
 
@@ -136,9 +136,11 @@ const buscar_id = async(req, res) => {
     } catch (error) {
 
         console.log(error);
+        // console.log(error.message);
+        //e.message
         res.status(500).json({
             ok: false,
-            msg: 'Error inesperado.'
+            msg: error.message
         });
     }
 }
