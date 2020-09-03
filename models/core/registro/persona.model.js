@@ -59,6 +59,12 @@ const schema = {
         type: [Object],
         default: []
     },
+    ubigeo: {
+        type: [Object],
+        default: []
+    },
+    // UBIGEO
+    //departamento, provincia, distrito
 };
 
 const PersonaSchema = Schema(Object.assign(schema, schemaBase, schemaAuditoria));

@@ -12,6 +12,45 @@ const listar = async(req, res) => {
     })
 }
 
+
+const actualizar = async(req, res = response) => {
+
+    const id = req.params.id;
+    const uid = req.uid;
+
+    try {
+
+        const persona = await Persona.findById(id)
+
+        if (!persona) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Persona no encontrada'
+            })
+        }
+
+        const cambiosPersona = {
+            ...req.body,
+            usuario: uid
+        }
+        const personaActualizada = await Persona.findByIdAndUpdate(id, cambiosPersona, { new: true })
+            //console.log(personaActualizada);
+        res.json({
+            ok: true,
+            msg: 'Actualizar socio',
+            persona: personaActualizada
+        })
+    } catch (error) {
+
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Hable con el Adm12'
+        })
+    }
+}
+
+
 const crear = async(req, res = response) => {
 
     const { documento_identidad, comentario } = req.body;
@@ -35,8 +74,9 @@ const crear = async(req, res = response) => {
 
         modelo.comentario = [{
             tipo: 'Nuevo',
-            usuario: req.header('usuario'),
-            nombre: req.header('nombre'),
+            usuario: req.header('id_usuario_sesion'),
+            usuario: req.header('usuario_sesion'),
+            nombre: req.header('nombre_sesion'),
             fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
             comentario
         }];
@@ -82,8 +122,33 @@ const buscar_por_documento_identidad = async(req, res) => {
     }
 }
 
+const buscar_id = async(req, res) => {
+
+    try {
+
+        const id = req.params.id;
+        const persona = await Persona.findById(id);
+
+        res.json({
+            ok: true,
+            persona
+        })
+    } catch (error) {
+
+        console.log(error);
+        // console.log(error.message);
+        //e.message
+        res.status(500).json({
+            ok: false,
+            msg: error.message
+        });
+    }
+}
+
 module.exports = {
     listar,
     crear,
-    buscar_por_documento_identidad
+    actualizar,
+    buscar_por_documento_identidad,
+    buscar_id
 }
