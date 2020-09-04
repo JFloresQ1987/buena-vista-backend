@@ -12,7 +12,7 @@ const getMenu = (rol) => {
             opcion: 'Registrar',
             icono: 'mdi mdi-gauge',
             submenu: [
-                { opcion: 'Socio', url: '/registro/gestion/socio' },
+                { opcion: 'Socio', url: '/registro/gestion/socio/nuevo' },
                 { opcion: 'Crédito', url: '/registro/gestion/credito' },
                 { opcion: 'Ahorro', url: '/registro/gestion/ahorro' }
             ]

@@ -28,11 +28,12 @@ const actualizar = async(req, res = response) => {
                 msg: 'Persona no encontrada'
             })
         }
-
+        
         const cambiosPersona = {
             ...req.body,
             usuario: uid
         }
+
         const personaActualizada = await Persona.findByIdAndUpdate(id, cambiosPersona, { new: true })
             //console.log(personaActualizada);
         res.json({
