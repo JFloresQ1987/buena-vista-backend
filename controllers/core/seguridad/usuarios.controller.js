@@ -42,8 +42,9 @@ const crear = async (req, res = response) => {
     persona.comentario = [
       {
         tipo: "Nuevo",
-        usuario: req.header("usuario"),
-        nombre: req.header("nombre"),
+        usuario: req.header("id_usuario_sesion"),
+        usuario: req.header("usuario_sesion"),
+        nombre: req.header("nombre_sesion"),
         fecha: now.format("DD/MM/YYYY hh:mm:ss a"),
         comentario,
       },
@@ -138,9 +139,10 @@ const actualizar = async (req, res = response) => {
 
     persona.referencia_domicilio = req.body.referencia_domicilio;
     persona.comentario.push({
-      tipo: "Editar",
-      usuario: req.header("usuario"),
-      nombre: req.header("nombre"),
+      tipo: "Editado",
+      usuario: req.header("id_usuario_sesion"),
+      usuario: req.header("usuario_sesion"),
+      nombre: req.header("nombre_sesion"),
       fecha: now.format("DD/MM/YYYY hh:mm:ss a"),
       comentario,
     });
