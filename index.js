@@ -18,6 +18,8 @@ app.use('/api/upload', require('./routes/upload.route'));
 app.use('/api/usuarios', require('./routes/core/seguridad/usuarios.route'));
 app.use('/api/personas', require('./routes/core/registro/personas.route'));
 app.use('/api/operacion-financiera', require('./routes/core/registro/operacion-financiera.route'));
+app.use('/api/operacion-financiera-detalle', require('./routes/core/registro/operacion-financiera-detalle.route'));
+app.use('/api/producto', require('./routes/core/configuracion/producto.route'));
 
 app.listen(process.env.PORT, () => {
 
