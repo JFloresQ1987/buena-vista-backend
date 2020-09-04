@@ -87,7 +87,33 @@ const listar_operaciones_financieras = async(req, res) => {
     }
 }
 
+const listar_operacion_financiera = async(req, res) => {
+
+    // const { id } = req.body;
+    const id_operacion_financiera = req.params.id_operacion_financiera;
+
+    // console.log(id_operacion_financiera)
+
+    try {
+
+        const modelo = await OperacionFinanciera.findOne({ "_id": id_operacion_financiera, "es_borrado": false })
+
+        res.json({
+            ok: true,
+            modelo
+        })
+    } catch (error) {
+
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error inesperado.'
+        });
+    }
+}
+
 module.exports = {
     crear,
-    listar_operaciones_financieras
+    listar_operaciones_financieras,
+    listar_operacion_financiera
 }
