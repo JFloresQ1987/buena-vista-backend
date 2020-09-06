@@ -18,10 +18,17 @@ const modelo = {
         jsonSchema: {
             enum: ["inverse", "info", "primary", "danger", "warning", "success"],
         },
-        default: ''
+        default: 'inverse'
     },
     // configuracion: {},
-    // programacion: {},
+    programacion: {
+        type: String,
+        required: true,
+        // jsonSchema: {
+        //     enum: ["inverse", "info", "primary", "danger", "warning", "success"],
+        // },
+        default: ''
+    },
     estado: {
         type: String,
         required: true,
@@ -45,11 +52,21 @@ const modelo = {
         // required: true,
         default: ''
     },
-    // gasto_administrativo: {
-    //     type: Number,
-    //     required: true,
-    //     default: 0
-    // },
+    monto_gasto: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    monto_ahorro_inicial: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    monto_capital: {
+        type: Number,
+        required: true,
+        default: 0
+    },
     tasa_aporte_inicial: {
         type: Number,
         required: true,

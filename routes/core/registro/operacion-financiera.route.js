@@ -2,11 +2,13 @@ const { Router } = require('express');
 const { check } = require('express-validator');
 const { validarCampos } = require('../../../middlewares/validar-campos');
 const { validarJWT } = require('../../../middlewares/validar-jwt');
-const { crear, listar_operaciones_financieras } = require('../../../controllers/core/registro/operacion-financiera.controller');
+const { crear, listar_operaciones_financieras, listar_operacion_financiera } = require('../../../controllers/core/registro/operacion-financiera.controller');
 
 const router = Router();
 
-router.get('/listar/:id_persona', validarJWT, listar_operaciones_financieras);
+router.get('/listar-productos/:id_persona', validarJWT, listar_operaciones_financieras);
+
+router.get('/listar-producto/:id_operacion_financiera', validarJWT, listar_operacion_financiera);
 
 router.post('/', [
     validarJWT,
