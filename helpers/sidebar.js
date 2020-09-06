@@ -56,7 +56,7 @@ const getMenu = (rol) => {
             submenu: [
                 { opcion: 'Usuarios', url: '/seguridad/gestion/usuario' },
                 { opcion: 'Roles', url: '/seguridad/gestion/rol' },
-                { opcion: 'Analistas', url: '/seguridad/gestion/rol' },
+                { opcion: 'Analistas', url: '/seguridad/gestion/analista' },
                 { opcion: 'Cajeros', url: '/seguridad/gestion/rol' }
             ]
         }, {
