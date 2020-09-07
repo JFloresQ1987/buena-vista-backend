@@ -49,13 +49,17 @@ const actualizar = async(req, res = response) => {
         modelo.avatar = req.body.avatar,
         modelo.comentario.push({
             tipo: 'Editado',
-            usuario: req.header('id_usuario_sesion'),
+            idUsuario: req.header('id_usuario_sesion'),
             usuario: req.header('usuario_sesion'),
             nombre: req.header('nombre_sesion'),
             fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
             comentario
         });
 
+        console.log(req.header('x-token'));
+        console.log(req.header('id_usuario_sesion'));
+        console.log(req.header('usuario_sesion'));
+        console.log(req.header('nombre_sesion'));
 
         await modelo.save(); 
         /* const cambiosPersona = {
