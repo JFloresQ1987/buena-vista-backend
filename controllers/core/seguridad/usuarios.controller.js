@@ -8,7 +8,7 @@ const listar = async (req, res) => {
   //const modelo = await Usuario.find({ "es_borrado": false }, 'usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente')
   const usuarios = await Usuario.find(
     { es_borrado: false },
-    "usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente"
+    "usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente rol"
   )
     .populate("persona", "nombre apellido_paterno apellido_materno")
     .sort({ persona: -1 });
@@ -20,6 +20,15 @@ const listar = async (req, res) => {
     ok: true,
     usuarios,
     total,
+  });
+};
+
+const listarxRol = async (req, res = response) => {
+  const id = req.params.id;
+  const usuarios = await Usuario.find({ es_borrado: false, rol: { $in: id } }).populate('persona','nombre apellido_paterno apellido_materno');
+  return res.json({
+    ok: true,
+    usuarios,
   });
 };
 
@@ -219,4 +228,5 @@ module.exports = {
   crear,
   getUsuario,
   actualizar,
+  listarxRol,
 };
