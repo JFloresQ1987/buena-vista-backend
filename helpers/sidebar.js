@@ -29,6 +29,7 @@ const getMenu = (rol) => {
             opcion: 'Caja',
             icono: 'mdi mdi-gauge',
             submenu: [
+                { opcion: 'Pago Productos', url: '/caja/pago/producto-caja' },
                 { opcion: 'Ingresos y egresos', url: '/registro/gestion/caja-ingresos-egresos' },
                 { opcion: 'Apertura de caja general', url: '/registro/gestion/cierre-caja' },
                 { opcion: 'Apertura de caja individual', url: '/registro/gestion/cierre-caja' },

@@ -20,6 +20,7 @@ app.use('/api/personas', require('./routes/core/registro/personas.route'));
 app.use('/api/operacion-financiera', require('./routes/core/registro/operacion-financiera.route'));
 app.use('/api/operacion-financiera-detalle', require('./routes/core/registro/operacion-financiera-detalle.route'));
 app.use('/api/producto', require('./routes/core/configuracion/producto.route'));
+app.use('/api/operacion-financiera-pago', require('./routes/core/caja/operacion-financiera-pago.route'));
 
 app.listen(process.env.PORT, () => {
 

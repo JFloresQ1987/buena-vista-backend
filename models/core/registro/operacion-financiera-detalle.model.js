@@ -132,13 +132,23 @@ const schema = Schema(
     Object.assign(modelo, schemaBase, schemaAuditoria), { collection: 'operaciones_financieras_detalle' });
 
 schema.method('toJSON', function() {
-    const { __v, _id, monto_amortizacion_capital, monto_interes, monto_ahorro_programado, ...object } = this.toObject();
+    const {
+        __v,
+        _id,
+        monto_amortizacion_capital,
+        monto_interes,
+        // monto_ahorro_programado,
+        // monto_gasto,
+        // monto_ahorro_inicial,
+        ...object
+    } = this.toObject();
 
     object.id = _id;
     object.monto_amortizacion_capital = Math.round(monto_amortizacion_capital * 100) / 100;
     object.monto_interes = Math.round(monto_interes * 100) / 100;
-    object.monto_ahorro_programado = monto_ahorro_programado;
-    object.monto_cuota = Math.ceil((monto_amortizacion_capital + monto_interes + monto_ahorro_programado) * 10) / 10;
+    // object.monto_ahorro_programado = monto_ahorro_programado;
+    object.monto_cuota = object.monto_gasto + object.monto_ahorro_inicial +
+        Math.ceil((monto_amortizacion_capital + monto_interes + object.monto_ahorro_programado) * 10) / 10;
     return object;
 })
 

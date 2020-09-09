@@ -33,6 +33,8 @@ const crear = async(req, res = response) => {
 
         for (let i = 0; i < detalle.length; i++) {
 
+            console.log(detalle[i]);
+
             operacion_financiera_detalle = new OperacionFinancieraDetalle(detalle[i]);
             operacion_financiera_detalle.operacion_financiera = modelo.id;
             operacion_financiera_detalle.persona = modelo.persona;
