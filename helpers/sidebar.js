@@ -12,7 +12,7 @@ const getMenu = (rol) => {
             opcion: 'Registrar',
             icono: 'mdi mdi-gauge',
             submenu: [
-                { opcion: 'Socio', url: '/registro/gestion/socio' },
+                { opcion: 'Socio', url: '/registro/gestion/socio/0' },
                 { opcion: 'Crédito', url: '/registro/gestion/credito' },
                 { opcion: 'Ahorro', url: '/registro/gestion/ahorro' }
             ]
@@ -58,6 +58,9 @@ const getMenu = (rol) => {
                 { opcion: 'Usuarios', url: '/seguridad/gestion/usuario' },
                 { opcion: 'Roles', url: '/seguridad/gestion/rol' },
                 { opcion: 'Analistas', url: '/seguridad/gestion/rol' },
+                { opcion: 'Cajeros', url: '/seguridad/gestion/rol' },
+                { opcion: 'Caja', url: '/seguridad/gestion/caja' },
+                { opcion: 'Analistas', url: '/seguridad/gestion/analista' },
                 { opcion: 'Cajeros', url: '/seguridad/gestion/rol' }
             ]
         }, {

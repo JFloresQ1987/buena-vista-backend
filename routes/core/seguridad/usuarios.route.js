@@ -2,7 +2,7 @@ const { Router } = require('express');
 const { check } = require('express-validator');
 const { validarCampos } = require('../../../middlewares/validar-campos');
 const { validarJWT, validarAuthorization } = require('../../../middlewares/validar-jwt');
-const { listar, crear, getUsuario, actualizar } = require('../../../controllers/core/seguridad/usuarios.controller');
+const { listar, crear, getUsuario, actualizar, listarxRol } = require('../../../controllers/core/seguridad/usuarios.controller');
 
 const { fake } = require('../../../controllers/test');
 
@@ -11,6 +11,7 @@ const router = Router();
 router.post('/fake', fake);
 
 router.get('/', validarJWT, listar);
+router.get('/rol/:id', validarJWT, listarxRol);
 router.get('/:id', validarJWT, getUsuario);
 
 router.post('/', [

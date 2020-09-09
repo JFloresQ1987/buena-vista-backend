@@ -18,6 +18,9 @@ const actualizar = async(req, res = response) => {
     const id = req.params.id;
     const uid = req.uid;
 
+    const { comentario } = req.body;
+    console.log(comentario);
+
     try {
 
         const persona = await Persona.findById(id)
@@ -29,23 +32,52 @@ const actualizar = async(req, res = response) => {
             })
         }
 
-        const cambiosPersona = {
+        const modelo = await Persona.findById(id) 
+        const now = dayjs();
+
+        modelo.nombre = req.body.nombre,
+        modelo.apellido_paterno = req.body.apellido_paterno,                
+        modelo.apellido_materno = req.body.apellido_materno,
+        modelo.documento_identidad = req.body.documento_identidad,
+        modelo.fecha_nacimiento = req.body.fecha_nacimiento,
+        modelo.es_masculino = req.body.es_masculino,
+        modelo.numero_telefono = req.body.numero_telefono,
+        modelo.numero_celular = req.body.numero_celular,
+        modelo.correo_electronico = req.body.correo_electronico,
+        modelo.domicilio = req.body.domicilio,
+        modelo.referencia_domicilio = req.body.referencia_domicilio,
+        modelo.avatar = req.body.avatar,
+        modelo.comentario.push({
+            tipo: 'Editado',
+            idUsuario: req.header('id_usuario_sesion'),
+            usuario: req.header('usuario_sesion'),
+            nombre: req.header('nombre_sesion'),
+            fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
+            comentario
+        });
+
+        console.log(req.header('x-token'));
+        console.log(req.header('id_usuario_sesion'));
+        console.log(req.header('usuario_sesion'));
+        console.log(req.header('nombre_sesion'));
+
+        await modelo.save(); 
+        /* const cambiosPersona = {
             ...req.body,
             usuario: uid
         }
-        const personaActualizada = await Persona.findByIdAndUpdate(id, cambiosPersona, { new: true })
-            //console.log(personaActualizada);
+        const personaActualizada = await Persona.findByIdAndUpdate(id, cambiosPersona, { new: true }) */
         res.json({
             ok: true,
-            msg: 'Actualizar socio',
-            persona: personaActualizada
+            msg: 'Actualizar socio'
+             
         })
     } catch (error) {
 
         console.log(error);
         res.status(500).json({
             ok: false,
-            msg: 'Hable con el Adm12'
+            msg: 'Hable con el Adm'
         })
     }
 }
@@ -63,11 +95,9 @@ const crear = async(req, res = response) => {
 
             return res.status(400).json({
                 ok: false,
-                msg: 'La persona ya esta registrado.'
+                msg: 'La persona ya esta registrada.'
             });
         }
-
-        // console.log(now.format());
 
         const modelo = new Persona(req.body);
         const now = dayjs();
