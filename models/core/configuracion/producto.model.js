@@ -14,6 +14,10 @@ const modelo = {
         required: true,
         default: ''
     },
+    configuracion: {
+        type: [Object],
+        default: []
+    },
     programacion: {
         type: [Object],
         default: []
