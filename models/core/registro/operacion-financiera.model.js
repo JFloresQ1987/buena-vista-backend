@@ -4,6 +4,39 @@ const { schemaAuditoria } = require('../../auditoria');
 
 const modelo = {
 
+    // grupo_banca_comunal: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'GrupoBancaComunal',
+    //     required: true
+    // },
+    persona: {
+        type: Schema.Types.ObjectId,
+        ref: 'Persona',
+        required: true
+    },
+    // analista: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'Persona',
+    //     required: true
+    // },
+    // producto: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'Persona',
+    //     required: true  
+    //},
+    // configuracion: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'Persona',
+    //     required: true  
+    //},
+    programacion: {
+        type: String,
+        required: true,
+        // jsonSchema: {
+        //     enum: ["inverse", "info", "primary", "danger", "warning", "success"],
+        // },
+        default: ''
+    },
     tipo: {
         type: String,
         required: true,
@@ -19,15 +52,6 @@ const modelo = {
             enum: ["inverse", "info", "primary", "danger", "warning", "success"],
         },
         default: 'inverse'
-    },
-    // configuracion: {},
-    programacion: {
-        type: String,
-        required: true,
-        // jsonSchema: {
-        //     enum: ["inverse", "info", "primary", "danger", "warning", "success"],
-        // },
-        default: ''
     },
     estado: {
         type: String,
@@ -100,22 +124,7 @@ const modelo = {
     comentario: {
         type: [Object],
         default: []
-    },
-    persona: {
-        type: Schema.Types.ObjectId,
-        ref: 'Persona',
-        required: true
-    },
-    // analista: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'Persona',
-    //     required: true
-    // }
-    // grupo_banca_comunal: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'GrupoBancaComunal',
-    //     required: true
-    // }
+    }
 };
 
 const schema = Schema(

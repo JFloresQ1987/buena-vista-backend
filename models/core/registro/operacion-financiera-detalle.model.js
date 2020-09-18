@@ -4,6 +4,31 @@ const { schemaAuditoria } = require('../../auditoria');
 
 const modelo = {
 
+    operacion_financiera: {
+        type: Schema.Types.ObjectId,
+        ref: 'OperacionFinanciera',
+        required: true
+    },
+    // grupo_banca_comunal: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'GrupoBancaComunal',
+    //     required: true
+    // },
+    persona: {
+        type: Schema.Types.ObjectId,
+        ref: 'Persona',
+        required: true
+    },
+    // analista: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'Persona',
+    //     required: true
+    // }
+    // producto: {
+    //     type: String,
+    //     required: true,
+    //     default: ''
+    // },
     // concepto: {
     //     type: String,
     //     required: true,
@@ -13,7 +38,7 @@ const modelo = {
         type: String,
         required: true,
         jsonSchema: {
-            enum: ["Previgente", "Vigente", "Pagado", "Anulado"],
+            enum: ["Previgente", "Vigente", "Pendiente", "Pagado", "Anulado"],
         },
         default: 'Previgente'
     },
@@ -72,6 +97,16 @@ const modelo = {
         required: true,
         default: 0
     },
+    monto_saldo_capital: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    monto_redondeo: {
+        type: Number,
+        required: true,
+        default: 0
+    },
     monto_interes: {
         type: Number,
         required: true,
@@ -95,37 +130,7 @@ const modelo = {
     pagos: {
         type: [Object],
         default: []
-    },
-    // monto_redondeo: {
-    //     type: Number,
-    //     required: true,
-    //     default: 0
-    // },
-    // monto_saldo_capital: {
-    //     type: Number,
-    //     required: true,
-    //     default: 0
-    // },
-    operacion_financiera: {
-        type: Schema.Types.ObjectId,
-        ref: 'OperacionFinanciera',
-        required: true
-    },
-    persona: {
-        type: Schema.Types.ObjectId,
-        ref: 'Persona',
-        required: true
-    },
-    // analista: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'Persona',
-    //     required: true
-    // }
-    // grupo_banca_comunal: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'GrupoBancaComunal',
-    //     required: true
-    // }
+    }
 };
 
 const schema = Schema(
@@ -137,7 +142,7 @@ schema.method('toJSON', function() {
         _id,
         monto_amortizacion_capital,
         monto_interes,
-        // monto_ahorro_programado,
+        monto_ahorro_programado,
         // monto_gasto,
         // monto_ahorro_inicial,
         ...object
@@ -147,8 +152,9 @@ schema.method('toJSON', function() {
     object.monto_amortizacion_capital = Math.round(monto_amortizacion_capital * 100) / 100;
     object.monto_interes = Math.round(monto_interes * 100) / 100;
     // object.monto_ahorro_programado = monto_ahorro_programado;
-    object.monto_cuota = object.monto_gasto + object.monto_ahorro_inicial +
-        Math.ceil((monto_amortizacion_capital + monto_interes + object.monto_ahorro_programado) * 10) / 10;
+    object.monto_cuota = (object.monto_gasto + object.monto_ahorro_inicial +
+        Math.ceil((monto_amortizacion_capital + monto_interes + monto_ahorro_programado) * 10) / 10).toFixed(2);
+    object.monto_ahorro_programado = monto_ahorro_programado.toFixed(2)
     return object;
 })
 
