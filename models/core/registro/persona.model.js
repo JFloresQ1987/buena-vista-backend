@@ -51,15 +51,15 @@ const schema = {
         required: true,
         default: ''
     },
+    ubigeo: {
+        type: [Object],
+        default: []
+    },
     avatar: {
         type: String,
         default: ''
     },
     comentario: {
-        type: [Object],
-        default: []
-    },
-    ubigeo: {
         type: [Object],
         default: []
     },

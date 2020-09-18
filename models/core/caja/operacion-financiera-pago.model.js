@@ -4,6 +4,56 @@ const { schemaAuditoria } = require('../../auditoria');
 
 const modelo = {
 
+    caja_diario: {
+        type: Schema.Types.ObjectId,
+        ref: 'CajaDiario',
+        required: true
+    },
+    cajero: {
+        type: Schema.Types.ObjectId,
+        ref: 'Persona',
+        // required: true
+    },
+    operacion_financiera: {
+        type: Schema.Types.ObjectId,
+        ref: 'OperacionFinanciera',
+        // required: true
+    },
+    operacion_financiera_desembolso: {
+        type: Schema.Types.ObjectId,
+        ref: 'OperacionFinanciera',
+        // required: true
+    },
+    // grupo_banca_comunal: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'GrupoBancaComunal',
+    //     required: true
+    // },
+    persona: {
+        type: Schema.Types.ObjectId,
+        ref: 'Persona',
+        // required: true
+    },
+    // analista: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'Persona',
+    //     required: true
+    // },
+    // persona_responsable: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'Persona',
+    //     required: true
+    // },
+    // concepto: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'Concepto',
+    //     // required: true
+    // },
+    concepto_detalle: {
+        type: String,
+        // required: true
+        default: ''
+    },
     estado_caja_diario: {
         type: String,
         required: true,
@@ -50,12 +100,27 @@ const modelo = {
         // required: true,
         default: 0
     },
+    monto_retiro_ahorro_inicial: {
+        type: Number,
+        // required: true,
+        default: 0
+    },
     monto_ahorro_voluntario: {
         type: Number,
         // required: true,
         default: 0
     },
+    monto_retiro_ahorro_voluntario: {
+        type: Number,
+        // required: true,
+        default: 0
+    },
     monto_ahorro_programado: {
+        type: Number,
+        // required: true,
+        default: 0
+    },
+    monto_retiro_ahorro_programado: {
         type: Number,
         // required: true,
         default: 0
@@ -75,40 +140,15 @@ const modelo = {
         // required: true,
         default: 0
     },
-    monto_mora: {
-        type: Number,
-        // required: true,
-        default: 0
-    },
-    monto_retiro_ahorro_inicial: {
-        type: Number,
-        // required: true,
-        default: 0
-    },
-    monto_retiro_ahorro_voluntario: {
-        type: Number,
-        // required: true,
-        default: 0
-    },
-    monto_retiro_ahorro_programado: {
-        type: Number,
-        // required: true,
-        default: 0
-    },
     monto_retiro_interes_ahorro: {
         type: Number,
         // required: true,
         default: 0
     },
-    // concepto: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'Concepto',
-    //     // required: true
-    // },
-    concepto_detalle: {
-        type: String,
-        // required: true
-        default: ''
+    monto_mora: {
+        type: Number,
+        // required: true,
+        default: 0
     },
     numero_comprobante: {
         type: String,
@@ -122,47 +162,7 @@ const modelo = {
     comentario: {
         type: [Object],
         default: []
-    },
-    operacion_financiera: {
-        type: Schema.Types.ObjectId,
-        ref: 'OperacionFinanciera',
-        // required: true
-    },
-    operacion_financiera_desembolso: {
-        type: Schema.Types.ObjectId,
-        ref: 'OperacionFinanciera',
-        // required: true
-    },
-    persona: {
-        type: Schema.Types.ObjectId,
-        ref: 'Persona',
-        // required: true
-    },
-    cajero: {
-        type: Schema.Types.ObjectId,
-        ref: 'Persona',
-        // required: true
-    },
-    // persona_responsable: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'Persona',
-    //     required: true
-    // },
-    // analista: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'Persona',
-    //     required: true
-    // }
-    // grupo_banca_comunal: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'GrupoBancaComunal',
-    //     required: true
-    // }
-    // caja_diario: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'CajaDiario',
-    //     required: true
-    // }
+    }
 };
 
 const schema = Schema(

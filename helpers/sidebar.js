@@ -9,17 +9,17 @@ const getMenu = (rol) => {
                     ]
                 },*/
         {
-            opcion: 'Registrar',
-            icono: 'mdi mdi-gauge',
+            opcion: 'Registro',
+            icono: 'mdi mdi-view-dashboard',
             submenu: [
                 { opcion: 'Socio', url: '/registro/gestion/socio/0' },
-                { opcion: 'Crédito', url: '/registro/gestion/credito' },
+                { opcion: 'Producto', url: '/registro/gestion/credito' },
                 { opcion: 'Ahorro', url: '/registro/gestion/ahorro' }
             ]
         },
         {
             opcion: 'Operaciones',
-            icono: 'mdi mdi-gauge',
+            icono: 'mdi mdi-chart-bubble',
             submenu: [
                 { opcion: 'Productos vigentes', url: '/operaciones/gestion/producto' },
                 { opcion: 'Productos históricos', url: '/operaciones/consulta/producto-historico' }
@@ -27,14 +27,14 @@ const getMenu = (rol) => {
         },
         {
             opcion: 'Caja',
-            icono: 'mdi mdi-gauge',
+            icono: 'mdi mdi-cart',
             submenu: [
                 { opcion: 'Pago Productos', url: '/caja/pago/producto-caja' },
                 { opcion: 'Ingresos y egresos', url: '/caja/gestion/ingresos-egresos' },
                 { opcion: 'Apertura de caja general', url: '/registro/gestion/cierre-caja' },
                 { opcion: 'Apertura de caja individual', url: '/registro/gestion/cierre-caja' },
                 { opcion: 'Cierre de caja general', url: '/registro/gestion/cierre-caja' },
-                { opcion: 'Cierre de caja individual', url: '/registro/gestion/cierre-caja' },
+                { opcion: 'Cierre de caja individual', url: '/caja/pago/cierre-caja-individual' },
                 { opcion: 'Anular recibo', url: '/registro/gestion/cierre-caja' },
                 { opcion: 'Duplicado de recibo', url: '/registro/gestion/cierre-caja' }
             ]
@@ -52,24 +52,26 @@ const getMenu = (rol) => {
     if (rol.includes('Administrador')) {
         // menu[1].submenu.unshift({});
         menu.unshift({
-            opcion: 'Gestionar',
-            icono: 'mdi mdi-bullseye',
-            submenu: [
-                { opcion: 'Usuarios', url: '/seguridad/gestion/usuario' },
-                { opcion: 'Roles', url: '/seguridad/gestion/rol' },
-                { opcion: 'Analistas', url: '/seguridad/gestion/rol' },
-                { opcion: 'Cajeros', url: '/seguridad/gestion/rol' },
-                { opcion: 'Caja', url: '/seguridad/gestion/caja' },
-                { opcion: 'Analistas', url: '/seguridad/gestion/analista' },
-                { opcion: 'Cajeros', url: '/seguridad/gestion/rol' }
-            ]
-        }, {
-            opcion: 'Reportes',
-            icono: 'mdi mdi-bullseye',
-            submenu: [
-                { opcion: 'Diario', url: '/seguridad/gestion/usuario' }
-            ]
-        });
+                opcion: 'Seguridad',
+                icono: 'mdi mdi-account-key',
+                submenu: [
+                    { opcion: 'Usuarios', url: '/seguridad/gestion/usuario' },
+                    // { opcion: 'Roles', url: '/seguridad/gestion/rol' },
+                    // { opcion: 'Analistas', url: '/seguridad/gestion/rol' },
+                    // { opcion: 'Cajeros', url: '/seguridad/gestion/rol' },
+                    { opcion: 'Caja', url: '/seguridad/gestion/caja' },
+                    { opcion: 'Analistas', url: '/seguridad/gestion/analista' },
+                    // { opcion: 'Cajeros', url: '/seguridad/gestion/rol' }
+                ]
+            }
+            /*, {
+                        opcion: 'Reportes',
+                        icono: 'mdi mdi-clipboard-text',
+                        submenu: [
+                            { opcion: 'Diario', url: '/seguridad/gestion/usuario' }
+                        ]
+                    }*/
+        );
     }
 
     return menu;
