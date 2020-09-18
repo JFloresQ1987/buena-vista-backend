@@ -26,6 +26,8 @@ app.use('/api/operacion-financiera-detalle', require('./routes/core/registro/ope
 app.use('/api/producto', require('./routes/core/configuracion/producto.route'));
 app.use('/api/operacion-financiera-pago', require('./routes/core/caja/operacion-financiera-pago.route'));
 
+app.use('/api/caja-diario', require('./routes/core/caja/caja-diaria.route'));
+
 app.listen(process.env.PORT, () => {
     console.log('Servidor corriendo en puerto ' + process.env.PORT);
 });
