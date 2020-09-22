@@ -1,12 +1,104 @@
 const { Schema, model } = require('mongoose');
 const { schemaBase } = require('../../base');
 const { schemaAuditoria } = require('../../auditoria');
+// const bancomunalModel = require('./bancomunal.model');
+// const Bancomunal = require('./bancomunal.model');
+// const Bancomunal = require('./models/core/registro/bancomunal.model');
 
 const modelo = {
 
-    // grupo_banca_comunal: {
+    producto: {
+        type: {
+            tipo: {
+                type: Schema.Types.ObjectId,
+                ref: 'Producto',
+                required: true
+            },
+            codigo_programacion: {
+                type: String,
+                // required: true,
+                // jsonSchema: {
+                //     enum: ["inverse", "info", "primary", "danger", "warning", "success"],
+                // },
+                default: ''
+            },
+            programacion: {
+                type: String,
+                // required: true,
+                // jsonSchema: {
+                //     enum: ["inverse", "info", "primary", "danger", "warning", "success"],
+                // },
+                default: ''
+            },
+            // tipo: {
+            //     type: String,
+            //     required: true,
+            //     jsonSchema: {
+            //         enum: ["CD", "CM", "PEX", "BC"],
+            //     },
+            //     default: ''
+            // },
+            color: {
+                type: String,
+                // required: true,
+                jsonSchema: {
+                    enum: ["inverse", "info", "primary", "danger", "warning", "success"],
+                },
+                default: 'inverse'
+            },
+        }
+    },
+    // producto: {
     //     type: Schema.Types.ObjectId,
-    //     ref: 'GrupoBancaComunal',
+    //     ref: 'Producto',
+    //     required: true
+    // },
+    configuracion: {
+        type: {
+            tasa_ahorro_inicial: {
+                type: Number,
+                required: true,
+                default: 0
+            },
+            tasa_aporte_capital: {
+                type: Number,
+                required: true,
+                default: 0
+            },
+            tasa_ahorro_programado: {
+                type: Number,
+                required: true,
+                default: 0
+            },
+            tasa_interes: {
+                type: Number,
+                required: true,
+                default: 0
+            },
+            tasa_mora: {
+                type: Number,
+                required: true,
+                default: 0
+            },
+        },
+        default: {}
+    },
+    bancomunal: {
+        type: {
+            grupo_bancomunal: {
+                type: Schema.Types.ObjectId,
+                ref: 'GrupoBancomunal',
+            },
+            numero_ciclo: {
+                type: Number,
+                default: 0
+            }
+        },
+        default: {}
+    },
+    // grupo_bancomunal: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'GrupoBancomunal',
     //     required: true
     // },
     persona: {
@@ -16,43 +108,37 @@ const modelo = {
     },
     // analista: {
     //     type: Schema.Types.ObjectId,
-    //     ref: 'Persona',
-    //     required: true
+    //     ref: 'Analista',
+    //     // required: true
     // },
-    // producto: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'Persona',
-    //     required: true  
-    //},
-    // configuracion: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'Persona',
-    //     required: true  
-    //},
-    programacion: {
-        type: String,
-        required: true,
-        // jsonSchema: {
-        //     enum: ["inverse", "info", "primary", "danger", "warning", "success"],
-        // },
-        default: ''
-    },
-    tipo: {
-        type: String,
-        required: true,
-        jsonSchema: {
-            enum: ["CD", "CM", "PEX", "BC"],
-        },
-        default: ''
-    },
-    color: {
-        type: String,
-        required: true,
-        jsonSchema: {
-            enum: ["inverse", "info", "primary", "danger", "warning", "success"],
-        },
-        default: 'inverse'
-    },
+
+
+
+
+    // programacion: {
+    //     type: String,
+    //     required: true,
+    //     // jsonSchema: {
+    //     //     enum: ["inverse", "info", "primary", "danger", "warning", "success"],
+    //     // },
+    //     default: ''
+    // },
+    // tipo: {
+    //     type: String,
+    //     required: true,
+    //     jsonSchema: {
+    //         enum: ["CD", "CM", "PEX", "BC"],
+    //     },
+    //     default: ''
+    // },
+    // color: {
+    //     type: String,
+    //     required: true,
+    //     jsonSchema: {
+    //         enum: ["inverse", "info", "primary", "danger", "warning", "success"],
+    //     },
+    //     default: 'inverse'
+    // },    
     estado: {
         type: String,
         required: true,
@@ -61,11 +147,11 @@ const modelo = {
         },
         default: 'Previgente'
     },
-    numero_ciclo: {
-        type: Number,
-        required: true,
-        default: 0
-    },
+    // numero_ciclo: {
+    //     type: Number,
+    //     required: true,
+    //     default: 0
+    // },
     fecha_inicio: {
         type: String,
         // required: true,
@@ -91,31 +177,31 @@ const modelo = {
         required: true,
         default: 0
     },
-    tasa_aporte_inicial: {
-        type: Number,
-        required: true,
-        default: 0
-    },
-    tasa_aporte_capital: {
-        type: Number,
-        required: true,
-        default: 0
-    },
-    tasa_aporte_programado: {
-        type: Number,
-        required: true,
-        default: 0
-    },
-    tasa_interes: {
-        type: Number,
-        required: true,
-        default: 0
-    },
-    tasa_mora: {
-        type: Number,
-        required: true,
-        default: 0
-    },
+    // tasa_aporte_inicial: {
+    //     type: Number,
+    //     required: true,
+    //     default: 0
+    // },
+    // tasa_aporte_capital: {
+    //     type: Number,
+    //     required: true,
+    //     default: 0
+    // },
+    // tasa_aporte_programado: {
+    //     type: Number,
+    //     required: true,
+    //     default: 0
+    // },
+    // tasa_interes: {
+    //     type: Number,
+    //     required: true,
+    //     default: 0
+    // },
+    // tasa_mora: {
+    //     type: Number,
+    //     required: true,
+    //     default: 0
+    // },
     se_desembolso_prestamo: {
         type: Boolean,
         required: false,

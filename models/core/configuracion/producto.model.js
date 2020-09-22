@@ -14,12 +14,12 @@ const modelo = {
         required: true,
         default: ''
     },
-    configuracion: {
+    programacion: {
         type: [Object],
         default: []
     },
-    programacion: {
-        type: [Object],
+    configuracion: {
+        type: {},
         default: []
     },
     comentario: {
