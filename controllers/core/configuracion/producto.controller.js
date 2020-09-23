@@ -32,7 +32,8 @@ const listar_programacion = async(req, res) => {
 
         res.json({
             ok: true,
-            lista: modelo.programacion
+            lista: modelo.programacion,
+            configuracion: modelo.configuracion
         })
     } catch (error) {
 

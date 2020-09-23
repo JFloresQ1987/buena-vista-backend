@@ -8,6 +8,8 @@ const crear = async(req, res = response) => {
 
     const { detalle, comentario } = req.body;
 
+    // console.log(req.body)
+
     const session = await OperacionFinanciera.startSession();
     session.startTransaction();
     try {

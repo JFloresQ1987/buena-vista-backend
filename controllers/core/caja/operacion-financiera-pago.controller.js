@@ -5,11 +5,26 @@ const OperacionFinancieraDetalle = require('../../../models/core/registro/operac
 const PagoOperacionFinanciera = require('../../../models/core/caja/operacion-financiera-pago.model');
 const CajaDiario = require('../../../models/core/caja/caja-diario.model');
 const dayjs = require('dayjs');
+// const RequestIp = require('@supercharge/request-ip')
+const requestIp = require('request-ip');
 
 const listar_operaciones_financieras_detalle_vigentes = async(req, res) => {
 
     // const { id_operacion_financiera } = req.body;
     const id_operacion_financiera = req.params.id_operacion_financiera;
+
+    // const ip = RequestIp.getClientIp(req)
+    // var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    // var ip = req.headers['x-forwarded-for'] ||
+    //     req.connection.remoteAddress ||
+    //     req.socket.remoteAddress ||
+    //     req.connection.socket.remoteAddress;
+
+    const ip = requestIp.getClientIp(req);
+
+    console.log(ip)
+        // console.log(req.headers['x-forwarded-for'])
+        // console.log(req.connection.remoteAddress)
 
     try {
 
@@ -171,7 +186,8 @@ const pagar_operacion_financiera = async(req, res) => {
 
             // apertura_caja_diario.caja_diario = 0;
 
-            caja_diario = await apertura_caja_diario.save();
+            await apertura_caja_diario.save();
+            // caja_diario = await apertura_caja_diario.save();
         }
 
 
@@ -189,6 +205,7 @@ const pagar_operacion_financiera = async(req, res) => {
         // }];
 
         let monto_recibido_actual = monto_recibido;
+        let monto_ahorro_voluntario_actual = monto_ahorro_voluntario;
         let monto_total = 0;
         let monto_total_gasto = 0;
         let monto_total_ahorro_inicial = 0;
@@ -233,8 +250,10 @@ const pagar_operacion_financiera = async(req, res) => {
             if (cuota.numero_cuota === 0)
                 await OperacionFinancieraDetalle.updateMany({ "operacion_financiera": operacion_financiera, "estado": "Previgente", "es_borrado": false }, { "estado": "Vigente" });
 
-            if (i === 0 && parseInt(monto_ahorro_voluntario) > 0)
-                cuota.monto_ahorro_voluntario += parseInt(monto_ahorro_voluntario);
+            if (i === 0 && Number(monto_ahorro_voluntario_actual) > 0)
+                cuota.monto_ahorro_voluntario += Number(monto_ahorro_voluntario_actual);
+            else if (i > 0 && Number(monto_ahorro_voluntario_actual) > 0)
+                monto_ahorro_voluntario_actual = 0;
 
             // monto_total_cuota += cuota.monto_ahorro_programado +
             //     Math.ceil((cuota.monto_amortizacion_capital + cuota.monto_interes) * 10) / 10;
@@ -268,7 +287,7 @@ const pagar_operacion_financiera = async(req, res) => {
 
             let monto_gasto_a_pagar = cuota.monto_gasto - monto_gasto_pagado;
             let monto_ahorro_inicial_a_pagar = cuota.monto_ahorro_inicial - monto_ahorro_inicial_pagado;
-            let monto_ahorro_voluntario_a_pagar = cuota.monto_ahorro_voluntario - monto_ahorro_voluntario_pagado;
+            let monto_ahorro_voluntario_a_pagar = Number(monto_ahorro_voluntario_actual); //cuota.monto_ahorro_voluntario - monto_ahorro_voluntario_pagado;
             let monto_ahorro_programado_a_pagar = cuota.monto_ahorro_programado - monto_ahorro_programado_pagado;
             let monto_amortizacion_capital_a_pagar = cuota.monto_amortizacion_capital - monto_amortizacion_capital_pagado;
             let monto_interes_a_pagar = cuota.monto_interes - monto_interes_pagado;
@@ -367,6 +386,14 @@ const pagar_operacion_financiera = async(req, res) => {
                     let monto_interes_a_amortizar = 0;
                     let monto_mora_a_amortizar = 0;
 
+                    if (monto_recibido_actual > 0 && monto_ahorro_voluntario_a_pagar <= monto_recibido_actual) {
+                        monto_ahorro_voluntario_a_amortizar = monto_ahorro_voluntario_a_pagar;
+                        monto_recibido_actual -= monto_ahorro_voluntario_a_pagar;
+                    } else if (monto_recibido_actual > 0 && monto_ahorro_voluntario_a_pagar > monto_recibido_actual) {
+                        monto_ahorro_voluntario_a_amortizar = monto_recibido_actual;
+                        monto_recibido_actual = 0;
+                    }
+
                     if (monto_recibido_actual > 0 && monto_mora_a_pagar <= monto_recibido_actual) {
                         monto_mora_a_amortizar = monto_mora_a_pagar;
                         monto_recibido_actual -= monto_mora_a_pagar;
@@ -396,14 +423,6 @@ const pagar_operacion_financiera = async(req, res) => {
                         monto_recibido_actual -= monto_ahorro_programado_a_pagar;
                     } else if (monto_recibido_actual > 0 && monto_ahorro_programado_a_pagar > monto_recibido_actual) {
                         monto_ahorro_programado_a_amortizar = monto_recibido_actual;
-                        monto_recibido_actual = 0;
-                    }
-
-                    if (monto_recibido_actual > 0 && monto_ahorro_voluntario_a_pagar <= monto_recibido_actual) {
-                        monto_ahorro_voluntario_a_amortizar = monto_ahorro_voluntario_a_pagar;
-                        monto_recibido_actual -= monto_ahorro_voluntario_a_pagar;
-                    } else if (monto_recibido_actual > 0 && monto_ahorro_voluntario_a_pagar > monto_recibido_actual) {
-                        monto_ahorro_voluntario_a_amortizar = monto_recibido_actual;
                         monto_recibido_actual = 0;
                     }
 

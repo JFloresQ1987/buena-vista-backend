@@ -12,13 +12,14 @@ router.get('/listar-producto/:id_operacion_financiera', validarJWT, listar_opera
 
 router.post('/', [
     validarJWT,
-    check('tipo', 'El tipo de operación es obligatorio').notEmpty(),
-    check('numero_ciclo', 'El número de ciclo es obligatorio').notEmpty(),
-    check('tasa_aporte_inicial', 'La tasa de aporte inicial es obligatorio').notEmpty(),
-    check('tasa_aporte_capital', 'La tasa de aporte capital es obligatorio').notEmpty(),
-    check('tasa_aporte_programado', 'La tasa de aporte programado es obligatorio').notEmpty(),
-    check('tasa_interes', 'La tasa de interes es obligatorio').notEmpty(),
-    check('tasa_mora', 'La tasa de mora es obligatorio').notEmpty(),
+    check('producto', 'El producto es obligatorio').notEmpty(),
+    // check('numero_ciclo', 'El número de ciclo es obligatorio').notEmpty(),
+    // check('tasa_aporte_inicial', 'La tasa de aporte inicial es obligatorio').notEmpty(),
+    // check('tasa_aporte_capital', 'La tasa de aporte capital es obligatorio').notEmpty(),
+    // check('tasa_aporte_programado', 'La tasa de aporte programado es obligatorio').notEmpty(),
+    // check('tasa_interes', 'La tasa de interes es obligatorio').notEmpty(),
+    // check('tasa_mora', 'La tasa de mora es obligatorio').notEmpty(),
+    check('configuracion', 'La configuración es obligatorio').notEmpty(),
     check('persona', 'El socio es obligatorio').notEmpty(),
     check('comentario', 'El comentario es obligatorio').notEmpty(),
     validarCampos

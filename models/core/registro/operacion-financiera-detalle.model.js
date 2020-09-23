@@ -38,9 +38,9 @@ const modelo = {
         type: String,
         required: true,
         jsonSchema: {
-            enum: ["Previgente", "Vigente", "Pendiente", "Pagado", "Anulado"],
+            enum: ["Prependiente", "Vigente", "Pendiente", "Amortizado", "Pagado", "Anulado"],
         },
-        default: 'Previgente'
+        default: 'Prependiente'
     },
     numero_cuota: {
         type: Number,
