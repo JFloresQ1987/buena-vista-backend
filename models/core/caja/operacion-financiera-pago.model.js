@@ -5,27 +5,32 @@ const { schemaAuditoria } = require('../../auditoria');
 const modelo = {
 
     diario: {
-        type: {
-            caja_diario: {
-                type: Schema.Types.ObjectId,
-                ref: 'CajaDiario',
-                required: true
-            },
-            estado: {
-                type: String,
-                required: true,
-                jsonSchema: {
-                    enum: ["Abierto", "Cerrado"],
-                },
-                default: 'Abierto'
-            },
-            cajero: {
-                type: Schema.Types.ObjectId,
-                ref: 'Persona',
-                // required: true
-            }
+        // type: {
+        caja_diario: {
+            type: Schema.Types.ObjectId,
+            ref: 'CajaDiario',
+            required: true
         },
-        default: {}
+        caja: {
+            type: Schema.Types.ObjectId,
+            ref: 'Caja',
+            required: true
+        },
+        estado: {
+            type: String,
+            required: true,
+            jsonSchema: {
+                enum: ["Abierto", "Cerrado"],
+            },
+            default: 'Abierto'
+        }
+        // cajero: {
+        //     type: Schema.Types.ObjectId,
+        //     ref: 'Persona',
+        //     // required: true
+        // }
+        // },
+        // default: {}
     },
     // grupo_banca_comunal: {
     //     type: Schema.Types.ObjectId,
@@ -53,54 +58,163 @@ const modelo = {
         required: true
     },
     recibo: {
-        type: {
-            estado: {
-                type: String,
-                required: true,
-                jsonSchema: {
-                    enum: ["Previgente", "Vigente", "Anulado"],
-                },
-                default: 'Previgente'
+        // type: {
+        estado: {
+            type: String,
+            required: true,
+            jsonSchema: {
+                enum: ["Previgente", "Vigente", "Anulado"],
             },
-            serie: {
-                type: String,
-                required: true
-            },
-            numero: {
-                type: String,
-                required: true
-            },
-            fecha: {
-                type: String,
-                required: true
-            },
-            ejercicio: {
-                type: String,
-                required: true
-            },
-            monto_total: {
-                type: Number,
-                required: true
-            }
+            default: 'Previgente'
         },
-        default: {}
+        serie: {
+            type: String,
+            required: true
+        },
+        numero: {
+            type: String,
+            required: true
+        },
+        fecha: {
+            type: String,
+            required: true
+        },
+        ejercicio: {
+            type: String,
+            required: true
+        },
+        monto_total: {
+            type: Number,
+            required: true
+        }
+        // },
+        // default: {}
     },
     producto: {
-        type: {
-            persona: {
-                type: Schema.Types.ObjectId,
-                ref: 'Persona',
+        // type: {
+        persona: {
+            type: Schema.Types.ObjectId,
+            ref: 'Persona',
+            // required: true
+        },
+        operacion_financiera: {
+            type: Schema.Types.ObjectId,
+            ref: 'OperacionFinanciera',
+            // required: true
+        },
+        operacion_financiera_desembolso: {
+            type: Schema.Types.ObjectId,
+            ref: 'OperacionFinanciera',
+            // required: true
+        },
+        monto_gasto: {
+            type: Number,
+            // required: true,
+            default: 0
+        },
+        monto_ahorro_inicial: {
+            type: Number,
+            // required: true,
+            default: 0
+        },
+        monto_retiro_ahorro_inicial: {
+            type: Number,
+            // required: true,
+            default: 0
+        },
+        monto_ahorro_voluntario: {
+            type: Number,
+            // required: true,
+            default: 0
+        },
+        monto_retiro_ahorro_voluntario: {
+            type: Number,
+            // required: true,
+            default: 0
+        },
+        monto_ahorro_programado: {
+            type: Number,
+            // required: true,
+            default: 0
+        },
+        monto_retiro_ahorro_programado: {
+            type: Number,
+            // required: true,
+            default: 0
+        },
+        monto_amortizacion_capital: {
+            type: Number,
+            // required: true,
+            default: 0
+        },
+        monto_interes: {
+            type: Number,
+            // required: true,
+            default: 0
+        },
+        monto_interes_ahorro: {
+            type: Number,
+            // required: true,
+            default: 0
+        },
+        monto_retiro_interes_ahorro: {
+            type: Number,
+            // required: true,
+            default: 0
+        },
+        monto_mora: {
+            type: Number,
+            // required: true,
+            default: 0
+        }
+        // },
+        // default: {}
+    },
+    concepto: {
+        // type: {
+        concepto: {
+            type: Schema.Types.ObjectId,
+            ref: 'Concepto',
+            required: true
+        },
+        sub_concepto: {
+            type: Schema.Types.ObjectId,
+            // required: true
+            default: ''
+        },
+        responsable: {
+            type: Schema.Types.ObjectId,
+            ref: 'Usuario'
                 // required: true
-            },
-            operacion_financiera: {
+        },
+        monto: {
+            type: Number,
+            // required: true,
+            default: 0
+        },
+        numero_comprobante: {
+            type: String,
+            // required: true
+            default: ''
+        },
+        detalle: {
+            type: String,
+            // required: true
+            default: ''
+        }
+        // },
+        // default: {}
+    },
+    detalle: {
+        monto_total: {
+            type: Number,
+            required: true
+        },
+        producto: {
+            concepto: {
                 type: Schema.Types.ObjectId,
-                ref: 'OperacionFinanciera',
-                // required: true
-            },
-            operacion_financiera_desembolso: {
-                type: Schema.Types.ObjectId,
-                ref: 'OperacionFinanciera',
-                // required: true
+                ref: 'OperacionFinancieraDetalle',
+                required: true
             },
             monto_gasto: {
                 type: Number,
@@ -162,43 +276,12 @@ const modelo = {
                 // required: true,
                 default: 0
             }
-        },
-        default: {}
-    },
-    concepto: {
-        type: {
-            concepto: {
-                type: String,
-                // required: true
-                default: ''
-            },
-            sub_concepto: {
-                type: String,
-                // required: true
-                default: ''
-            },
-            responsable: {
-                type: Schema.Types.ObjectId,
-                ref: 'Persona'
-                    // required: true
-            },
-            monto: {
-                type: Number,
-                // required: true,
-                default: 0
-            },
-            numero_comprobante: {
-                type: String,
-                // required: true
-                default: ''
-            },
-            detalle: {
-                type: [Object],
-                // required: true
-                default: ''
-            }
-        },
-        default: {}
+            // },
+            // default: {}
+        }
+        // type: [Object],
+        // // required: true
+        // default: ''
     },
     comentario: {
         type: [Object],
