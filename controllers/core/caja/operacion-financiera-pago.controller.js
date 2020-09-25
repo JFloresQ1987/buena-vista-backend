@@ -4,6 +4,7 @@ const OperacionFinanciera = require('../../../models/core/registro/operacion-fin
 const OperacionFinancieraDetalle = require('../../../models/core/registro/operacion-financiera-detalle.model');
 const PagoOperacionFinanciera = require('../../../models/core/caja/operacion-financiera-pago.model');
 const CajaDiario = require('../../../models/core/caja/caja-diario.model');
+const Caja = require('../../../models/core/seguridad/caja.model');
 const dayjs = require('dayjs');
 // const RequestIp = require('@supercharge/request-ip')
 const requestIp = require('request-ip');
@@ -20,21 +21,23 @@ const listar_operaciones_financieras_detalle_vigentes = async(req, res) => {
     //     req.socket.remoteAddress ||
     //     req.connection.socket.remoteAddress;
 
-    const ip = requestIp.getClientIp(req);
+    // const ip = requestIp.getClientIp(req);
 
-    console.log(ip)
-        // console.log(req.headers['x-forwarded-for'])
-        // console.log(req.connection.remoteAddress)
+    // //console.log(ip.replace('::ffff:', ''))
+    // //console.log(req.headers['x-forwarded-for'])
+    // //console.log(req.connection.remoteAddress)
 
     try {
 
         const lista = await OperacionFinancieraDetalle.find({
                 "operacion_financiera": id_operacion_financiera,
                 // "estado": "Vigente",
-                "estado": { $in: ["Vigente", "Pendiente", "Amortizado"] },
+                "estado": { $in: ["Pendiente", "Amortizado"] },
                 "es_borrado": false
             })
             .sort({ "numero_cuota": 1 });
+
+        // //console.log(lista)
 
         for (let i = 0; i < lista.length; i++) {
 
@@ -48,23 +51,25 @@ const listar_operaciones_financieras_detalle_vigentes = async(req, res) => {
 
             for (let j = 0; j < lista[i].pagos.length; j++) {
 
-                monto_gasto_pagado += lista[i].pagos[j].monto_gasto || 0;
-                monto_ahorro_inicial_pagado += lista[i].pagos[j].monto_ahorro_inicial || 0;
-                monto_ahorro_voluntario_pagado += lista[i].pagos[j].monto_ahorro_voluntario || 0;
-                monto_ahorro_programado_pagado += lista[i].pagos[j].monto_ahorro_programado || 0;
-                monto_amortizacion_capital_pagado += lista[i].pagos[j].monto_amortizacion_capital || 0;
-                monto_interes_pagado += lista[i].pagos[j].monto_interes || 0;
-                monto_mora_pagado += lista[i].pagos[j].monto_mora || 0;
+                monto_gasto_pagado += lista[i].pagos[j].ingresos.monto_gasto || 0;
+                monto_ahorro_inicial_pagado += lista[i].pagos[j].ahorros.monto_ahorro_inicial || 0;
+                monto_ahorro_voluntario_pagado += lista[i].pagos[j].ahorros.monto_ahorro_voluntario || 0;
+                monto_ahorro_programado_pagado += lista[i].pagos[j].ahorros.monto_ahorro_programado || 0;
+                monto_amortizacion_capital_pagado += lista[i].pagos[j].ingresos.monto_amortizacion_capital || 0;
+                monto_interes_pagado += lista[i].pagos[j].ingresos.monto_interes || 0;
+                monto_mora_pagado += lista[i].pagos[j].ingresos.monto_mora || 0;
             }
 
-            lista[i].monto_gasto -= monto_gasto_pagado;
-            lista[i].monto_ahorro_inicial -= monto_ahorro_inicial_pagado;
-            lista[i].monto_ahorro_voluntario -= monto_ahorro_voluntario_pagado;
-            lista[i].monto_ahorro_programado -= monto_ahorro_programado_pagado;
-            lista[i].monto_amortizacion_capital -= monto_amortizacion_capital_pagado;
-            lista[i].monto_interes -= monto_interes_pagado;
-            lista[i].monto_mora -= monto_mora_pagado;
+            lista[i].ingresos.monto_gasto -= monto_gasto_pagado;
+            lista[i].ahorros.monto_ahorro_inicial -= monto_ahorro_inicial_pagado;
+            lista[i].ahorros.monto_ahorro_voluntario -= monto_ahorro_voluntario_pagado;
+            lista[i].ahorros.monto_ahorro_programado -= monto_ahorro_programado_pagado;
+            lista[i].ingresos.monto_amortizacion_capital -= monto_amortizacion_capital_pagado;
+            lista[i].ingresos.monto_mora -= monto_mora_pagado;
+            lista[i].ingresos.monto_interes -= monto_interes_pagado;
         }
+
+        // //console.log(lista)
 
         res.json({
             ok: true,
@@ -72,7 +77,7 @@ const listar_operaciones_financieras_detalle_vigentes = async(req, res) => {
         })
     } catch (error) {
 
-        console.log(error);
+        //console.log(error);
         res.status(500).json({
             ok: false,
             msg: 'Error inesperado.'
@@ -83,6 +88,12 @@ const listar_operaciones_financieras_detalle_vigentes = async(req, res) => {
 const pagar_operacion_financiera = async(req, res) => {
 
     // const { id_operacion_financiera } = req.body;
+    const id_usuario_sesion = req.header('id_usuario_sesion');
+
+    const ip = requestIp.getClientIp(req).replace('::ffff:', '');
+
+    // //console.log(ip.replace('::ffff:', ''))
+
     const {
         operacion_financiera,
         monto_ahorro_voluntario,
@@ -109,23 +120,37 @@ const pagar_operacion_financiera = async(req, res) => {
         // const lista = await OperacionFinancieraDetalle.find({ "operacion_financiera": id_operacion_financiera, "estado": "Vigente", "es_borrado": false })
         //     .sort({ "numero_cuota": 1 });
 
-        // console.log(monto_ahorro_voluntario);
-        // console.log(monto_recibido);
-        // console.log(detalle);
-        // console.log(lista_id_operacion_financiera_detalle);
+        // //console.log(monto_ahorro_voluntario);
+        // //console.log(monto_recibido);
+        // //console.log(detalle);
+        // //console.log(lista_id_operacion_financiera_detalle);
+
+        const caja = await Caja.findOne({ "ip": ip, "usuario": id_usuario_sesion, "es_vigente": true, "es_borrado": false })
+
+        // //console.log(ip)
+        // //console.log(id_usuario_sesion)
+        // //console.log(caja)
+
+        if (!caja)
+            return res.status(404).json({
+                ok: false,
+                msg: 'Estación de trabajo y/o usuario no habilitados para hacer caja.'
+            })
+
+        //console.log(caja.id)
 
         const modelo = new PagoOperacionFinanciera(req.body);
         const now = dayjs();
         const fecha_apertura = now.format('DD/MM/YYYY');
 
-        const ultimo_caja_diario = await CajaDiario.findOne({ "es_vigente": true, "es_borrado": false })
-            .where("fecha_apertura").ne(fecha_apertura)
+        const ultimo_caja_diario = await CajaDiario.findOne({ "caja": caja.id, "es_vigente": true, "es_borrado": false })
+            .where("apertura.fecha_apertura").ne(fecha_apertura)
             .sort({ $natural: -1 });
 
-        // console.log(ultimo_caja_diario)
+        // //console.log(ultimo_caja_diario)
 
         if (ultimo_caja_diario) {
-            // console.log('entroo')
+            // //console.log('entroo')
             if (ultimo_caja_diario.estado === 'Abierto') {
 
                 return res.status(404).json({
@@ -135,9 +160,9 @@ const pagar_operacion_financiera = async(req, res) => {
             }
         }
 
-        const caja_diario = await CajaDiario.findOne({ "fecha_apertura": fecha_apertura, "es_vigente": true, "es_borrado": false });
+        let caja_diario = await CajaDiario.findOne({ "caja": caja.id, "apertura.fecha_apertura": fecha_apertura, "es_vigente": true, "es_borrado": false });
 
-        // console.log(caja_diario)
+        // //console.log(caja_diario)
 
         if (caja_diario) {
             if (caja_diario.estado === 'Cerrado') {
@@ -153,7 +178,7 @@ const pagar_operacion_financiera = async(req, res) => {
 
         if (!caja_diario) {
 
-            // console.log('Entro a crear caja')
+            // //console.log('Entro a crear caja')
 
             // const ultimo_caja_diario = await CajaDiario.findOne({ "es_borrado": false })
             //     .sort({ $natural: -1 });
@@ -162,35 +187,41 @@ const pagar_operacion_financiera = async(req, res) => {
 
             const apertura_caja_diario = new CajaDiario();
 
-            // console.log(apertura_caja_diario.estado)
+            apertura_caja_diario.caja = caja.id;
+
+            // //console.log(apertura_caja_diario.estado)
 
             apertura_caja_diario.estado = "Abierto";
-            // console.log(apertura_caja_diario.estado)
-            apertura_caja_diario.fecha_apertura = fecha_apertura;
+            // //console.log(apertura_caja_diario.estado)
+            apertura_caja_diario.apertura.fecha_apertura = fecha_apertura;
 
             if (ultimo_caja_diario) {
 
-                apertura_caja_diario.cantidad_diez_centimos_apertura = ultimo_caja_diario.cantidad_diez_centimos_cierre;
-                apertura_caja_diario.cantidad_veinte_centimos_apertura = ultimo_caja_diario.cantidad_veinte_centimos_cierre;
-                apertura_caja_diario.cantidad_cincuenta_centimos_apertura = ultimo_caja_diario.cantidad_cincuenta_centimos_cierre;
-                apertura_caja_diario.cantidad_un_sol_apertura = ultimo_caja_diario.cantidad_un_sol_apertura;
-                apertura_caja_diario.cantidad_cinco_soles_apertura = ultimo_caja_diario.cantidad_cinco_soles_cierre;
-                apertura_caja_diario.cantidad_diez_soles_apertura = ultimo_caja_diario.cantidad_diez_soles_cierre;
-                apertura_caja_diario.cantidad_veinte_soles_apertura = ultimo_caja_diario.cantidad_veinte_soles_cierre;
-                apertura_caja_diario.cantidad_cincuenta_soles_apertura = ultimo_caja_diario.cantidad_cincuenta_soles_cierre;
-                apertura_caja_diario.cantidad_dos_soles_apertura = ultimo_caja_diario.cantidad_dos_soles_cierre;
-                apertura_caja_diario.cantidad_cien_soles_apertura = ultimo_caja_diario.cantidad_cien_soles_cierre;
-                apertura_caja_diario.cantidad_discientos_soles_apertura = ultimo_caja_diario.cantidad_discientos_soles_cierre;
+                // //console.log(apertura_caja_diario)
+
+                apertura_caja_diario.apertura.cantidad_diez_centimos_apertura = ultimo_caja_diario.cierre.cantidad_diez_centimos_cierre;
+                apertura_caja_diario.apertura.cantidad_veinte_centimos_apertura = ultimo_caja_diario.cierre.cantidad_veinte_centimos_cierre;
+                apertura_caja_diario.apertura.cantidad_cincuenta_centimos_apertura = ultimo_caja_diario.cierre.cantidad_cincuenta_centimos_cierre;
+                apertura_caja_diario.apertura.cantidad_un_sol_apertura = ultimo_caja_diario.cierre.cantidad_un_sol_cierre;
+                apertura_caja_diario.apertura.cantidad_cinco_soles_apertura = ultimo_caja_diario.cierre.cantidad_cinco_soles_cierre;
+                apertura_caja_diario.apertura.cantidad_diez_soles_apertura = ultimo_caja_diario.cierre.cantidad_diez_soles_cierre;
+                apertura_caja_diario.apertura.cantidad_veinte_soles_apertura = ultimo_caja_diario.cierre.cantidad_veinte_soles_cierre;
+                apertura_caja_diario.apertura.cantidad_cincuenta_soles_apertura = ultimo_caja_diario.cierre.cantidad_cincuenta_soles_cierre;
+                apertura_caja_diario.apertura.cantidad_dos_soles_apertura = ultimo_caja_diario.cierre.cantidad_dos_soles_cierre;
+                apertura_caja_diario.apertura.cantidad_cien_soles_apertura = ultimo_caja_diario.cierre.cantidad_cien_soles_cierre;
+                apertura_caja_diario.apertura.cantidad_discientos_soles_apertura = ultimo_caja_diario.cierre.cantidad_discientos_soles_cierre;
                 apertura_caja_diario.monto_total_apertura = ultimo_caja_diario.monto_total_apertura + ultimo_caja_diario.monto_total_operaciones;
             }
 
             // apertura_caja_diario.caja_diario = 0;
+            // //console.log(apertura_caja_diario)
 
-            await apertura_caja_diario.save();
+            caja_diario = await apertura_caja_diario.save();
             // caja_diario = await apertura_caja_diario.save();
+
         }
 
-
+        // //console.log('llegoooo...')
 
 
         //Caja diario ya se encuentra cerrado.
@@ -229,6 +260,8 @@ const pagar_operacion_financiera = async(req, res) => {
 
         let correlativo_recibo = 1;
 
+        // //console.log(ultimo_pago)
+
         if (ultimo_pago) {
 
             // const str = 'sometext-20202';
@@ -239,16 +272,16 @@ const pagar_operacion_financiera = async(req, res) => {
 
         dato_recibo.numero_recibo = 'I-' + correlativo_recibo.toString().padStart(8, "00000000");
 
-        // console.log(ultimo_pago);
-        // console.log(correlativo_recibo);
-        // console.log(dato_recibo.numero_recibo);
+        // //console.log(ultimo_pago);
+        // //console.log(correlativo_recibo);
+        // //console.log(dato_recibo.numero_recibo);
 
         for (let i = 0; i < cuotas.length; i++) {
 
             const cuota = await OperacionFinancieraDetalle.findById({ "_id": cuotas[i] })
 
             if (cuota.numero_cuota === 0)
-                await OperacionFinancieraDetalle.updateMany({ "operacion_financiera": operacion_financiera, "estado": "Previgente", "es_borrado": false }, { "estado": "Vigente" });
+                await OperacionFinancieraDetalle.updateMany({ "operacion_financiera": operacion_financiera, "estado": "Prependiente", "es_borrado": false }, { "estado": "Pendiente" });
 
             if (i === 0 && Number(monto_ahorro_voluntario_actual) > 0)
                 cuota.monto_ahorro_voluntario += Number(monto_ahorro_voluntario_actual);
@@ -277,21 +310,21 @@ const pagar_operacion_financiera = async(req, res) => {
                 monto_mora_pagado += cuota.pagos[i].monto_mora || 0;
             }
 
-            // console.log(monto_gasto_pagado);
-            // console.log(monto_ahorro_inicial_pagado);
-            // console.log(monto_ahorro_voluntario_pagado);
-            // console.log(monto_ahorro_programado_pagado);
-            // console.log(monto_amortizacion_capital_pagado);
-            // console.log(monto_interes_pagado);
-            // console.log(monto_mora_pagado);
+            // //console.log(monto_gasto_pagado);
+            // //console.log(monto_ahorro_inicial_pagado);
+            // //console.log(monto_ahorro_voluntario_pagado);
+            // //console.log(monto_ahorro_programado_pagado);
+            // //console.log(monto_amortizacion_capital_pagado);
+            // //console.log(monto_interes_pagado);
+            // //console.log(monto_mora_pagado);
 
-            let monto_gasto_a_pagar = cuota.monto_gasto - monto_gasto_pagado;
-            let monto_ahorro_inicial_a_pagar = cuota.monto_ahorro_inicial - monto_ahorro_inicial_pagado;
+            let monto_gasto_a_pagar = cuota.ingresos.monto_gasto - monto_gasto_pagado;
+            let monto_ahorro_inicial_a_pagar = cuota.ahorros.monto_ahorro_inicial - monto_ahorro_inicial_pagado;
             let monto_ahorro_voluntario_a_pagar = Number(monto_ahorro_voluntario_actual); //cuota.monto_ahorro_voluntario - monto_ahorro_voluntario_pagado;
-            let monto_ahorro_programado_a_pagar = cuota.monto_ahorro_programado - monto_ahorro_programado_pagado;
-            let monto_amortizacion_capital_a_pagar = cuota.monto_amortizacion_capital - monto_amortizacion_capital_pagado;
-            let monto_interes_a_pagar = cuota.monto_interes - monto_interes_pagado;
-            let monto_mora_a_pagar = cuota.monto_mora - monto_mora_pagado;
+            let monto_ahorro_programado_a_pagar = cuota.ahorros.monto_ahorro_programado - monto_ahorro_programado_pagado;
+            let monto_amortizacion_capital_a_pagar = cuota.ingresos.monto_amortizacion_capital - monto_amortizacion_capital_pagado;
+            let monto_interes_a_pagar = cuota.ingresos.monto_interes - monto_interes_pagado;
+            let monto_mora_a_pagar = cuota.ingresos.monto_mora - monto_mora_pagado;
 
             // monto_total_cuota += monto_ahorro_programado_a_pagar +
             //     Math.ceil((monto_amortizacion_capital_a_pagar + monto_interes_a_pagar) * 10) / 10;
@@ -304,44 +337,67 @@ const pagar_operacion_financiera = async(req, res) => {
                 monto_interes_a_pagar +
                 monto_mora_a_pagar
 
+            // //console.log(monto_gasto_a_pagar)
+            // //console.log(monto_ahorro_inicial_a_pagar)
+            // //console.log(monto_ahorro_voluntario_a_pagar)
+            // //console.log(monto_ahorro_programado_a_pagar)
+            // //console.log(monto_amortizacion_capital_a_pagar)
+            // //console.log(monto_interes_a_pagar)
+            // //console.log(monto_mora_a_pagar)
+
+            // //console.log(monto_total_cuota_a_pagar)
+            // //console.log(monto_recibido_actual)
+
             if (monto_total_cuota_a_pagar <= monto_recibido_actual) {
 
-                // console.log(monto_recibido_actual)
+                // //console.log(monto_recibido_actual)
 
                 cuota.estado = 'Pagado';
 
-                // console.log(monto_ahorro_voluntario_a_pagar)
+                // //console.log(monto_ahorro_voluntario_a_pagar)
 
                 cuota.pagos.push({
-                    serie_recibo: dato_recibo.serie_recibo,
-                    numero_recibo: dato_recibo.numero_recibo,
-                    fecha_recibo: dato_recibo.fecha_recibo,
-                    monto_gasto: monto_gasto_a_pagar,
-                    monto_ahorro_inicial: monto_ahorro_inicial_a_pagar,
-                    monto_ahorro_voluntario: monto_ahorro_voluntario_a_pagar,
-                    monto_ahorro_programado: monto_ahorro_programado_a_pagar,
-                    monto_amortizacion_capital: monto_amortizacion_capital_a_pagar,
-                    monto_interes: monto_interes_a_pagar,
-                    monto_mora: monto_mora_a_pagar
+                    recibo: {
+                        serie_recibo: dato_recibo.serie_recibo,
+                        numero_recibo: dato_recibo.numero_recibo,
+                        fecha_recibo: dato_recibo.fecha_recibo
+                    },
+                    ingresos: {
+                        monto_gasto: monto_gasto_a_pagar,
+                        monto_amortizacion_capital: monto_amortizacion_capital_a_pagar,
+                        monto_interes: monto_interes_a_pagar,
+                        monto_mora: monto_mora_a_pagar
+                    },
+                    ahorros: {
+
+                        monto_ahorro_inicial: monto_ahorro_inicial_a_pagar,
+                        monto_ahorro_voluntario: monto_ahorro_voluntario_a_pagar,
+                        monto_ahorro_programado: monto_ahorro_programado_a_pagar,
+                    }
                 });
 
                 monto_recibido_actual -= monto_total_cuota_a_pagar;
 
+                // //console.log('entrooo 1')
+                // //console.log(modelo)
+
                 modelo.detalle.push({
-                    operacion_financiera_detalle: cuota.id,
-                    numero_cuota: cuota.numero_cuota,
-                    monto_gasto: monto_gasto_a_pagar,
-                    monto_ahorro_inicial: monto_ahorro_inicial_a_pagar,
-                    // monto_retiro_ahorro_inicial: cuota.monto_retiro_ahorro_inicial,
-                    monto_ahorro_voluntario: monto_ahorro_voluntario_a_pagar,
-                    // monto_retiro_ahorro_voluntario: cuota.monto_retiro_ahorro_voluntario,
-                    monto_ahorro_programado: monto_ahorro_programado_a_pagar,
-                    // monto_retiro_ahorro_programado: cuota.monto_retiro_ahorro_programado,
-                    monto_amortizacion_capital: monto_amortizacion_capital_a_pagar,
-                    monto_interes: monto_interes_a_pagar,
-                    // monto_interes_ganado: cuota.monto_interes_ganado,
-                    // monto_retiro_interes_ganado: cuota.monto_retiro_interes_ganado,
-                    monto_mora: monto_mora_a_pagar
+                    producto: {
+                        operacion_financiera_detalle: cuota.id,
+                        numero_cuota: cuota.numero_cuota,
+                        monto_gasto: monto_gasto_a_pagar,
+                        monto_ahorro_inicial: monto_ahorro_inicial_a_pagar,
+                        // monto_retiro_ahorro_inicial: cuota.monto_retiro_ahorro_inicial,
+                        monto_ahorro_voluntario: monto_ahorro_voluntario_a_pagar,
+                        // monto_retiro_ahorro_voluntario: cuota.monto_retiro_ahorro_voluntario,
+                        monto_ahorro_programado: monto_ahorro_programado_a_pagar,
+                        // monto_retiro_ahorro_programado: cuota.monto_retiro_ahorro_programado,
+                        monto_amortizacion_capital: monto_amortizacion_capital_a_pagar,
+                        monto_interes: monto_interes_a_pagar,
+                        // monto_interes_ganado: cuota.monto_interes_ganado,
+                        // monto_retiro_interes_ganado: cuota.monto_retiro_interes_ganado,
+                        monto_mora: monto_mora_a_pagar
+                    }
                 });
 
                 // monto_total_cuota += cuota.monto_ahorro_programado +
@@ -360,7 +416,7 @@ const pagar_operacion_financiera = async(req, res) => {
                     monto_amortizacion_capital_a_pagar + monto_interes_a_pagar +
                     monto_mora_a_pagar; // + parseInt(monto_ahorro_voluntario);
 
-                // console.log(monto_total)
+                // //console.log(monto_total)
 
                 monto_total_gasto += monto_gasto_a_pagar;
                 monto_total_ahorro_inicial += monto_ahorro_inicial_a_pagar;
@@ -374,7 +430,7 @@ const pagar_operacion_financiera = async(req, res) => {
 
                 if (monto_recibido_actual >= 0.1) {
 
-                    // console.log(monto_recibido_actual)
+                    // //console.log(monto_recibido_actual)
 
                     // cuota.estado = 'Amortizado';
 
@@ -443,33 +499,44 @@ const pagar_operacion_financiera = async(req, res) => {
                     }
 
                     cuota.pagos.push({
-                        serie_recibo: dato_recibo.serie_recibo,
-                        numero_recibo: dato_recibo.numero_recibo,
-                        fecha_recibo: dato_recibo.fecha_recibo,
-                        monto_gasto: monto_gasto_a_amortizar,
-                        monto_ahorro_inicial: monto_ahorro_inicial_a_amortizar,
-                        monto_ahorro_voluntario: monto_ahorro_voluntario_a_amortizar,
-                        monto_ahorro_programado: monto_ahorro_programado_a_amortizar,
-                        monto_amortizacion_capital: monto_amortizacion_capital_a_amortizar,
-                        monto_interes: monto_interes_a_amortizar,
-                        monto_mora: monto_mora_a_amortizar
+                        recibo: {
+                            serie_recibo: dato_recibo.serie_recibo,
+                            numero_recibo: dato_recibo.numero_recibo,
+                            fecha_recibo: dato_recibo.fecha_recibo,
+                        },
+                        ingresos: {
+                            monto_gasto: monto_gasto_a_amortizar,
+                            monto_amortizacion_capital: monto_amortizacion_capital_a_amortizar,
+                            monto_interes: monto_interes_a_amortizar,
+                            monto_mora: monto_mora_a_amortizar
+                        },
+                        ahorros: {
+                            monto_ahorro_inicial: monto_ahorro_inicial_a_amortizar,
+                            monto_ahorro_voluntario: monto_ahorro_voluntario_a_amortizar,
+                            monto_ahorro_programado: monto_ahorro_programado_a_amortizar
+                        }
                     });
 
+                    // //console.log('entrooo 2')
+                    // //console.log(modelo)
+
                     modelo.detalle.push({
-                        operacion_financiera_detalle: cuota.id,
-                        numero_cuota: cuota.numero_cuota,
-                        monto_gasto: monto_gasto_a_amortizar,
-                        monto_ahorro_inicial: monto_ahorro_inicial_a_amortizar,
-                        // monto_retiro_ahorro_inicial: cuota.monto_retiro_ahorro_inicial,
-                        monto_ahorro_voluntario: monto_ahorro_voluntario_a_amortizar,
-                        // monto_retiro_ahorro_voluntario: cuota.monto_retiro_ahorro_voluntario,
-                        monto_ahorro_programado: monto_ahorro_programado_a_amortizar,
-                        // monto_retiro_ahorro_programado: cuota.monto_retiro_ahorro_programado,
-                        monto_amortizacion_capital: monto_amortizacion_capital_a_amortizar,
-                        monto_interes: monto_interes_a_amortizar,
-                        // monto_interes_ganado: cuota.monto_interes_ganado,
-                        // monto_retiro_interes_ganado: cuota.monto_retiro_interes_ganado,
-                        monto_mora: monto_mora_a_amortizar
+                        producto: {
+                            operacion_financiera_detalle: cuota.id,
+                            numero_cuota: cuota.numero_cuota,
+                            monto_gasto: monto_gasto_a_amortizar,
+                            monto_ahorro_inicial: monto_ahorro_inicial_a_amortizar,
+                            // monto_retiro_ahorro_inicial: cuota.monto_retiro_ahorro_inicial,
+                            monto_ahorro_voluntario: monto_ahorro_voluntario_a_amortizar,
+                            // monto_retiro_ahorro_voluntario: cuota.monto_retiro_ahorro_voluntario,
+                            monto_ahorro_programado: monto_ahorro_programado_a_amortizar,
+                            // monto_retiro_ahorro_programado: cuota.monto_retiro_ahorro_programado,
+                            monto_amortizacion_capital: monto_amortizacion_capital_a_amortizar,
+                            monto_interes: monto_interes_a_amortizar,
+                            // monto_interes_ganado: cuota.monto_interes_ganado,
+                            // monto_retiro_interes_ganado: cuota.monto_retiro_interes_ganado,
+                            monto_mora: monto_mora_a_amortizar
+                        }
                     });
 
                     // monto_total_cuota += cuota.monto_ahorro_programado +
@@ -484,11 +551,11 @@ const pagar_operacion_financiera = async(req, res) => {
                     // monto_total_cuota += monto_ahorro_programado_a_amortizar +
                     //     Math.ceil((monto_amortizacion_capital_a_amortizar + monto_interes_a_amortizar) * 10) / 10;
 
-                    // console.log(monto_total);
-                    // console.log(monto_ahorro_programado_a_amortizar);
-                    // console.log(monto_amortizacion_capital_a_amortizar);
-                    // console.log(monto_interes_a_amortizar);
-                    // console.log(monto_total_cuota);
+                    // //console.log(monto_total);
+                    // //console.log(monto_ahorro_programado_a_amortizar);
+                    // //console.log(monto_amortizacion_capital_a_amortizar);
+                    // //console.log(monto_interes_a_amortizar);
+                    // //console.log(monto_total_cuota);
 
                     monto_total += monto_gasto_a_amortizar + monto_ahorro_inicial_a_amortizar +
                         // monto_ahorro_voluntario_a_amortizar + monto_total_cuota +
@@ -496,13 +563,13 @@ const pagar_operacion_financiera = async(req, res) => {
                         monto_amortizacion_capital_a_amortizar + monto_interes_a_amortizar +
                         monto_mora_a_amortizar; // + parseInt(monto_ahorro_voluntario);
 
-                    // console.log(monto_total)
-                    // console.log(monto_gasto_a_amortizar)
-                    // console.log(monto_ahorro_inicial_a_amortizar)
-                    // console.log(monto_ahorro_voluntario_a_amortizar)
-                    // console.log(monto_mora_a_amortizar)
+                    // //console.log(monto_total)
+                    // //console.log(monto_gasto_a_amortizar)
+                    // //console.log(monto_ahorro_inicial_a_amortizar)
+                    // //console.log(monto_ahorro_voluntario_a_amortizar)
+                    // //console.log(monto_mora_a_amortizar)
 
-                    // console.log(monto_total)
+                    // //console.log(monto_total)
 
 
                     monto_total_gasto += monto_gasto_a_amortizar;
@@ -516,7 +583,7 @@ const pagar_operacion_financiera = async(req, res) => {
 
             }
 
-            // console.log(monto_total);
+            // //console.log(monto_total);
 
             // cuota.pagos.push(dato_recibo);
             // cuota.pagos.push({
@@ -565,7 +632,7 @@ const pagar_operacion_financiera = async(req, res) => {
             //     // cuota.monto_amortizacion_capital + cuota.monto_interes +
             //     cuota.monto_mora; // + parseInt(monto_ahorro_voluntario);
 
-            // // console.log(monto_total)
+            // // //console.log(monto_total)
 
             // monto_total_gasto += cuota.monto_gasto;
             // monto_total_ahorro_inicial += cuota.monto_ahorro_inicial;
@@ -581,7 +648,7 @@ const pagar_operacion_financiera = async(req, res) => {
             //     monto_total_ahorro_voluntario += cuota.monto_ahorro_voluntario;
         }
 
-        // console.log(cuota.operacion_financiera);
+        // //console.log(cuota.operacion_financiera);
 
         // const operacion_financiera_detalle = await OperacionFinancieraDetalle.find({ "operacion_financiera": cuota.operacion_financiera, "estado": "Previgente", "es_borrado": false });
 
@@ -590,32 +657,44 @@ const pagar_operacion_financiera = async(req, res) => {
         // await OperacionFinancieraDetalle.updateMany({ "operacion_financiera": operacion_financiera, "estado": "Previgente", "es_borrado": false }, { "estado": "Vigente" });
         // await OperacionFinancieraDetalle.updateMany({ "operacion_financiera": "5f52b9533813a42e687c9a3b", "estado": "Previgente", "es_borrado": false }, { "estado": "Vigente" }, function(err, docs) {
         //     if (err) {
-        //         console.log(err)
+        //         //console.log(err)
         //     } else {
-        //         console.log("Updated Docs : ", docs);
+        //         //console.log("Updated Docs : ", docs);
         //     }
         // });
 
-        // console.log(monto_total)
+        // //console.log(monto_total)
 
-        modelo.monto_total = monto_total.toFixed(1);
-        modelo.monto_gasto = monto_total_gasto;
-        modelo.monto_ahorro_inicial = monto_total_ahorro_inicial;
-        modelo.monto_ahorro_voluntario = monto_total_ahorro_voluntario;
-        modelo.monto_ahorro_programado = monto_total_ahorro_programado;
-        modelo.monto_amortizacion_capital = monto_total_amortizacion_capital;
-        modelo.monto_interes = monto_total_interes;
-        modelo.monto_mora = monto_total_mora;
+        //console.log(caja_diario)
 
-        modelo.estado_caja_diario = 'Abierto';
-        modelo.estado_pago = 'Vigente';
         modelo.es_ingreso = true;
 
-        modelo.serie_recibo = dato_recibo.serie_recibo;
-        modelo.numero_recibo = dato_recibo.numero_recibo;
-        modelo.fecha_recibo = dato_recibo.fecha_recibo;
+        modelo.diario = {
+            caja_diario: caja_diario.id,
+            caja: caja.id,
+            estado: 'Abierto'
+        };
 
-        modelo.caja_diario = caja_diario.id;
+        modelo.recibo = {
+            estado: 'Vigente',
+            serie: dato_recibo.serie_recibo,
+            numero: dato_recibo.numero_recibo,
+            fecha: dato_recibo.fecha_recibo,
+            ejercicio: '2020',
+            monto_total: monto_total.toFixed(1)
+        };
+
+        modelo.producto = {
+            persona: id_socio,
+            operacion_financiera: operacion_financiera,
+            monto_gasto: monto_total_gasto,
+            monto_ahorro_inicial: monto_total_ahorro_inicial,
+            monto_ahorro_voluntario: monto_total_ahorro_voluntario,
+            monto_ahorro_programado: monto_total_ahorro_programado,
+            monto_amortizacion_capital: monto_total_amortizacion_capital,
+            monto_interes: monto_total_interes,
+            monto_mora: monto_total_mora
+        };
 
         // modelo.operacion_financiera = 0;
         // modelo.persona = 0;
@@ -627,15 +706,19 @@ const pagar_operacion_financiera = async(req, res) => {
         //     fecha_recibo: '04/09/2020 13:15:05'
         // };
 
-        // console.log(modelo);
+        // //console.log(modelo);
 
-        // console.log(modelo.monto_total)
+        // //console.log(modelo.monto_total)
+
+        console.log(modelo)
 
         await modelo.save();
 
+        console.log(2)
+
         const cuotas_pendientes = await OperacionFinancieraDetalle.findOne({ "operacion_financiera": operacion_financiera, "estado": "Vigente", "es_borrado": false });
 
-        // console.log(cuotas_pendientes);
+        // //console.log(cuotas_pendientes);
 
         if (!cuotas_pendientes) {
             // if (cuotas_pendientes.length === 0) {
@@ -1131,7 +1214,7 @@ const pagar_operacion_financiera = async(req, res) => {
 //         // const lista = await OperacionFinancieraDetalle.find({ "operacion_financiera": id_operacion_financiera, "estado": "Vigente", "es_borrado": false })
 //         //     .sort({ "numero_cuota": 1 });
 
-//         console.log(id_operacion_financiera);
+//         //console.log(id_operacion_financiera);
 
 //         const recibo = {
 //             serie_recibo: '001',
@@ -1145,7 +1228,7 @@ const pagar_operacion_financiera = async(req, res) => {
 //         })
 //     } catch (error) {
 
-//         console.log(error);
+//         //console.log(error);
 //         res.status(500).json({
 //             ok: false,
 //             msg: 'Error inesperado.'
