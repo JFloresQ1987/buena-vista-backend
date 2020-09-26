@@ -290,7 +290,7 @@ const modelo = {
 };
 
 const schema = Schema(
-    Object.assign(modelo, schemaBase, schemaAuditoria), { collection: 'pago_operaciones_financieras' });
+    Object.assign(modelo, schemaBase, schemaAuditoria), { collection: 'pago_operacion_financiera' });
 
 schema.method('toJSON', function() {
     const { __v, _id, ...object } = this.toObject();
