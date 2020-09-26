@@ -4,24 +4,28 @@ const dayjs = require("dayjs");
 const Analista = require("../../../models/core/seguridad/analista.model");
 
 const listar = async (req, res = response) => {
-  /* const analistas = await Analista.find(
-    { es_borrado: false },
-    "descripcion producto usuario es_bloqueado es_vigente"
-  ).populate('usuario','usuario rol persona', populate('persona')); */
-  const analistas = await Analista.find(
-    { es_borrado: false },
-    "descripcion producto usuario es_bloqueado es_vigente"
-  ).populate({
-    path: "usuario",
-    select: "rol persona usuario",
-    populate: {
-      path: "persona",
-      select: "nombre apellido_paterno apellido_materno",
-    },
-  });
+  const desde = Number(req.query.desde) || 0;
+  const [analistas, total] = await Promise.all([
+    Analista.find(
+      { es_borrado: false },
+      "descripcion producto usuario es_bloqueado es_vigente"
+    )
+      .populate({
+        path: "usuario",
+        select: "rol persona usuario",
+        populate: {
+          path: "persona",
+          select: "nombre apellido_paterno apellido_materno",
+        },
+      })
+      .skip(desde)
+      .limit(10),
+      Analista.find({es_borrado:false}).countDocuments()
+  ])
   res.json({
     ok: true,
     analistas,
+    total
   });
 };
 

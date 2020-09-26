@@ -51,9 +51,30 @@ const schema = {
         required: true,
         default: ''
     },
+    // ubigeo: {
+    //     type: [Object],
+    //     default: []
+    // },
     ubigeo: {
-        type: [Object],
-        default: []
+        cocigo: {
+            type: String,
+            required: true
+        },
+        departamento: {
+            type: Schema.Types.ObjectId,
+            ref: 'Ubigeo',
+            required: true
+        },
+        provincia: {
+            type: Schema.Types.ObjectId,
+            // ref: 'Ubigeo',
+            required: true
+        },
+        distrito: {
+            type: Schema.Types.ObjectId,
+            // ref: 'Ubigeo',
+            required: true
+        }
     },
     avatar: {
         type: String,
@@ -62,9 +83,7 @@ const schema = {
     comentario: {
         type: [Object],
         default: []
-    },
-    // UBIGEO
-    //departamento, provincia, distrito
+    }
 };
 
 const PersonaSchema = Schema(Object.assign(schema, schemaBase, schemaAuditoria));

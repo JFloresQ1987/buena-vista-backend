@@ -20,7 +20,7 @@ const crear = async(req, res = response) => {
 
         operacion_financiera.comentario = [{
             tipo: 'Nuevo',
-            usuario: req.header('id_usuario_sesion'),
+            id_usuario: req.header('id_usuario_sesion'),
             usuario: req.header('usuario_sesion'),
             nombre: req.header('nombre_sesion'),
             fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
@@ -75,7 +75,14 @@ const listar_operaciones_financieras = async(req, res) => {
 
     try {
 
-        const lista = await OperacionFinanciera.find({ "persona": id_persona, "estado": { $in: ["Previgente", "Vigente"] }, "es_borrado": false });
+        const lista = await OperacionFinanciera.find({
+                "persona": id_persona,
+                "estado": { $in: ["Previgente", "Vigente"] },
+                "es_borrado": false
+            })
+            .populate('producto.tipo', 'descripcion');
+
+        // console.log(lista)
 
         res.json({
             ok: true,
@@ -101,6 +108,9 @@ const listar_operacion_financiera = async(req, res) => {
     try {
 
         const modelo = await OperacionFinanciera.findOne({ "_id": id_operacion_financiera, "es_borrado": false })
+            .populate('producto.tipo', 'descripcion');
+
+        console.log(modelo)
 
         res.json({
             ok: true,

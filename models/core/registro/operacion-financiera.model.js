@@ -8,45 +8,45 @@ const { schemaAuditoria } = require('../../auditoria');
 const modelo = {
 
     producto: {
-        type: {
-            tipo: {
-                type: Schema.Types.ObjectId,
-                ref: 'Producto',
-                required: true
-            },
-            codigo_programacion: {
-                type: String,
-                // required: true,
-                // jsonSchema: {
-                //     enum: ["inverse", "info", "primary", "danger", "warning", "success"],
-                // },
-                default: ''
-            },
-            programacion: {
-                type: String,
-                // required: true,
-                // jsonSchema: {
-                //     enum: ["inverse", "info", "primary", "danger", "warning", "success"],
-                // },
-                default: ''
-            },
-            // tipo: {
-            //     type: String,
-            //     required: true,
-            //     jsonSchema: {
-            //         enum: ["CD", "CM", "PEX", "BC"],
-            //     },
-            //     default: ''
+        // type: {
+        tipo: {
+            type: Schema.Types.ObjectId,
+            ref: 'Producto',
+            required: true
+        },
+        codigo_programacion: {
+            type: String,
+            // required: true,
+            // jsonSchema: {
+            //     enum: ["inverse", "info", "primary", "danger", "warning", "success"],
             // },
-            color: {
-                type: String,
-                // required: true,
-                jsonSchema: {
-                    enum: ["inverse", "info", "primary", "danger", "warning", "success"],
-                },
-                default: 'inverse'
+            default: ''
+        },
+        programacion: {
+            type: String,
+            // required: true,
+            // jsonSchema: {
+            //     enum: ["inverse", "info", "primary", "danger", "warning", "success"],
+            // },
+            default: ''
+        },
+        // tipo: {
+        //     type: String,
+        //     required: true,
+        //     jsonSchema: {
+        //         enum: ["CD", "CM", "PEX", "BC"],
+        //     },
+        //     default: ''
+        // },
+        color: {
+            type: String,
+            // required: true,
+            jsonSchema: {
+                enum: ["inverse", "info", "primary", "danger", "warning", "success"],
             },
-        }
+            default: 'inverse'
+        },
+        // }
     },
     // producto: {
     //     type: Schema.Types.ObjectId,
@@ -54,47 +54,47 @@ const modelo = {
     //     required: true
     // },
     configuracion: {
-        type: {
-            tasa_ahorro_inicial: {
-                type: Number,
-                required: true,
-                default: 0
-            },
-            tasa_aporte_capital: {
-                type: Number,
-                required: true,
-                default: 0
-            },
-            tasa_ahorro_programado: {
-                type: Number,
-                required: true,
-                default: 0
-            },
-            tasa_interes: {
-                type: Number,
-                required: true,
-                default: 0
-            },
-            tasa_mora: {
-                type: Number,
-                required: true,
-                default: 0
-            },
+        // type: {
+        tasa_ahorro_inicial: {
+            type: Number,
+            required: true,
+            default: 0
         },
-        default: {}
+        tasa_aporte_capital: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        tasa_ahorro_programado: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        tasa_interes: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        tasa_mora: {
+            type: Number,
+            required: true,
+            default: 0
+        }
+        // },
+        // default: {}
     },
     bancomunal: {
-        type: {
-            grupo_bancomunal: {
-                type: Schema.Types.ObjectId,
-                ref: 'GrupoBancomunal',
-            },
-            numero_ciclo: {
-                type: Number,
-                default: 0
-            }
+        // type: {
+        grupo_bancomunal: {
+            type: Schema.Types.ObjectId,
+            ref: 'GrupoBancomunal',
         },
-        default: {}
+        numero_ciclo: {
+            type: Number,
+            default: 0
+        }
+        // },
+        // default: {}
     },
     // grupo_bancomunal: {
     //     type: Schema.Types.ObjectId,
@@ -111,10 +111,6 @@ const modelo = {
     //     ref: 'Analista',
     //     // required: true
     // },
-
-
-
-
     // programacion: {
     //     type: String,
     //     required: true,
@@ -214,7 +210,7 @@ const modelo = {
 };
 
 const schema = Schema(
-    Object.assign(modelo, schemaBase, schemaAuditoria), { collection: 'operaciones_financieras' });
+    Object.assign(modelo, schemaBase, schemaAuditoria), { collection: 'operacion_financiera' });
 
 schema.method('toJSON', function() {
     const { __v, _id, ...object } = this.toObject();

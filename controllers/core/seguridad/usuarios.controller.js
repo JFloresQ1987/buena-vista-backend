@@ -5,16 +5,20 @@ const Usuario = require("../../../models/core/seguridad/usuario.model");
 const Persona = require("../../../models/core/registro/persona.model");
 
 const listar = async (req, res) => {
+  const desde = Number(req.query.desde) || 0;
   //const modelo = await Usuario.find({ "es_borrado": false }, 'usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente')
-  const usuarios = await Usuario.find(
-    { es_borrado: false },
-    "usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente rol"
-  )
-    .populate("persona", "nombre apellido_paterno apellido_materno")
-    .sort({ persona: -1 });
-  //).populate('persona','nombre apellido_paterno apellido_materno');
 
-  const total = await Usuario.find({ es_borrado: false }).countDocuments();
+  const [usuarios, total] = await Promise.all([
+    Usuario.find(
+      { es_borrado: false },
+      "usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente rol"
+    )
+      .populate("persona", "nombre apellido_paterno apellido_materno")
+      .sort({ persona: -1 })
+      .skip(desde)
+      .limit(10),
+    Usuario.find({ es_borrado: false }).countDocuments(),
+  ]);
 
   res.json({
     ok: true,
@@ -25,7 +29,10 @@ const listar = async (req, res) => {
 
 const listarxRol = async (req, res = response) => {
   const id = req.params.id;
-  const usuarios = await Usuario.find({ es_borrado: false, rol: { $in: id } }).populate('persona','nombre apellido_paterno apellido_materno');
+  const usuarios = await Usuario.find({
+    es_borrado: false,
+    rol: { $in: id },
+  }).populate("persona", "nombre apellido_paterno apellido_materno");
   return res.json({
     ok: true,
     usuarios,
@@ -98,7 +105,7 @@ const getUsuario = async (req, res) => {
     const id = req.params.id;
     const usuario = await Usuario.findById(id).populate(
       "persona",
-      "nombre apellido_paterno apellido_materno fecha_nacimiento documento_identidad es_masculino numero_telefono numero_celular correo_electronico domicilio referencia_domicilio comentario"
+      "nombre apellido_paterno apellido_materno fecha_nacimiento documento_identidad es_masculino numero_telefono numero_celular correo_electronico domicilio referencia_domicilio ubigeo comentario"
     );
     if (usuario) {
       res.json({
@@ -140,12 +147,16 @@ const actualizar = async (req, res = response) => {
     persona.apellido_paterno = req.body.apellido_paterno;
     persona.apellido_materno = req.body.apellido_materno;
     persona.fecha_nacimiento = req.body.fecha_nacimiento;
-
+    persona.ubigeo = {
+      cocigo: "101",
+      departamento: req.body.departamento,
+      provincia: req.body.provincia,
+      distrito: req.body.distrito,
+    };
     persona.numero_celular = req.body.numero_celular;
     persona.numero_telefono = req.body.numero_telefono;
     persona.correo_electronico = req.body.correo_electronico;
     persona.domicilio = req.body.domicilio;
-
     persona.referencia_domicilio = req.body.referencia_domicilio;
     persona.comentario.push({
       tipo: "Editado",
@@ -163,7 +174,7 @@ const actualizar = async (req, res = response) => {
   } catch (error) {
     res.status(500).json({
       ok: false,
-      msg: "Error inesperado.",
+      msg: error.message,
     });
   }
 };
