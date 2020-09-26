@@ -107,6 +107,11 @@ const modelo = {
             ref: 'OperacionFinanciera',
             // required: true
         },
+        // monto_total: {
+        //     type: Number,
+        //     required: true,
+        //     default: 0
+        // },
         monto_gasto: {
             type: Number,
             // required: true,
@@ -175,46 +180,52 @@ const modelo = {
         concepto: {
             type: Schema.Types.ObjectId,
             ref: 'Concepto',
-            required: true
+            // required: true
         },
         sub_concepto: {
             type: Schema.Types.ObjectId,
             // required: true
-            default: ''
+            // default: ''
         },
         responsable: {
             type: Schema.Types.ObjectId,
             ref: 'Usuario'
                 // required: true
         },
-        monto: {
-            type: Number,
-            // required: true,
-            default: 0
-        },
+        // monto_total: {
+        //     type: Number,
+        //     required: true,
+        //     default: 0
+        // },
         numero_comprobante: {
             type: String,
             // required: true
-            default: ''
+            // default: ''
         },
         detalle: {
             type: String,
             // required: true
-            default: ''
+            // default: ''
         }
         // },
         // default: {}
     },
-    detalle: {
+    detalle: [{
         monto_total: {
             type: Number,
-            required: true
+            required: true,
+            default: 0
         },
         producto: {
-            concepto: {
+            operacion_financiera_detalle: {
                 type: Schema.Types.ObjectId,
                 ref: 'OperacionFinancieraDetalle',
                 required: true
+            },
+            numero_cuota: {
+                type: Number,
+                // required: true,
+                default: 0
             },
             monto_gasto: {
                 type: Number,
@@ -282,7 +293,7 @@ const modelo = {
         // type: [Object],
         // // required: true
         // default: ''
-    },
+    }],
     comentario: {
         type: [Object],
         default: []

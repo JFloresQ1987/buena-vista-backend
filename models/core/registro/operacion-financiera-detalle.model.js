@@ -46,9 +46,9 @@ const modelo = {
         type: String,
         required: true,
         jsonSchema: {
-            enum: ["Previgente", "Vigente", "Pendiente", "Amortizado", "Pagado", "Anulado"],
+            enum: ["Prependiente", "Vigente", "Pendiente", "Amortizado", "Pagado", "Anulado"],
         },
-        default: 'Previgente'
+        default: 'Prependiente'
     },
     numero_cuota: {
         type: Number,
@@ -295,8 +295,18 @@ schema.method('toJSON', function() {
     object.monto_interes = Math.round(ingresos.monto_interes * 100) / 100;
     // object.monto_ahorro_programado = monto_ahorro_programado;
     object.monto_cuota = (ingresos.monto_gasto + ahorros.monto_ahorro_inicial +
-        Math.ceil((ingresos.monto_amortizacion_capital + ingresos.monto_interes + ahorros.monto_ahorro_programado) * 10) / 10).toFixed(2);
+        ingresos.monto_amortizacion_capital + ingresos.monto_interes + ahorros.monto_ahorro_programado).toFixed(2);
+    // object.monto_cuota = (ingresos.monto_gasto + ahorros.monto_ahorro_inicial +
+    //     Math.ceil((ingresos.monto_amortizacion_capital + ingresos.monto_interes + ahorros.monto_ahorro_programado) * 10) / 10).toFixed(2);
+
+    // console.log(ingresos.monto_amortizacion_capital)
+    // console.log(ingresos.monto_interes)
+    // console.log(ahorros.monto_ahorro_programado)
+
+
     object.monto_ahorro_programado = ahorros.monto_ahorro_programado.toFixed(2)
+    object.ingresos = ingresos;
+    object.ahorros = ahorros;
     return object;
 })
 
