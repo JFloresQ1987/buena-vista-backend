@@ -30,7 +30,7 @@ const getMenu = (rol) => {
             icono: 'mdi mdi-cart',
             submenu: [
                 { opcion: 'Pago Productos', url: '/caja/pago/producto-caja' },
-                { opcion: 'Ingresos y egresos', url: '/registro/gestion/caja-ingresos-egresos' },
+                { opcion: 'Ingresos y egresos', url: '/caja/gestion/ingresos-egresos' },
                 { opcion: 'Apertura de caja general', url: '/registro/gestion/cierre-caja' },
                 { opcion: 'Apertura de caja individual', url: '/registro/gestion/cierre-caja' },
                 { opcion: 'Cierre de caja general', url: '/registro/gestion/cierre-caja' },
