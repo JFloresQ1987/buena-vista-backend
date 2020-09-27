@@ -8,6 +8,14 @@ const schema = {
         type: String,
         required: true,
     },
+    local_atencion: {
+        type: String,
+        // required: true,
+        jsonSchema: {
+            enum: ["Ayacucho", "Huanta", "San Francisco"],
+        },
+        default: 'Ayacucho'
+    },
     ip: {
         type: String,
         required: true
@@ -15,6 +23,16 @@ const schema = {
     pc_nombre: {
         type: String,
         required: true,
+    },
+    serie: {
+        type: String,
+        // required: true
+        default: '001'
+    },
+    es_caja_principal: {
+        type: Boolean,
+        // required: true
+        default: false
     },
     usuario: {
         type: Schema.Types.ObjectId,
