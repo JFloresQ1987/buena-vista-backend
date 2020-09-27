@@ -28,6 +28,9 @@ app.use('/api/operacion-financiera-pago', require('./routes/core/caja/operacion-
 
 app.use('/api/caja-diario', require('./routes/core/caja/caja-diaria.route'));
 
+app.use('/api/ubigeo', require('./routes/core/ubigeo.route'));
+app.use('/api/pago-concepto', require('./routes/core/configuracion/pago-concepto.route'));
+
 app.listen(process.env.PORT, () => {
     console.log('Servidor corriendo en puerto ' + process.env.PORT);
 });

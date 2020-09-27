@@ -1236,8 +1236,31 @@ const pagar_operacion_financiera = async(req, res) => {
 //     }
 // }
 
-module.exports = {
+const registrarIngresoEgreso = async (req, res = response) => {
+  try {
+    const { es_ingreso } = req.body;
+    const operacion = es_ingreso ? "inreso" : "egreso";
+    const model = await PagoOperacionFinanciera.create(req.body);
+    if (!model) {
+      return res.json({
+        ok: false,
+        msg: `No se registro ${operacion} correctamente`
+      });
+    }
+    return res.json({
+      ok: true,
+      msg: `Se registro el ${operacion} correctamente`
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: error.msg,
+    });
+  }
+};
 
-    listar_operaciones_financieras_detalle_vigentes,
-    pagar_operacion_financiera
-}
+module.exports = {
+  listar_operaciones_financieras_detalle_vigentes,
+  pagar_operacion_financiera,
+  registrarIngresoEgreso,
+};
