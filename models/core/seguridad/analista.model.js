@@ -8,7 +8,8 @@ const schema = {
     required: true,
   },
   producto: {
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref: "Producto",
     required: true,
   },
   usuario: {

@@ -17,7 +17,7 @@ const listar = async (req, res = response) => {
           path: "persona",
           select: "nombre apellido_paterno apellido_materno",
         },
-      })
+      }).populate("producto","_id descripcion")
       .skip(desde)
       .limit(10),
       Analista.find({es_borrado:false}).countDocuments()
