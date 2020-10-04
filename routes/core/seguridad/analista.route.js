@@ -2,7 +2,7 @@ const { Router } = require('express');
 const { check } = require('express-validator');
 const { validarCampos } = require('../../../middlewares/validar-campos');
 const { validarJWT, validarAuthorization } = require('../../../middlewares/validar-jwt');
-const { listar, crear, getAnalista, actualizar, getListaDesplegable } = require("../../../controllers/core/seguridad/analista.controller");
+const { listar, crear, getAnalista, actualizar, getListaDesplegablexProducto } = require("../../../controllers/core/seguridad/analista.controller");
 
 const router = Router();
 
@@ -11,9 +11,9 @@ const router = Router();
 // ============================
 
 router.get('/', [validarJWT, validarAuthorization], listar);
+router.get('/lista-desplegable-por-producto/:producto', [validarJWT, validarAuthorization], getListaDesplegablexProducto);
 router.get('/:id', [validarJWT, validarAuthorization], getAnalista);
 router.put('/:id', [validarJWT, validarAuthorization], actualizar);
 router.post('/', [validarJWT, validarAuthorization], crear);
-router.get('/lista-desplegable', [validarJWT, validarAuthorization], getListaDesplegable);
 
 module.exports = router;

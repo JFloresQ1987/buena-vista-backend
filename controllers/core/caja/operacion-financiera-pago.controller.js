@@ -3,11 +3,13 @@ const logger = require('../../../helpers/logger');
 const OperacionFinanciera = require('../../../models/core/registro/operacion-financiera.model');
 const OperacionFinancieraDetalle = require('../../../models/core/registro/operacion-financiera-detalle.model');
 const PagoOperacionFinanciera = require('../../../models/core/caja/operacion-financiera-pago.model');
-const CajaDiario = require('../../../models/core/caja/caja-diario.model');
-const Caja = require('../../../models/core/seguridad/caja.model');
-const dayjs = require('dayjs');
+// const CajaDiario = require('../../../models/core/caja/caja-diario.model');
+// const Caja = require('../../../models/core/seguridad/caja.model');
+// const dayjs = require('dayjs');
 // const RequestIp = require('@supercharge/request-ip')
 const requestIp = require('request-ip');
+const { getRecibo } = require('../../../helpers/core/recibo');
+const { validarPago } = require('../../../helpers/core/validar-pago');
 
 const listar_operaciones_financieras_detalle_vigentes = async(req, res) => {
 
@@ -125,115 +127,178 @@ const pagar_operacion_financiera = async(req, res) => {
         // //console.log(detalle);
         // //console.log(lista_id_operacion_financiera_detalle);
 
-        const caja = await Caja.findOne({ "ip": ip, "usuario": id_usuario_sesion, "es_vigente": true, "es_borrado": false })
+        // const caja = await Caja.findOne({ "ip": ip, "usuario": id_usuario_sesion, "es_vigente": true, "es_borrado": false })
 
-        // //console.log(ip)
-        // //console.log(id_usuario_sesion)
-        // //console.log(caja)
+        // // //console.log(ip)
+        // // //console.log(id_usuario_sesion)
+        // // //console.log(caja)
 
-        if (!caja)
-            return res.status(404).json({
-                ok: false,
-                msg: 'Estación de trabajo y/o usuario no habilitados para hacer caja.'
-            })
+        // if (!caja)
+        //     return res.status(404).json({
+        //         ok: false,
+        //         msg: 'Estación de trabajo y/o usuario no habilitados para hacer caja.'
+        //     })
 
-        //console.log(caja.id)
+        // //console.log(caja.id)
 
-        const modelo = new PagoOperacionFinanciera(req.body);
-        const now = dayjs();
-        const fecha_apertura = now.format('DD/MM/YYYY');
+        // // const modelo = new PagoOperacionFinanciera(req.body);
+        // const now = dayjs();
+        // const fecha_apertura = now.format('DD/MM/YYYY');
 
-        const ultimo_caja_diario = await CajaDiario.findOne({ "caja": caja.id, "es_vigente": true, "es_borrado": false })
-            .where("apertura.fecha_apertura").ne(fecha_apertura)
-            .sort({ $natural: -1 });
+        // const ultimo_caja_diario = await CajaDiario.findOne({ "caja": caja.id, "es_vigente": true, "es_borrado": false })
+        //     .where("apertura.fecha_apertura").ne(fecha_apertura)
+        //     .sort({ $natural: -1 });
 
-        // //console.log(ultimo_caja_diario)
+        // // //console.log(ultimo_caja_diario)
 
-        if (ultimo_caja_diario) {
-            // //console.log('entroo')
-            if (ultimo_caja_diario.estado === 'Abierto') {
+        // if (ultimo_caja_diario) {
+        //     // //console.log('entroo')
+        //     if (ultimo_caja_diario.estado === 'Abierto') {
 
-                return res.status(404).json({
-                    ok: false,
-                    msg: 'Existe caja diario abierto, cierre antes de continuar.'
-                })
-            }
-        }
+        //         return res.status(404).json({
+        //             ok: false,
+        //             msg: 'Existe caja diario abierto, cierre antes de continuar.'
+        //         })
+        //     }
+        // }
 
-        let caja_diario = await CajaDiario.findOne({ "caja": caja.id, "apertura.fecha_apertura": fecha_apertura, "es_vigente": true, "es_borrado": false });
+        // let caja_diario = await CajaDiario.findOne({ "caja": caja.id, "apertura.fecha_apertura": fecha_apertura, "es_vigente": true, "es_borrado": false });
 
-        // //console.log(caja_diario)
+        // // //console.log(caja_diario)
 
-        if (caja_diario) {
-            if (caja_diario.estado === 'Cerrado') {
+        // if (caja_diario) {
+        //     if (caja_diario.estado === 'Cerrado') {
 
-                return res.status(404).json({
-                    ok: false,
-                    msg: 'Caja diario ya se encuentra cerrado.'
-                })
-            }
-        }
+        //         return res.status(404).json({
+        //             ok: false,
+        //             msg: 'Caja diario ya se encuentra cerrado.'
+        //         })
+        //     }
+        // }
 
-        // const caja_diario_actual
+        // // const caja_diario_actual
 
-        if (!caja_diario) {
+        // if (!caja_diario) {
 
-            // //console.log('Entro a crear caja')
+        //     // //console.log('Entro a crear caja')
 
-            // const ultimo_caja_diario = await CajaDiario.findOne({ "es_borrado": false })
-            //     .sort({ $natural: -1 });
+        //     // const ultimo_caja_diario = await CajaDiario.findOne({ "es_borrado": false })
+        //     //     .sort({ $natural: -1 });
 
-            // db.collectionName.findOne({}, {sort:{$natural:-1}})
+        //     // db.collectionName.findOne({}, {sort:{$natural:-1}})
 
-            const apertura_caja_diario = new CajaDiario();
+        //     const apertura_caja_diario = new CajaDiario();
 
-            apertura_caja_diario.caja = caja.id;
+        //     apertura_caja_diario.caja = caja.id;
 
-            // //console.log(apertura_caja_diario.estado)
+        //     // //console.log(apertura_caja_diario.estado)
 
-            apertura_caja_diario.estado = "Abierto";
-            // //console.log(apertura_caja_diario.estado)
-            apertura_caja_diario.apertura.fecha_apertura = fecha_apertura;
+        //     apertura_caja_diario.estado = "Abierto";
+        //     // //console.log(apertura_caja_diario.estado)
+        //     apertura_caja_diario.apertura.fecha_apertura = fecha_apertura;
 
-            if (ultimo_caja_diario) {
+        //     if (ultimo_caja_diario) {
 
-                // //console.log(apertura_caja_diario)
+        //         // //console.log(apertura_caja_diario)
 
-                apertura_caja_diario.apertura.cantidad_diez_centimos_apertura = ultimo_caja_diario.cierre.cantidad_diez_centimos_cierre;
-                apertura_caja_diario.apertura.cantidad_veinte_centimos_apertura = ultimo_caja_diario.cierre.cantidad_veinte_centimos_cierre;
-                apertura_caja_diario.apertura.cantidad_cincuenta_centimos_apertura = ultimo_caja_diario.cierre.cantidad_cincuenta_centimos_cierre;
-                apertura_caja_diario.apertura.cantidad_un_sol_apertura = ultimo_caja_diario.cierre.cantidad_un_sol_cierre;
-                apertura_caja_diario.apertura.cantidad_cinco_soles_apertura = ultimo_caja_diario.cierre.cantidad_cinco_soles_cierre;
-                apertura_caja_diario.apertura.cantidad_diez_soles_apertura = ultimo_caja_diario.cierre.cantidad_diez_soles_cierre;
-                apertura_caja_diario.apertura.cantidad_veinte_soles_apertura = ultimo_caja_diario.cierre.cantidad_veinte_soles_cierre;
-                apertura_caja_diario.apertura.cantidad_cincuenta_soles_apertura = ultimo_caja_diario.cierre.cantidad_cincuenta_soles_cierre;
-                apertura_caja_diario.apertura.cantidad_dos_soles_apertura = ultimo_caja_diario.cierre.cantidad_dos_soles_cierre;
-                apertura_caja_diario.apertura.cantidad_cien_soles_apertura = ultimo_caja_diario.cierre.cantidad_cien_soles_cierre;
-                apertura_caja_diario.apertura.cantidad_discientos_soles_apertura = ultimo_caja_diario.cierre.cantidad_discientos_soles_cierre;
-                apertura_caja_diario.monto_total_apertura = ultimo_caja_diario.monto_total_apertura + ultimo_caja_diario.monto_total_operaciones;
-            }
+        //         apertura_caja_diario.apertura.cantidad_diez_centimos_apertura = ultimo_caja_diario.cierre.cantidad_diez_centimos_cierre;
+        //         apertura_caja_diario.apertura.cantidad_veinte_centimos_apertura = ultimo_caja_diario.cierre.cantidad_veinte_centimos_cierre;
+        //         apertura_caja_diario.apertura.cantidad_cincuenta_centimos_apertura = ultimo_caja_diario.cierre.cantidad_cincuenta_centimos_cierre;
+        //         apertura_caja_diario.apertura.cantidad_un_sol_apertura = ultimo_caja_diario.cierre.cantidad_un_sol_cierre;
+        //         apertura_caja_diario.apertura.cantidad_cinco_soles_apertura = ultimo_caja_diario.cierre.cantidad_cinco_soles_cierre;
+        //         apertura_caja_diario.apertura.cantidad_diez_soles_apertura = ultimo_caja_diario.cierre.cantidad_diez_soles_cierre;
+        //         apertura_caja_diario.apertura.cantidad_veinte_soles_apertura = ultimo_caja_diario.cierre.cantidad_veinte_soles_cierre;
+        //         apertura_caja_diario.apertura.cantidad_cincuenta_soles_apertura = ultimo_caja_diario.cierre.cantidad_cincuenta_soles_cierre;
+        //         apertura_caja_diario.apertura.cantidad_dos_soles_apertura = ultimo_caja_diario.cierre.cantidad_dos_soles_cierre;
+        //         apertura_caja_diario.apertura.cantidad_cien_soles_apertura = ultimo_caja_diario.cierre.cantidad_cien_soles_cierre;
+        //         apertura_caja_diario.apertura.cantidad_discientos_soles_apertura = ultimo_caja_diario.cierre.cantidad_discientos_soles_cierre;
+        //         apertura_caja_diario.monto_total_apertura = ultimo_caja_diario.monto_total_apertura + ultimo_caja_diario.monto_total_operaciones;
+        //     }
 
-            // apertura_caja_diario.caja_diario = 0;
-            // //console.log(apertura_caja_diario)
+        //     // apertura_caja_diario.caja_diario = 0;
+        //     // //console.log(apertura_caja_diario)
 
-            caja_diario = await apertura_caja_diario.save();
-            // caja_diario = await apertura_caja_diario.save();
+        //     caja_diario = await apertura_caja_diario.save();
+        //     // caja_diario = await apertura_caja_diario.save();
 
-        }
+        // }
 
-        // //console.log('llegoooo...')
+        // // //console.log('llegoooo...')
 
 
-        //Caja diario ya se encuentra cerrado.
+        // //Caja diario ya se encuentra cerrado.
 
-        // modelo.comentario = [{
-        //     tipo: 'Nuevo',
-        //     usuario: req.header('id_usuario_sesion'),
-        //     usuario: req.header('usuario_sesion'),
-        //     nombre: req.header('nombre_sesion'),
-        //     fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
-        //     comentario
-        // }];
+        // // modelo.comentario = [{
+        // //     tipo: 'Nuevo',
+        // //     usuario: req.header('id_usuario_sesion'),
+        // //     usuario: req.header('usuario_sesion'),
+        // //     nombre: req.header('nombre_sesion'),
+        // //     fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
+        // //     comentario
+        // // }];
+
+        // // let monto_recibido_actual = monto_recibido;
+        // // let monto_ahorro_voluntario_actual = monto_ahorro_voluntario;
+        // // let monto_total = 0;
+        // // let monto_total_gasto = 0;
+        // // let monto_total_ahorro_inicial = 0;
+        // // let monto_total_ahorro_voluntario = 0;
+        // // let monto_total_ahorro_programado = 0;
+        // // let monto_total_amortizacion_capital = 0;
+        // // let monto_total_interes = 0;
+        // // let monto_total_mora = 0;
+        // // let monto_total_cuota = 0;
+        // // let monto_total_cuota_pagada = 0;
+
+        // let dato_recibo = {
+        //     serie_recibo: '001',
+        //     numero_recibo: 'I-00000001',
+        //     fecha_recibo: now.format('DD/MM/YYYY hh:mm:ss a')
+        // };
+
+        // const ultimo_pago = await PagoOperacionFinanciera.findOne({ "serie_recibo": '001', "es_borrado": false })
+        //     // .where("fecha_apertura").ne(fecha_apertura)
+        //     .sort({ $natural: -1 });
+
+        // let correlativo_recibo = 1;
+
+        // // //console.log(ultimo_pago)
+
+        // if (ultimo_pago) {
+
+        //     // const str = 'sometext-20202';
+        //     // const slug = str.split('-').pop();
+
+        //     correlativo_recibo = parseInt(ultimo_pago.numero_recibo.split('-').pop()) + 1;
+        // }
+
+        // dato_recibo.numero_recibo = 'I-' + correlativo_recibo.toString().padStart(8, "00000000");
+
+        // //console.log(ultimo_pago);
+        // //console.log(correlativo_recibo);
+        // //console.log(dato_recibo.numero_recibo);
+
+        const data_validacion = {
+            ip: ip,
+            id_usuario_sesion: id_usuario_sesion,
+            // caja: caja.id
+        };
+
+        console.log(data_validacion)
+
+        const resultado_validacion = await validarPago(data_validacion);
+
+        console.log(resultado_validacion)
+
+        if (!resultado_validacion.ok)
+            return res.status(404).json(resultado_validacion)
+                // return resultado_validacion;
+
+        // console.log(resultado_validacion)
+
+        const dato_recibo = resultado_validacion.dato_recibo;
+
+        // console.log(dato_recibo)
 
         let monto_recibido_actual = monto_recibido;
         let monto_ahorro_voluntario_actual = monto_ahorro_voluntario;
@@ -245,36 +310,8 @@ const pagar_operacion_financiera = async(req, res) => {
         let monto_total_amortizacion_capital = 0;
         let monto_total_interes = 0;
         let monto_total_mora = 0;
-        // let monto_total_cuota = 0;
-        // let monto_total_cuota_pagada = 0;
 
-        let dato_recibo = {
-            serie_recibo: '001',
-            numero_recibo: 'I-00000001',
-            fecha_recibo: now.format('DD/MM/YYYY hh:mm:ss a')
-        };
-
-        const ultimo_pago = await PagoOperacionFinanciera.findOne({ "serie_recibo": '001', "es_borrado": false })
-            // .where("fecha_apertura").ne(fecha_apertura)
-            .sort({ $natural: -1 });
-
-        let correlativo_recibo = 1;
-
-        // //console.log(ultimo_pago)
-
-        if (ultimo_pago) {
-
-            // const str = 'sometext-20202';
-            // const slug = str.split('-').pop();
-
-            correlativo_recibo = parseInt(ultimo_pago.numero_recibo.split('-').pop()) + 1;
-        }
-
-        dato_recibo.numero_recibo = 'I-' + correlativo_recibo.toString().padStart(8, "00000000");
-
-        // //console.log(ultimo_pago);
-        // //console.log(correlativo_recibo);
-        // //console.log(dato_recibo.numero_recibo);
+        const modelo = new PagoOperacionFinanciera(req.body);
 
         for (let i = 0; i < cuotas.length; i++) {
 
@@ -670,8 +707,10 @@ const pagar_operacion_financiera = async(req, res) => {
         modelo.es_ingreso = true;
 
         modelo.diario = {
-            caja_diario: caja_diario.id,
-            caja: caja.id,
+            caja_diario: resultado_validacion.caja_diario,
+            // caja_diario: caja_diario.id,
+            caja: resultado_validacion.caja,
+            // caja: caja.id,
             estado: 'Abierto'
         };
 
@@ -710,20 +749,41 @@ const pagar_operacion_financiera = async(req, res) => {
 
         // //console.log(modelo.monto_total)
 
-        console.log(modelo)
+        // console.log(modelo)
 
         await modelo.save();
 
-        console.log(2)
+        // console.log(2)
 
-        const cuotas_pendientes = await OperacionFinancieraDetalle.findOne({ "operacion_financiera": operacion_financiera, "estado": "Vigente", "es_borrado": false });
+        const cuotas_pendientes = await OperacionFinancieraDetalle.findOne({ "operacion_financiera": operacion_financiera, "estado": "Pendiente", "es_borrado": false });
 
         // //console.log(cuotas_pendientes);
+
+        const model_operacion_financiera = await OperacionFinanciera.findById({ "_id": operacion_financiera })
+            .populate({
+                path: "producto.tipo",
+                select: "descripcion",
+            })
+            .populate({
+                path: "analista",
+                select: "usuario",
+                populate: {
+                    path: "usuario",
+                    select: "persona",
+                    populate: {
+                        path: "persona",
+                        select: "nombre apellido_paterno apellido_materno",
+                    }
+                }
+            });
+
+        console.log(model_operacion_financiera)
+            // console.log(cuotas_pendientes)
 
         if (!cuotas_pendientes) {
             // if (cuotas_pendientes.length === 0) {
 
-            const model_operacion_financiera = await OperacionFinanciera.findById({ "_id": operacion_financiera });
+            // const model_operacion_financiera = await OperacionFinanciera.findById({ "_id": operacion_financiera });
             model_operacion_financiera.estado = 'Pagado';
             await model_operacion_financiera.save();
         }
@@ -923,276 +983,300 @@ const pagar_operacion_financiera = async(req, res) => {
         //     }],
         // ];
 
-        let recibo = [
-            [{
-                content: 'Buenavista La Bolsa S.A.C.',
-                colSpan: 3,
-                styles: { halign: 'center' },
-                // styles: { halign: 'center', fillColor: [22, 160, 133] },
-            }, ],
-            [{
-                content: 'Agencia Ayacucho',
-                colSpan: 3,
-                styles: { halign: 'center' },
-                // styles: { halign: 'center', fillColor: [22, 160, 133] },
-            }, ],
-            // [
-            //   {
-            //     content: 'RUC: 20574744599',
-            //     colSpan: 3,
-            //     styles: { halign: 'center' },
-            //     // styles: { halign: 'center', fillColor: [22, 160, 133] },
-            //   },
-            // ],
-            [{
-                content: '------------------------------------',
-                colSpan: 3,
-                styles: { halign: 'center' },
-                // styles: { halign: 'center', fillColor: [22, 160, 133] },
-            }, ],
-            [{
-                    content: 'RUC: 20574744599',
-                    colSpan: 1,
-                    styles: { halign: 'left' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                },
-                {
-                    content: '',
-                    colSpan: 1,
-                    // styles: { halign: 'left' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                },
-                {
-                    content: dato_recibo.numero_recibo,
-                    colSpan: 1,
-                    styles: { halign: 'right' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                },
-            ],
-            [
+        const data_recibo = {
+            agencia: 'Agencia Ayacucho',
+            numero_recibo: dato_recibo.numero_recibo,
+            documento_identidad_socio: documento_identidad_socio,
+            nombres_apellidos_socio: nombres_apellidos_socio,
+            nombres_apellidos_analista: model_operacion_financiera.analista.usuario.persona.nombre +
+                ' ' + model_operacion_financiera.analista.usuario.persona.apellido_paterno +
+                ' ' + model_operacion_financiera.analista.usuario.persona.apellido_materno,
+            producto: model_operacion_financiera.producto.tipo.descripcion,
+            monto_total_amortizacion_capital: monto_total_amortizacion_capital,
+            monto_total_interes: monto_total_interes,
+            monto_total_ahorro_programado: monto_total_ahorro_programado,
+            monto_total_ahorro_voluntario: monto_total_ahorro_voluntario,
+            monto_total_mora: monto_total_mora,
+            monto_total_ahorro_inicial: monto_total_ahorro_inicial,
+            monto_total_gasto: monto_total_gasto,
+            monto_total: monto_total,
+            usuario: req.header('usuario_sesion'),
+            fecha_recibo: dato_recibo.fecha_recibo,
+            impresion: 'Original'
+        };
 
-            ],
-            [{
-                content: 'DNI: ' + documento_identidad_socio,
-                colSpan: 3,
-                styles: { halign: 'left' },
-                // styles: { halign: 'center', fillColor: [22, 160, 133] },
-            }],
-            [{
-                content: 'Socio: ' + nombres_apellidos_socio,
-                colSpan: 3,
-                styles: { halign: 'left' },
-                // styles: { halign: 'center', fillColor: [22, 160, 133] },
-            }],
-            [{
-                content: 'Analista: Jorge Flores Quispe',
-                colSpan: 3,
-                styles: { halign: 'left' },
-                // styles: { halign: 'center', fillColor: [22, 160, 133] },
-            }],
-            [{
-                content: 'Producto: Créditos Personales',
-                colSpan: 3,
-                styles: { halign: 'left' },
-                // styles: { halign: 'center', fillColor: [22, 160, 133] },
-            }],
-            [
+        // let recibo = [
+        //     [{
+        //         content: 'Buenavista La Bolsa S.A.C.',
+        //         colSpan: 3,
+        //         styles: { halign: 'center' },
+        //         // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //     }, ],
+        //     [{
+        //         content: 'Agencia Ayacucho',
+        //         colSpan: 3,
+        //         styles: { halign: 'center' },
+        //         // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //     }, ],
+        //     // [
+        //     //   {
+        //     //     content: 'RUC: 20574744599',
+        //     //     colSpan: 3,
+        //     //     styles: { halign: 'center' },
+        //     //     // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //     //   },
+        //     // ],
+        //     [{
+        //         content: '------------------------------------',
+        //         colSpan: 3,
+        //         styles: { halign: 'center' },
+        //         // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //     }, ],
+        //     [{
+        //             content: 'RUC: 20574744599',
+        //             colSpan: 1,
+        //             styles: { halign: 'left' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         },
+        //         {
+        //             content: '',
+        //             colSpan: 1,
+        //             // styles: { halign: 'left' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         },
+        //         {
+        //             content: dato_recibo.numero_recibo,
+        //             colSpan: 1,
+        //             styles: { halign: 'right' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         },
+        //     ],
+        //     [
 
-            ],
-            [{
-                content: 'Operaciones en Soles',
-                colSpan: 3,
-                styles: { halign: 'left' },
-                // styles: { halign: 'center', fillColor: [22, 160, 133] },
-            }],
-            [{
-                content: '------------------------------------',
-                colSpan: 3,
-                styles: { halign: 'center' },
-                // styles: { halign: 'center', fillColor: [22, 160, 133] },
-            }],
-            [{
-                    content: 'Detalle Operación',
-                    colSpan: 2,
-                    styles: { halign: 'center' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                },
-                {
-                    content: 'Monto',
-                    colSpan: 1,
-                    styles: { halign: 'right' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                }
-            ],
-            [{
-                content: '------------------------------------',
-                colSpan: 3,
-                styles: { halign: 'center' },
-                // styles: { halign: 'center', fillColor: [22, 160, 133] },
-            }]
+        //     ],
+        //     [{
+        //         content: 'DNI: ' + documento_identidad_socio,
+        //         colSpan: 3,
+        //         styles: { halign: 'left' },
+        //         // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //     }],
+        //     [{
+        //         content: 'Socio: ' + nombres_apellidos_socio,
+        //         colSpan: 3,
+        //         styles: { halign: 'left' },
+        //         // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //     }],
+        //     [{
+        //         content: 'Analista: ' + model_operacion_financiera.analista.usuario.persona.nombre +
+        //             ' ' + model_operacion_financiera.analista.usuario.persona.apellido_paterno +
+        //             ' ' + model_operacion_financiera.analista.usuario.persona.apellido_materno,
+        //         colSpan: 3,
+        //         styles: { halign: 'left' },
+        //         // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //     }],
+        //     [{
+        //         content: 'Producto: ' + model_operacion_financiera.producto.tipo.descripcion,
+        //         colSpan: 3,
+        //         styles: { halign: 'left' },
+        //         // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //     }],
+        //     [
 
-        ];
+        //     ],
+        //     [{
+        //         content: 'Operaciones en Soles',
+        //         colSpan: 3,
+        //         styles: { halign: 'left' },
+        //         // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //     }],
+        //     [{
+        //         content: '------------------------------------',
+        //         colSpan: 3,
+        //         styles: { halign: 'center' },
+        //         // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //     }],
+        //     [{
+        //             content: 'Detalle Operación',
+        //             colSpan: 2,
+        //             styles: { halign: 'center' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         },
+        //         {
+        //             content: 'Monto',
+        //             colSpan: 1,
+        //             styles: { halign: 'right' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         }
+        //     ],
+        //     [{
+        //         content: '------------------------------------',
+        //         colSpan: 3,
+        //         styles: { halign: 'center' },
+        //         // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //     }]
 
-        if (monto_total_amortizacion_capital > 0)
-            recibo.push([{
-                    content: 'Amortización Capital',
-                    colSpan: 2,
-                    styles: { halign: 'left' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                },
-                {
-                    content: monto_total_amortizacion_capital.toFixed(2),
-                    colSpan: 1,
-                    styles: { halign: 'right' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                }
-            ]);
+        // ];
 
-        if (monto_total_interes > 0)
-            recibo.push([{
-                    content: 'Interés',
-                    colSpan: 2,
-                    styles: { halign: 'left' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                },
-                {
-                    content: monto_total_interes.toFixed(2),
-                    colSpan: 1,
-                    styles: { halign: 'right' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                }
-            ]);
+        // if (monto_total_amortizacion_capital > 0)
+        //     recibo.push([{
+        //             content: 'Amortización Capital',
+        //             colSpan: 2,
+        //             styles: { halign: 'left' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         },
+        //         {
+        //             content: monto_total_amortizacion_capital.toFixed(2),
+        //             colSpan: 1,
+        //             styles: { halign: 'right' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         }
+        //     ]);
 
-        if (monto_total_ahorro_programado > 0)
-            recibo.push([{
-                    content: 'Ahorro Programado',
-                    colSpan: 2,
-                    styles: { halign: 'left' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                },
-                {
-                    content: monto_total_ahorro_programado.toFixed(2),
-                    colSpan: 1,
-                    styles: { halign: 'right' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                }
-            ]);
+        // if (monto_total_interes > 0)
+        //     recibo.push([{
+        //             content: 'Interés',
+        //             colSpan: 2,
+        //             styles: { halign: 'left' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         },
+        //         {
+        //             content: monto_total_interes.toFixed(2),
+        //             colSpan: 1,
+        //             styles: { halign: 'right' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         }
+        //     ]);
 
-        if (monto_total_ahorro_voluntario > 0)
-            recibo.push([{
-                    content: 'Ahorro Voluntario',
-                    colSpan: 2,
-                    styles: { halign: 'left' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                },
-                {
-                    content: monto_total_ahorro_voluntario.toFixed(2),
-                    colSpan: 1,
-                    styles: { halign: 'right' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                }
-            ]);
+        // if (monto_total_ahorro_programado > 0)
+        //     recibo.push([{
+        //             content: 'Ahorro Programado',
+        //             colSpan: 2,
+        //             styles: { halign: 'left' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         },
+        //         {
+        //             content: monto_total_ahorro_programado.toFixed(2),
+        //             colSpan: 1,
+        //             styles: { halign: 'right' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         }
+        //     ]);
 
-        if (monto_total_mora > 0)
-            recibo.push([{
-                    content: 'Mora',
-                    colSpan: 2,
-                    styles: { halign: 'left' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                },
-                {
-                    content: monto_total_mora.toFixed(2),
-                    colSpan: 1,
-                    styles: { halign: 'right' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                }
-            ]);
+        // if (monto_total_ahorro_voluntario > 0)
+        //     recibo.push([{
+        //             content: 'Ahorro Voluntario',
+        //             colSpan: 2,
+        //             styles: { halign: 'left' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         },
+        //         {
+        //             content: monto_total_ahorro_voluntario.toFixed(2),
+        //             colSpan: 1,
+        //             styles: { halign: 'right' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         }
+        //     ]);
 
-        if (monto_total_ahorro_inicial > 0)
-            recibo.push([{
-                    content: 'Ahorro Inicial',
-                    colSpan: 2,
-                    styles: { halign: 'left' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                },
-                {
-                    content: monto_total_ahorro_inicial.toFixed(2),
-                    colSpan: 1,
-                    styles: { halign: 'right' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                }
-            ]);
+        // if (monto_total_mora > 0)
+        //     recibo.push([{
+        //             content: 'Mora',
+        //             colSpan: 2,
+        //             styles: { halign: 'left' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         },
+        //         {
+        //             content: monto_total_mora.toFixed(2),
+        //             colSpan: 1,
+        //             styles: { halign: 'right' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         }
+        //     ]);
 
-        if (monto_total_gasto > 0)
-            recibo.push([{
-                    content: 'Gasto Administrativo',
-                    colSpan: 2,
-                    styles: { halign: 'left' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                },
-                {
-                    content: monto_total_gasto.toFixed(2),
-                    colSpan: 1,
-                    styles: { halign: 'right' },
-                    // styles: { halign: 'center', fillColor: [22, 160, 133] },
-                }
-            ]);
+        // if (monto_total_ahorro_inicial > 0)
+        //     recibo.push([{
+        //             content: 'Ahorro Inicial',
+        //             colSpan: 2,
+        //             styles: { halign: 'left' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         },
+        //         {
+        //             content: monto_total_ahorro_inicial.toFixed(2),
+        //             colSpan: 1,
+        //             styles: { halign: 'right' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         }
+        //     ]);
 
-        recibo.push([{
-            content: '------------------------------------',
-            colSpan: 3,
-            styles: { halign: 'center' },
-            // rowHeight: 2
-            // styles: { halign: 'center', fillColor: [22, 160, 133] },
-        }]);
+        // if (monto_total_gasto > 0)
+        //     recibo.push([{
+        //             content: 'Gasto Administrativo',
+        //             colSpan: 2,
+        //             styles: { halign: 'left' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         },
+        //         {
+        //             content: monto_total_gasto.toFixed(2),
+        //             colSpan: 1,
+        //             styles: { halign: 'right' },
+        //             // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //         }
+        //     ]);
 
-        recibo.push([{
-                content: 'Total: S/.',
-                colSpan: 2,
-                styles: { halign: 'center' },
-                // styles: { halign: 'center', fillColor: [22, 160, 133] },
-            },
-            {
-                content: (Math.round(monto_total * 10) / 10).toFixed(2),
-                colSpan: 1,
-                styles: { halign: 'right' },
-                // styles: { halign: 'center', fillColor: [22, 160, 133] },
-            }
-        ]);
+        // recibo.push([{
+        //     content: '------------------------------------',
+        //     colSpan: 3,
+        //     styles: { halign: 'center' },
+        //     // rowHeight: 2
+        //     // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        // }]);
 
-        recibo.push([]);
+        // recibo.push([{
+        //         content: 'Total: S/.',
+        //         colSpan: 2,
+        //         styles: { halign: 'center' },
+        //         // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //     },
+        //     {
+        //         content: (Math.round(monto_total * 10) / 10).toFixed(2),
+        //         colSpan: 1,
+        //         styles: { halign: 'right' },
+        //         // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        //     }
+        // ]);
 
-        recibo.push([{
-            content: 'Usuario: ' + req.header('usuario_sesion'),
-            colSpan: 3,
-            styles: { halign: 'left' },
-            // styles: { halign: 'center', fillColor: [22, 160, 133] },
-        }]);
+        // recibo.push([]);
 
-        recibo.push([{
-            content: 'Fecha: ' + dato_recibo.fecha_recibo,
-            colSpan: 3,
-            styles: { halign: 'left' },
-            // styles: { halign: 'center', fillColor: [22, 160, 133] },
-        }])
+        // recibo.push([{
+        //     content: 'Usuario: ' + req.header('usuario_sesion'),
+        //     colSpan: 3,
+        //     styles: { halign: 'left' },
+        //     // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        // }]);
 
-        recibo.push([{
-            content: 'Recibo: Original',
-            colSpan: 3,
-            styles: { halign: 'left' },
-            // styles: { halign: 'center', fillColor: [22, 160, 133] },
-        }]);
+        // recibo.push([{
+        //     content: 'Fecha: ' + dato_recibo.fecha_recibo,
+        //     colSpan: 3,
+        //     styles: { halign: 'left' },
+        //     // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        // }])
 
-        recibo.push([{
-            content: '** **',
-            colSpan: 3,
-            styles: { halign: 'center' },
-            // styles: { halign: 'center', fillColor: [22, 160, 133] },
-        }]);
+        // recibo.push([{
+        //     content: 'Recibo: Original',
+        //     colSpan: 3,
+        //     styles: { halign: 'left' },
+        //     // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        // }]);
+
+        // recibo.push([{
+        //     content: '** **',
+        //     colSpan: 3,
+        //     styles: { halign: 'center' },
+        //     // styles: { halign: 'center', fillColor: [22, 160, 133] },
+        // }]);
 
         res.json({
             ok: true,
-            recibo
+            recibo: getRecibo(data_recibo)
         })
     } catch (error) {
 
@@ -1236,31 +1320,31 @@ const pagar_operacion_financiera = async(req, res) => {
 //     }
 // }
 
-const registrarIngresoEgreso = async (req, res = response) => {
-  try {
-    const { es_ingreso } = req.body;
-    const operacion = es_ingreso ? "inreso" : "egreso";
-    const model = await PagoOperacionFinanciera.create(req.body);
-    if (!model) {
-      return res.json({
-        ok: false,
-        msg: `No se registro ${operacion} correctamente`
-      });
+const registrarIngresoEgreso = async(req, res = response) => {
+    try {
+        const { es_ingreso } = req.body;
+        const operacion = es_ingreso ? "inreso" : "egreso";
+        const model = await PagoOperacionFinanciera.create(req.body);
+        if (!model) {
+            return res.json({
+                ok: false,
+                msg: `No se registro ${operacion} correctamente`
+            });
+        }
+        return res.json({
+            ok: true,
+            msg: `Se registro el ${operacion} correctamente`
+        });
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: error.msg,
+        });
     }
-    return res.json({
-      ok: true,
-      msg: `Se registro el ${operacion} correctamente`
-    });
-  } catch (error) {
-    return res.status(500).json({
-      ok: false,
-      msg: error.msg,
-    });
-  }
 };
 
 module.exports = {
-  listar_operaciones_financieras_detalle_vigentes,
-  pagar_operacion_financiera,
-  registrarIngresoEgreso,
+    listar_operaciones_financieras_detalle_vigentes,
+    pagar_operacion_financiera,
+    registrarIngresoEgreso,
 };

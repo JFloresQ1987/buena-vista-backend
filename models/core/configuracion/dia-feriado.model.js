@@ -8,27 +8,23 @@ const schema = {
         type: String,
         required: true
     },
-    numero_ciclo: {
+    anio: {
         type: Number,
         required: true
     },
-    fecha_inicio: {
-        type: String,
-        required: true
-    },
-    fecha_fin: {
+    fecha_feriado: {
         type: String,
         required: true
     }
 };
 
-const GrupoBancomunalSchema = Schema(Object.assign(schema, schemaBase, schemaAuditoria), { collection: 'grupo_bancomunal' });
+const DiaFeriadoSchema = Schema(Object.assign(schema, schemaBase, schemaAuditoria), { collection: 'dia_feriado' });
 
-GrupoBancomunalSchema.method('toJSON', function() {
+DiaFeriadoSchema.method('toJSON', function() {
     const { __v, _id, ...object } = this.toObject();
 
     object.id = _id;
     return object;
 })
 
-module.exports = model('GrupoBancomunal', GrupoBancomunalSchema);
+module.exports = model('DiaFeriado', DiaFeriadoSchema);

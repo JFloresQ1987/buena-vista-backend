@@ -91,7 +91,7 @@ const modelo = {
         },
         numero_ciclo: {
             type: Number,
-            default: 0
+            // default: 0
         }
         // },
         // default: {}
@@ -106,11 +106,11 @@ const modelo = {
         ref: 'Persona',
         required: true
     },
-    // analista: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'Analista',
-    //     // required: true
-    // },
+    analista: {
+        type: Schema.Types.ObjectId,
+        ref: 'Analista',
+        required: true
+    },
     // programacion: {
     //     type: String,
     //     required: true,

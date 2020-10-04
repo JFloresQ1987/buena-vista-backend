@@ -119,25 +119,35 @@ const actualizar = async(req, res = response) => {
     }
 };
 
-const getListaDesplegable = async(req, res = response) => {
-    /* const analistas = await Analista.find(
-      { es_borrado: false },
-      "descripcion producto usuario es_bloqueado es_vigente"
-    ).populate('usuario','usuario rol persona', populate('persona')); */
-    const analistas = await Analista.find({ es_vigente: true, es_borrado: false },
-        "_id"
-    ).populate({
-        path: "usuario",
-        // select: "rol persona usuario",
-        populate: {
-            path: "persona",
-            select: "nombre apellido_paterno apellido_materno"
-        },
-    });
-    res.json({
-        ok: true,
-        analistas,
-    });
+const getListaDesplegablexProducto = async(req, res = response) => {
+
+    try {
+
+        const producto = req.params.producto;
+        const lista = await Analista.find({ "producto": producto, "es_vigente": true, "es_borrado": false }, "id")
+            .populate({
+                path: "usuario",
+                select: "persona",
+                populate: {
+                    path: "persona",
+                    select: "nombre apellido_paterno apellido_materno",
+                    // $concat: ["$nombre", "$apellido_paterno", "$apellido_materno"]
+                },
+            });
+
+        // console.log(lista)
+
+        res.json({
+            ok: true,
+            lista,
+        });
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            ok: false,
+            msg: error.message,
+        });
+    }
 };
 
 module.exports = {
@@ -145,5 +155,5 @@ module.exports = {
     crear,
     getAnalista,
     actualizar,
-    getListaDesplegable
+    getListaDesplegablexProducto
 };
