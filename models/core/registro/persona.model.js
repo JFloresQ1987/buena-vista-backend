@@ -56,10 +56,10 @@ const schema = {
     //     default: []
     // },
     ubigeo: {
-        cocigo: {
-            type: String,
-            required: true
-        },
+        // cocigo: {
+        //     type: String,
+        //     required: true
+        // },
         departamento: {
             type: Schema.Types.ObjectId,
             ref: 'Ubigeo',

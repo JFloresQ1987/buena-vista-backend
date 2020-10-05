@@ -27,6 +27,8 @@ const crear = async(req, res = response) => {
             comentario
         }];
 
+        console.log(operacion_financiera)
+
         const modelo = await operacion_financiera.save(opts);
 
         let operacion_financiera_detalle;
@@ -35,7 +37,7 @@ const crear = async(req, res = response) => {
 
         for (let i = 0; i < detalle.length; i++) {
 
-            console.log(detalle[i]);
+            // console.log(detalle[i]);
 
             operacion_financiera_detalle = new OperacionFinancieraDetalle(detalle[i]);
             operacion_financiera_detalle.operacion_financiera = modelo.id;
@@ -110,7 +112,7 @@ const listar_operacion_financiera = async(req, res) => {
         const modelo = await OperacionFinanciera.findOne({ "_id": id_operacion_financiera, "es_borrado": false })
             .populate('producto.tipo', 'descripcion');
 
-        console.log(modelo)
+        // console.log(modelo)
 
         res.json({
             ok: true,

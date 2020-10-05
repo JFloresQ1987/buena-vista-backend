@@ -24,14 +24,14 @@ const schema = {
 };
 
 const AnalistaSchema = Schema(
-  Object.assign(schema, schemaBase, schemaAuditoria)
+    Object.assign(schema, schemaBase, schemaAuditoria)
 );
 
-AnalistaSchema.method("toJSON", function () {
-  const { __v, _id, ...object } = this.toObject();
+AnalistaSchema.method("toJSON", function() {
+    const { __v, _id, ...object } = this.toObject();
 
-  object.id = _id;
-  return object;
+    object.id = _id;
+    return object;
 });
 
 module.exports = model("Analista", AnalistaSchema);

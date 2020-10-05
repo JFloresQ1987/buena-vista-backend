@@ -9,6 +9,14 @@ const modelo = {
     //     ref: 'Persona',
     //     // required: true
     // },
+    local_atencion: {
+        type: String,
+        // required: true,
+        jsonSchema: {
+            enum: ["Ayacucho", "Huanta", "San Francisco"],
+        },
+        default: 'Ayacucho'
+    },
     caja: {
         type: Schema.Types.ObjectId,
         ref: 'Caja',

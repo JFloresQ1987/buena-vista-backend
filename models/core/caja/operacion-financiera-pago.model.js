@@ -67,6 +67,14 @@ const modelo = {
             },
             default: 'Previgente'
         },
+        local_atencion: {
+            type: String,
+            // required: true,
+            jsonSchema: {
+                enum: ["Ayacucho", "Huanta", "San Francisco"],
+            },
+            default: 'Ayacucho'
+        },
         serie: {
             type: String,
             required: true
