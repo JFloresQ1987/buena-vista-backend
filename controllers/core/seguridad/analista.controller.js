@@ -3,29 +3,30 @@ const bcrypt = require("bcryptjs");
 const dayjs = require("dayjs");
 const Analista = require("../../../models/core/seguridad/analista.model");
 
-const listar = async(req, res = response) => {
-    const desde = Number(req.query.desde) || 0;
-    const [analistas, total] = await Promise.all([
-        Analista.find({ es_borrado: false },
-            "descripcion producto usuario es_bloqueado es_vigente"
-        )
-        .populate({
-            path: "usuario",
-            select: "rol persona usuario",
-            populate: {
-                path: "persona",
-                select: "nombre apellido_paterno apellido_materno",
-            },
-        })
-        .skip(desde)
-        .limit(10),
-        Analista.find({ es_borrado: false }).countDocuments()
-    ])
-    res.json({
-        ok: true,
-        analistas,
-        total
-    });
+const listar = async (req, res = response) => {
+  const desde = Number(req.query.desde) || 0;
+  const [analistas, total] = await Promise.all([
+    Analista.find(
+      { es_borrado: false },
+      "descripcion producto usuario es_bloqueado es_vigente"
+    )
+      .populate({
+        path: "usuario",
+        select: "rol persona usuario",
+        populate: {
+          path: "persona",
+          select: "nombre apellido_paterno apellido_materno",
+        },
+      }).populate("producto","_id descripcion")
+      .skip(desde)
+      .limit(10),
+      Analista.find({es_borrado:false}).countDocuments()
+  ])
+  res.json({
+    ok: true,
+    analistas,
+    total
+  });
 };
 
 const crear = async(req, res = response) => {

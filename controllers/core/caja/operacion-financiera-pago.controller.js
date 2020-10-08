@@ -1,8 +1,10 @@
-const { response } = require('express');
-const logger = require('../../../helpers/logger');
-const OperacionFinanciera = require('../../../models/core/registro/operacion-financiera.model');
-const OperacionFinancieraDetalle = require('../../../models/core/registro/operacion-financiera-detalle.model');
-const PagoOperacionFinanciera = require('../../../models/core/caja/operacion-financiera-pago.model');
+const { response } = require("express");
+const logger = require("../../../helpers/logger");
+const OperacionFinanciera = require("../../../models/core/registro/operacion-financiera.model");
+const OperacionFinancieraDetalle = require("../../../models/core/registro/operacion-financiera-detalle.model");
+const PagoOperacionFinanciera = require("../../../models/core/caja/operacion-financiera-pago.model");
+const PagoConcepto = require("../../../models/core/configuracion/pago-concepto.model");
+const Usuario = require("../../../models/core/seguridad/usuario.model");
 // const CajaDiario = require('../../../models/core/caja/caja-diario.model');
 // const Caja = require('../../../models/core/seguridad/caja.model');
 // const dayjs = require('dayjs');
@@ -518,54 +520,85 @@ const pagar_operacion_financiera = async(req, res) => {
     }
 }
 
-// const realizar_pago_operacion_financiera = async(req, res) => {
-
-//     const { lista_id_operacion_financiera_detalle } = req.body;
-//     // const id_operacion_financiera = req.params.id_operacion_financiera;
-
-//     try {
-
-//         // const lista = await OperacionFinancieraDetalle.find({ "operacion_financiera": id_operacion_financiera, "estado": "Vigente", "es_borrado": false })
-//         //     .sort({ "numero_cuota": 1 });
-
-//         //console.log(id_operacion_financiera);
-
-//         const recibo = {
-//             serie_recibo: '001',
-//             numero_recibo: 'I-00000001',
-//             fecha_recibo: '04/09/2020 13:15:05'
-//         };
-
-//         res.json({
-//             ok: true,
-//             recibo
-//         })
-//     } catch (error) {
-
-//         //console.log(error);
-//         res.status(500).json({
-//             ok: false,
-//             msg: 'Error inesperado.'
-//         });
-//     }
-// }
-
 const registrarIngresoEgreso = async(req, res = response) => {
+    const id_usuario_sesion = "5f48329023ab991c688ccca8"; //req.header("id_usuario_sesion");
+    const ip = "192.168.1.31"; //requestIp.getClientIp(req).replace("::ffff:", "");
+    const { es_ingreso } = req.body;
     try {
-        const { es_ingreso } = req.body;
-        const operacion = es_ingreso ? "inreso" : "egreso";
-        const model = await PagoOperacionFinanciera.create(req.body);
-        if (!model) {
-            return res.json({
-                ok: false,
-                msg: `No se registro ${operacion} correctamente`
-            });
-        }
+        const data_validacion = {
+            ip: ip,
+            id_usuario_sesion: id_usuario_sesion,
+            es_ingreso,
+            // caja: caja.id
+        };
+
+        const resultado_validacion = await validarPago(data_validacion);
+
+        if (!resultado_validacion.ok)
+            return res.status(404).json(resultado_validacion);
+        // return resultado_validacion;
+
+        // console.log(resultado_validacion)
+
+        const dato_recibo = resultado_validacion.dato_recibo;
+
+        const modelo = new PagoOperacionFinanciera(req.body);
+        modelo.diario = {
+            caja_diario: resultado_validacion.caja_diario,
+            // caja_diario: caja_diario.id,
+            caja: resultado_validacion.caja,
+            // caja: caja.id,
+            estado: "Abierto",
+        };
+        modelo.es_ingreso = req.body.es_ingreso;
+
+        modelo.recibo = {
+            estado: "Vigente",
+            serie: dato_recibo.serie_recibo,
+            numero: dato_recibo.numero_recibo,
+            fecha: dato_recibo.fecha_recibo,
+            ejercicio: "2020",
+            monto_total: req.body.monto,
+        };
+
+        await modelo.save();
+        /* console.log(req.body)
+        console.log(modelo); */
+        const responsable = await Usuario.findById(
+            modelo.concepto.responsable,
+            "id persona"
+        ).populate(
+            "persona",
+            "nombre apellido_paterno apellido_materno documento_identidad"
+        );
+        const documento_identidad_responsable =
+            responsable.persona.documento_identidad;
+        const nombres_apellidos_responsable =
+            responsable.persona.nombre +
+            ", " +
+            responsable.persona.apellido_paterno +
+            " " +
+            responsable.persona.apellido_materno;
+        const id = req.body.concepto.concepto;
+        const concepto = await PagoConcepto.findById(id);
+        console.log(concepto);
+        const data_recibo = {
+            agencia: "Agencia Ayacucho",
+            numero_recibo: dato_recibo.numero_recibo,
+            documento_identidad_responsable: documento_identidad_responsable,
+            nombres_apellidos_responsable: nombres_apellidos_responsable,
+            concepto: concepto.descripcion,
+            monto_total: req.body.monto,
+            usuario: req.header("usuario_sesion"),
+            fecha_recibo: dato_recibo.fecha_recibo,
+            impresion: "Original",
+        };
         return res.json({
             ok: true,
-            msg: `Se registro el ${operacion} correctamente`
+            recibo: getRecibo(data_recibo),
         });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({
             ok: false,
             msg: error.msg,
@@ -574,6 +607,7 @@ const registrarIngresoEgreso = async(req, res = response) => {
 };
 
 module.exports = {
+
     listar_operaciones_financieras_detalle_vigentes,
     pagar_operacion_financiera,
     registrarIngresoEgreso,

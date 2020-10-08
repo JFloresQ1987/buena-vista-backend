@@ -46,7 +46,8 @@ const crear = async (req, res = response) => {
 
 const listar = async (req, res) => {
   const cajas = await Caja.find({ es_borrado: false })
-        .populate({path:"usuario", select:"persona usuario", populate:{path:"persona", select:"nombre apellido_paterno apellido_materno"}});
+        .populate({path:"usuario", select:"persona usuario", 
+              populate:{path:"persona", select:"nombre apellido_paterno apellido_materno"}});
 
   const total = await Caja.find({ es_borrado: false }).countDocuments();
 

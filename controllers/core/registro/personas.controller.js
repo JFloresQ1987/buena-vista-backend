@@ -166,8 +166,6 @@ const buscar_id = async(req, res) => {
     } catch (error) {
 
         console.log(error);
-        // console.log(error.message);
-        //e.message
         res.status(500).json({
             ok: false,
             msg: error.message
@@ -175,10 +173,57 @@ const buscar_id = async(req, res) => {
     }
 }
 
+const buscar_por_nombre = async(req, res) => {
+
+    try {
+        let termino = req.params.termino;
+        let regex = new RegExp(termino, 'i')
+
+        const persona = await Persona.find({nombre: regex}, "documento_identidad nombre apellido_paterno apellido_materno");
+
+        res.json({
+            ok: true,
+            persona
+        })
+        
+    } catch (error) {
+         console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: error.message
+        });
+    }
+}
+
+const buscar_por_apellido = async(req, res) => {
+
+    try {
+        let termino = req.params.termino;
+        let regex = new RegExp(termino, 'i')
+
+        const persona = await Persona.find({apellido_paterno: regex}, "documento_identidad nombre apellido_paterno apellido_materno");
+
+        res.json({
+            ok: true,
+            persona
+        })
+        
+    } catch (error) {
+         console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: error.message
+        });
+    }
+}
+
+
 module.exports = {
     listar,
     crear,
     actualizar,
     buscar_por_documento_identidad,
-    buscar_id
+    buscar_id,
+    buscar_por_nombre,
+    buscar_por_apellido
 }
