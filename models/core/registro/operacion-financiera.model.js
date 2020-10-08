@@ -75,6 +75,11 @@ const modelo = {
             required: true,
             default: 0
         },
+        tasa_interes_ganado: {
+            type: Number,
+            required: true,
+            default: 0
+        },
         tasa_mora: {
             type: Number,
             required: true,
@@ -109,7 +114,7 @@ const modelo = {
     analista: {
         type: Schema.Types.ObjectId,
         ref: 'Analista',
-        required: true
+        // required: true
     },
     // programacion: {
     //     type: String,
@@ -200,7 +205,12 @@ const modelo = {
     // },
     se_desembolso_prestamo: {
         type: Boolean,
-        required: false,
+        // required: false,
+        default: false
+    },
+    es_congelado: {
+        type: Boolean,
+        // required: false,
         default: false
     },
     comentario: {

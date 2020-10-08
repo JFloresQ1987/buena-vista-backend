@@ -6,7 +6,7 @@ const { listar, listar_programacion } = require('../../../controllers/core/confi
 
 const router = Router();
 
-router.get('/listar', validarJWT, listar);
+router.get('/listar/:es_prestamo', validarJWT, listar);
 router.get('/listar-programacion/:id', validarJWT, listar_programacion);
 
 module.exports = router;
