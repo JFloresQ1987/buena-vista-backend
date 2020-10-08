@@ -35,6 +35,7 @@ const getMenu = (rol) => {
                 { opcion: 'Apertura de caja individual', url: '/registro/gestion/cierre-caja' },
                 { opcion: 'Cierre de caja general', url: '/registro/gestion/cierre-caja' },
                 { opcion: 'Cierre de caja individual', url: '/caja/pago/cierre-caja-individual' },
+                { opcion: 'Listar Cajas', url: '/caja/pago/cajas-lista' },
                 { opcion: 'Anular recibo', url: '/registro/gestion/cierre-caja' },
                 { opcion: 'Duplicado de recibo', url: '/registro/gestion/cierre-caja' }
             ]

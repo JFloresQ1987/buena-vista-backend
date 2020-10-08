@@ -179,7 +179,8 @@ const buscar_por_nombre = async(req, res) => {
         let termino = req.params.termino;
         let regex = new RegExp(termino, 'i')
 
-        const persona = await Persona.find({nombre: regex}, "documento_identidad nombre apellido_paterno apellido_materno");
+        const persona = await Persona.find({nombre: regex}, 
+            "documento_identidad domicilio nombre apellido_paterno apellido_materno");
 
         res.json({
             ok: true,
@@ -196,12 +197,36 @@ const buscar_por_nombre = async(req, res) => {
 }
 
 const buscar_por_apellido = async(req, res) => {
-
+    // dni, apellidos, nombres, domicili
     try {
         let termino = req.params.termino;
         let regex = new RegExp(termino, 'i')
 
-        const persona = await Persona.find({apellido_paterno: regex}, "documento_identidad nombre apellido_paterno apellido_materno");
+        const persona = await Persona.find({apellido_paterno: regex}, 
+            "documento_identidad domicilio nombre apellido_paterno apellido_materno");
+
+        res.json({
+            ok: true,
+            persona
+        })
+        
+    } catch (error) {
+         console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: error.message
+        });
+    }
+}
+
+const buscar_por_apellido_mat = async(req, res) => {
+    // dni, apellidos, nombres, domicili
+    try {
+        let termino = req.params.termino;
+        let regex = new RegExp(termino, 'i')
+
+        const persona = await Persona.find({apellido_materno: regex}, 
+            "documento_identidad domicilio nombre apellido_paterno apellido_materno");
 
         res.json({
             ok: true,
@@ -225,5 +250,6 @@ module.exports = {
     buscar_por_documento_identidad,
     buscar_id,
     buscar_por_nombre,
-    buscar_por_apellido
+    buscar_por_apellido,
+    buscar_por_apellido_mat
 }

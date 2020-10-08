@@ -13,6 +13,13 @@ const cerrarCaja = async(req, res = response) => {
         
         //const cajaDiario = await CajaDiario.findById(id);
         const modelo = await CajaDiario.findOne({"caja": id, "estado": "Abierto"});
+        if (!modelo) {
+            return res.json({
+              ok: false,
+              msg: "No hay caja abierta",
+            });
+        }
+
 
         const operaciones = await Operaciones.find({
                 "recibo.estado": "Vigente",
@@ -117,18 +124,22 @@ const cerrarCaja = async(req, res = response) => {
     }
 }
 
-
-
-
 const cargarCaja = async(req, res) => {
 
     const id = req.params.id;
 
     try {
 
-        const cajaDiario = await  CajaDiario.findOne({ estado: "Abierto" },
+        const cajaDiario = await  CajaDiario.findOne({/* "caja": id, */ estado: "Abierto" },
             "monto_total_apertura apertura.fecha_apertura id caja")
-        console.log(cajaDiario.caja);
+        
+            /* if (!cajaDiario) {
+                return res.json({
+                  ok: false,
+                  msg: "No hay caja abierta",
+                });
+            } */
+
         /* const fechasApertura = await CajaDiario.find({estado: "Abierto" }, "apertura.fecha_apertura")
         console.log(fechasApertura); */
 
@@ -166,6 +177,7 @@ const cargarCaja = async(req, res) => {
                     monto_egreso += element
                 });
                 monto_total_operaciones = monto_ingreso - monto_egreso
+
                 return res.json({
                     ok: true,
                     monto_total_operaciones,
@@ -186,8 +198,32 @@ const cargarCaja = async(req, res) => {
     }
 }
 
+const listarCajas = async(req, res) => {
+
+    try {
+        const cajas = await CajaDiario.find({},
+            "apertura.fecha_apertura cierre.fecha_cierre  cantidad_operaciones monto_total_apertura monto_total_operaciones estado monto_total_efectivo monto_total_operaciones")
+            .sort({"apertura.fecha_apertura": -1})
+            // 
+        res.json({
+            ok: true,
+            cajas,
+            //fecha_apertura: cajas.apertura.fecha_apertura,
+            // fecha_cierre: cajas.cierre.fecha_cierre
+
+        })
+    } catch (error) {
+        console.log(error);
+        res.json({
+            ok: false,
+            msg: 'Hable con el Admin!'
+        })
+    }
+}
+
 
 module.exports = {
     cerrarCaja,
-    cargarCaja
+    cargarCaja,
+    listarCajas
 };
