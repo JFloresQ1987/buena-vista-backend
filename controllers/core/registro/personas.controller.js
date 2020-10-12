@@ -134,9 +134,6 @@ const buscar_por_documento_identidad = async(req, res) => {
         const documento_identidad = req.params.documento_identidad;
         const persona = await Persona.findOne({ "documento_identidad": documento_identidad, "es_borrado": false });
 
-        // const now = dayjs();
-
-        // console.log(now.format('DD/MM/YYYY hh:mm:ss a'));
 
         res.json({
             ok: true,
@@ -174,17 +171,21 @@ const buscar_id = async(req, res) => {
 }
 
 const buscar_por_nombre = async(req, res) => {
-
+    const desde = Number(req.query.desde) || 0;
     try {
         let termino = req.params.termino;
         let regex = new RegExp(termino, 'i')
 
         const persona = await Persona.find({nombre: regex}, 
-            "documento_identidad domicilio nombre apellido_paterno apellido_materno");
-
+            "documento_identidad domicilio nombre apellido_paterno apellido_materno")
+            .limit(15)
+            .skip(desde)
+            .sort({"nombre": 1});
+        const total = await Persona.find({nombre: regex}).countDocuments()
         res.json({
             ok: true,
-            persona
+            persona,
+            total
         })
         
     } catch (error) {
@@ -197,17 +198,22 @@ const buscar_por_nombre = async(req, res) => {
 }
 
 const buscar_por_apellido = async(req, res) => {
-    // dni, apellidos, nombres, domicili
+    const desde = Number(req.query.desde) || 0;
     try {
         let termino = req.params.termino;
         let regex = new RegExp(termino, 'i')
 
         const persona = await Persona.find({apellido_paterno: regex}, 
-            "documento_identidad domicilio nombre apellido_paterno apellido_materno");
-
+            "documento_identidad domicilio nombre apellido_paterno apellido_materno")
+            .limit(15)
+            .skip(desde)
+            .sort({"nombre": 1});;
+        const total = await Persona.find({apellido_paterno: regex}).countDocuments()
+        
         res.json({
             ok: true,
-            persona
+            persona,
+            total
         })
         
     } catch (error) {
@@ -220,17 +226,21 @@ const buscar_por_apellido = async(req, res) => {
 }
 
 const buscar_por_apellido_mat = async(req, res) => {
-    // dni, apellidos, nombres, domicili
+    const desde = Number(req.query.desde) || 0;
     try {
         let termino = req.params.termino;
         let regex = new RegExp(termino, 'i')
 
         const persona = await Persona.find({apellido_materno: regex}, 
-            "documento_identidad domicilio nombre apellido_paterno apellido_materno");
-
+            "documento_identidad domicilio nombre apellido_paterno apellido_materno")
+            .limit(15)
+            .skip(desde)
+            .sort({"nombre": 1});;
+        const total = await Persona.find({apellido_materno: regex}).countDocuments()  
         res.json({
             ok: true,
-            persona
+            persona,
+            total
         })
         
     } catch (error) {

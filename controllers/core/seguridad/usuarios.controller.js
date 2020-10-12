@@ -179,60 +179,97 @@ const actualizar = async (req, res = response) => {
   }
 };
 
-// const actualizar = async (req, res = response) => {
+const cambiarClaveAdministrador = async (req, res = response) => {
+  try {
+    const id = req.params.id;
+    const usuario = await Usuario.findById(id);
+    usuario.clave = req.body.clave;
+    const now = dayjs();
+    const salt = bcrypt.genSaltSync();
+    usuario.clave = bcrypt.hashSync(usuario.clave, salt);
+    usuario.comentario.push({
+      tipo: "Editado",
+      usuario: req.header("id_usuario_sesion"),
+      usuario: req.header("usuario_sesion"),
+      nombre: req.header("nombre_sesion"),
+      fecha: now.format("DD/MM/YYYY hh:mm:ss a"),
+      comentario:"Cambio de Clave",
+    });
+    await usuario.save();
 
-//     const { nombre, clave, correo } = req.body;
+    return res.json({
+      ok: true,
+      msg: "Clave cambiada correctamente",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error inesperado",
+    });
+  }
+};
 
-//     const uid = req.params.id;
+const cambiarClaveUsuario = async (req, res = response) => {
+  try {
+    console.log(req.body);
+    const { usuario, old_password, password } = req.body;
+    const modelo = await Usuario.findOne({ usuario });
 
-//     try {
+    const clave_valido = bcrypt.compareSync(old_password, modelo.clave);
+    if (!clave_valido) {
+      return res.status(400).json({
+        ok: false,
+        msg: "La clave anterior no es la correcta",
+      });
+    }
 
-//         const modelo = await Usuario.findById({ uid });
+    modelo.clave = password;
 
-//         if(modelo){
+    const salt = bcrypt.genSaltSync();
+    modelo.clave = bcrypt.hashSync(modelo.clave, salt);
 
-//             return res.status(400).json({
-//                 ok: false,
-//                 msg: 'No existe usuario por ese id.'
-//             });
-//         }
+    await modelo.save();
 
-//         //TODO: validar token
+    return res.json({
+      ok: true,
+      msg: "Clave cambiada correctamente",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: "Error inesperado",
+    });
+  }
+};
 
-//         const campos = req.body;
-//         delete campos.clave;
-
-//         if(modelo.correo !== correo){
-
-//             const existe_correo = await Usuario.findOne({ correo });
-
-//             if(existe_correo){
-
-//                 return res.status(400).json({
-//                     ok: false,
-//                     msg: 'El existe un usuario con ese correo.'
-//                 });
-//             }
-//         }
-
-//         campos.correo = correo;
-
-//         const modelo = await Usuario.findByIdAndUpdate(uid, campos);
-
-//         res.json({
-//             ok: true,
-//             modelo
-//         })
-
-//     } catch (error) {
-
-//         console.log(error);
-//         res.status(500).json({
-//             ok: false,
-//             msg: 'Error inesperado.'
-//         });
-//     }
-// }
+const cambiarVigencia = async (req, res = response) => {
+  try {
+    const id = req.params.id;
+    const { comentario } = req.body;
+    const now = dayjs();
+    const usuario = await Usuario.findById(id);
+    usuario.es_vigente = !usuario.es_vigente;
+    usuario.comentario.push({
+      tipo: "Editado",
+      usuario: req.header("id_usuario_sesion"),
+      usuario: req.header("usuario_sesion"),
+      nombre: req.header("nombre_sesion"),
+      fecha: now.format("DD/MM/YYYY hh:mm:ss a"),
+      comentario,
+    });
+    
+    await usuario.save();
+    return res.json({
+      ok: true,
+      msg: usuario.es_vigente ? "Usuario vigente!" : "Usuario dado de baja.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      msg: error.message,
+    });
+  }
+};
 
 module.exports = {
   listar,
@@ -240,4 +277,7 @@ module.exports = {
   getUsuario,
   actualizar,
   listarxRol,
+  cambiarClaveAdministrador,
+  cambiarClaveUsuario,
+  cambiarVigencia,
 };

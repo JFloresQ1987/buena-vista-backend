@@ -8,10 +8,13 @@ const router = Router();
 
 router.post('/', [
     validarJWT,
-    check('descripcion', 'La descripción es oblgatoria').notEmpty(),
+    check('descripcion', 'La descripción es obligatoria').notEmpty(),
     check('ip', 'La ip es obligatoria').notEmpty(),
     check('pc_nombre', 'El nombre de la pc es obligatorio').notEmpty(),
     check('usuario', 'El usuario es obligatorio').notEmpty(),
+    check('es_caja_principal','el campo es requerido').notEmpty(),    
+    check('serie','La serie es obligatoria').notEmpty(),
+    check('local_atencion','El local de atención es obligatorio').notEmpty(),
     validarCampos
 ], crear);
 
@@ -23,6 +26,9 @@ router.put('/:id', [
     check('ip', 'La ip es obligatoria').notEmpty(),
     check('pc_nombre', 'El nombre de la pc es obligatorio').notEmpty(),
     check('usuario', 'El usuario es obligatorio').notEmpty(),
+    check('es_caja_principal','el campo es requerido').notEmpty(),    
+    check('serie','La serie es obligatoria').notEmpty(),
+    check('local_atencion','El local de atención es obligatorio').notEmpty(),
     validarCampos
 ], actualizar);
 

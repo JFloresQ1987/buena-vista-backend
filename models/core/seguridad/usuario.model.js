@@ -1,6 +1,6 @@
-const { Schema, model } = require('mongoose');
-const { schemaBase } = require('../../base');
-const { schemaAuditoria } = require('../../auditoria');
+const { Schema, model } = require("mongoose");
+const { schemaBase } = require("../../base");
+const { schemaAuditoria } = require("../../auditoria");
 
 const schema = {
 
@@ -38,13 +38,15 @@ const schema = {
     }
 };
 
-const UsuarioSchema = Schema(Object.assign(schema, schemaBase, schemaAuditoria));
+const UsuarioSchema = Schema(
+    Object.assign(schema, schemaBase, schemaAuditoria)
+);
 
-UsuarioSchema.method('toJSON', function() {
+UsuarioSchema.method("toJSON", function() {
     const { __v, _id, clave, ...object } = this.toObject();
 
     object.id = _id;
     return object;
-})
+});
 
-module.exports = model('Usuario', UsuarioSchema);
+module.exports = model("Usuario", UsuarioSchema);
