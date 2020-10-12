@@ -82,6 +82,9 @@ const actualizar = async(req, res = response) => {
       modelo.ip = req.body.ip,                
       modelo.pc_nombre = req.body.pc_nombre,
       modelo.usuario = req.body.usuario,
+      modelo.serie = req.body.serie,
+      modelo.es_caja_principal = req.body.es_caja_principal,
+      modelo.local_atencion = req.body.local_atencion,
       modelo.comentario.push({
           tipo: 'Editado',
           idUsuario: req.header('id_usuario_sesion'),
@@ -122,8 +125,6 @@ const buscar_caja = async(req, res) => {
   } catch (error) {
 
       console.log(error);
-      // console.log(error.message);
-      //e.message
       res.status(500).json({
           ok: false,
           msg: error.message

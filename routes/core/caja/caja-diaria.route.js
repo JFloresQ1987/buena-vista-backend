@@ -8,7 +8,7 @@ const router = Router();
 
 router.put('/:id', validarJWT, cerrarCaja);
 
-router.get('/:id', validarJWT, cargarCaja);
+router.get('/caja', validarJWT, cargarCaja);
 
 router.get('/', validarJWT, listarCajas);
 

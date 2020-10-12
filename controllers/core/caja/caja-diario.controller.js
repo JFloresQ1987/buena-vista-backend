@@ -2,6 +2,9 @@ const { response } = require("express");
 const dayjs = require("dayjs");
 const CajaDiario = require("../../../models/core/caja/caja-diario.model");
 const Operaciones = require("../../../models/core/caja/operacion-financiera-pago.model");
+const Caja = require("../../../models/core/seguridad/caja.model")
+const requestIp = require("request-ip");
+
 
 const cerrarCaja = async(req, res = response) => {
     
@@ -126,22 +129,36 @@ const cerrarCaja = async(req, res = response) => {
 
 const cargarCaja = async(req, res) => {
 
-    const id = req.params.id;
+    const id_usuario_sesion = "5f8236bedd1aaa4dc4109588"; //req.header("id_usuario_sesion");
+    const ip = "192.168.1.10"; //requestIp.getClientIp(req).replace("::ffff:", "");
+    
 
     try {
-
-        const cajaDiario = await  CajaDiario.findOne({/* "caja": id, */ estado: "Abierto" },
-            "monto_total_apertura apertura.fecha_apertura id caja")
         
-            /* if (!cajaDiario) {
-                return res.json({
-                  ok: false,
-                  msg: "No hay caja abierta",
-                });
-            } */
+        const caja = await Caja.findOne({
+            ip: ip,
+            usuario: id_usuario_sesion,
+            es_vigente: true,
+            es_borrado: false,
+          });   
 
-        /* const fechasApertura = await CajaDiario.find({estado: "Abierto" }, "apertura.fecha_apertura")
-        console.log(fechasApertura); */
+        const cajaDiario = await  CajaDiario.findOne({ 
+            caja: caja._id,
+            estado: "Abierto",
+            es_vigente: true,
+            es_borrado: false 
+        },"monto_total_apertura apertura.fecha_apertura id caja")
+
+        console.log(cajaDiario);
+            /* .populate({path:'caja', select:'usuario',
+            populate: {path:'usuario'}}) */
+
+        if (!cajaDiario) {
+            return {
+              ok: false,
+              msg: "No hay caja abierta",
+            };
+        }
 
         const cant_operaciones = await Operaciones.find({
                 "es_vigente": true,
@@ -150,7 +167,7 @@ const cargarCaja = async(req, res) => {
             })
             .countDocuments();
 
-        const obtenerCaja = await Operaciones.find({
+        const obtenerMontoCaja = await Operaciones.find({
                 "recibo.estado": "Vigente",
                 "diario.caja_diario": cajaDiario.id,
                 "diario.caja": cajaDiario.caja,
@@ -189,28 +206,30 @@ const cargarCaja = async(req, res) => {
                 })
             })
 
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            ok: false,
-            msg: 'Error inesperado.'
-        });
+   } catch (error) {
+    console.log(error);
+    res.status(500).json({
+        ok: false,
+        msg: 'Error inesperado.'
+    });
     }
 }
 
 const listarCajas = async(req, res) => {
+    const now = dayjs();
+    const desde = req.query.desde || '2001-01-01'
+    const hasta = req.query.hasta || now.format('YYYY-MM-DD')
+    console.log(desde);
+    console.log(hasta);
 
     try {
-        const cajas = await CajaDiario.find({},
+        const cajas = await CajaDiario.find({ "apertura.fecha_apertura": {"$gte":desde, "$lte": hasta } },
             "apertura.fecha_apertura cierre.fecha_cierre  cantidad_operaciones monto_total_apertura monto_total_operaciones estado monto_total_efectivo monto_total_operaciones")
-            .sort({"apertura.fecha_apertura": -1})
-            // 
+            .sort({"apertura.fecha_apertura": -1})        
+        
         res.json({
             ok: true,
             cajas,
-            //fecha_apertura: cajas.apertura.fecha_apertura,
-            // fecha_cierre: cajas.cierre.fecha_cierre
-
         })
     } catch (error) {
         console.log(error);
