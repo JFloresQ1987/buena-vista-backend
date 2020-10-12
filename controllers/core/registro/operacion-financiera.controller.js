@@ -27,7 +27,7 @@ const crear = async(req, res = response) => {
             comentario
         }];
 
-        console.log(operacion_financiera)
+        // console.log(operacion_financiera)
 
         const modelo = await operacion_financiera.save(opts);
 

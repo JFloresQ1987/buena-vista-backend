@@ -14,6 +14,11 @@ const modelo = {
         required: true,
         default: ''
     },
+    es_prestamo: {
+        type: Boolean,
+        required: true,
+        default: true
+    },
     programacion: {
         type: [Object],
         default: []

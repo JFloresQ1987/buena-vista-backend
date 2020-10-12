@@ -4,9 +4,11 @@ const Producto = require('../../../models/core/configuracion/producto.model');
 
 const listar = async(req, res) => {
 
+    const es_prestamo = req.params.es_prestamo;
+
     try {
 
-        const lista = await Producto.find({ "es_borrado": false })
+        const lista = await Producto.find({ "es_prestamo": es_prestamo, "es_borrado": false })
 
         res.json({
             ok: true,
