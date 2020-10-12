@@ -13,6 +13,7 @@ const requestIp = require('request-ip');
 const { getRecibo } = require('../../../helpers/core/recibo');
 const { validarPago } = require('../../../helpers/core/validar-pago');
 const dayjs = require('dayjs');
+const operacionFinancieraPagoModel = require("../../../models/core/caja/operacion-financiera-pago.model");
 
 const listar_operaciones_financieras_detalle_vigentes = async(req, res) => {
 
@@ -43,13 +44,16 @@ const listar_operaciones_financieras_detalle_vigentes = async(req, res) => {
 
             for (let j = 0; j < lista[i].pagos.length; j++) {
 
-                monto_gasto_pagado += lista[i].pagos[j].ingresos.monto_gasto || 0;
-                monto_ahorro_inicial_pagado += lista[i].pagos[j].ahorros.monto_ahorro_inicial || 0;
-                monto_ahorro_voluntario_pagado += lista[i].pagos[j].ahorros.monto_ahorro_voluntario || 0;
-                monto_ahorro_programado_pagado += lista[i].pagos[j].ahorros.monto_ahorro_programado || 0;
-                monto_amortizacion_capital_pagado += lista[i].pagos[j].ingresos.monto_amortizacion_capital || 0;
-                monto_interes_pagado += lista[i].pagos[j].ingresos.monto_interes || 0;
-                monto_mora_pagado += lista[i].pagos[j].ingresos.monto_mora || 0;
+                if (lista[i].pagos[j].es_vigente) {
+
+                    monto_gasto_pagado += lista[i].pagos[j].ingresos.monto_gasto || 0;
+                    monto_ahorro_inicial_pagado += lista[i].pagos[j].ahorros.monto_ahorro_inicial || 0;
+                    monto_ahorro_voluntario_pagado += lista[i].pagos[j].ahorros.monto_ahorro_voluntario || 0;
+                    monto_ahorro_programado_pagado += lista[i].pagos[j].ahorros.monto_ahorro_programado || 0;
+                    monto_amortizacion_capital_pagado += lista[i].pagos[j].ingresos.monto_amortizacion_capital || 0;
+                    monto_interes_pagado += lista[i].pagos[j].ingresos.monto_interes || 0;
+                    monto_mora_pagado += lista[i].pagos[j].ingresos.monto_mora || 0;
+                }
             }
 
             lista[i].ingresos.monto_gasto -= monto_gasto_pagado;
@@ -75,15 +79,100 @@ const listar_operaciones_financieras_detalle_vigentes = async(req, res) => {
     }
 }
 
-const desembolsar_operacion_financiera = async(req, res) => {
+const listar = async(req, res) => {
 
-    const id = req.params.id;
-    const now = dayjs();
+    // const { id_operacion_financiera } = req.body;
+    // const id_operacion_financiera = req.params.id_operacion_financiera;
 
     try {
 
+        const lista = await PagoOperacionFinanciera.find({
+                "es_vigente": true,
+                "es_borrado": false
+            })
+            .sort({ "_id": -1 });
+
+        res.json({
+            ok: true,
+            lista
+        })
+    } catch (error) {
+
+        //console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error inesperado.'
+        });
+    }
+}
+
+const desembolsar_operacion_financiera = async(req, res) => {
+
+    const id = req.params.id;
+    const id_usuario_sesion = req.header("id_usuario_sesion");
+    const now = dayjs();
+    const ip = requestIp.getClientIp(req).replace("::ffff:", "");
+
+    const {
+        // operacion_financiera,
+        // monto_ahorro_voluntario,
+        // monto_recibido,
+        // cuotas,
+        id_socio,
+        documento_identidad_socio,
+        nombres_apellidos_socio
+    } = req.body;
+
+    // console.log(documento_identidad_socio)
+    // console.log(nombres_apellidos_socio)
+
+    try {
+
+        const data_validacion = {
+            ip: ip,
+            id_usuario_sesion: id_usuario_sesion,
+            es_ingreso: false,
+            // caja: caja.id
+        };
+
+        const resultado_validacion = await validarPago(data_validacion);
+
+        if (!resultado_validacion.ok)
+            return res.status(404).json(resultado_validacion);
+
+
+
+
         const modelo = await OperacionFinanciera.findById(id);
-        modelo.se_desembolso_prestamo = true;
+        // modelo.desembolso.se_desembolso_prestamo = true;
+
+        const monto_desembolso = modelo.monto_capital;
+        const recibo = resultado_validacion.recibo;
+
+        // console.log(recibo)
+
+
+
+        const desembolso = {
+            se_desembolso_prestamo: true,
+            recibo: {
+                serie: recibo.serie,
+                numero: recibo.numero,
+                fecha: recibo.fecha,
+                monto_desembolso: monto_desembolso
+            }
+        };
+
+        // console.log(desembolso)
+
+        modelo.desembolso = desembolso;
+
+        // modelo.desembolo.se_desembolso_prestamo = true;
+        // modelo.desembolo.recibo.serie = recibo.serie;
+        // modelo.desembolo.recibo.numero = recibo.numero;
+        // modelo.desembolo.recibo.fecha = recibo.fecha;
+        // modelo.desembolo.recibo.monto_desembolso = monto_desembolso;
+
 
         modelo.comentario.push({
             tipo: 'Editado',
@@ -97,13 +186,129 @@ const desembolsar_operacion_financiera = async(req, res) => {
         console.log(modelo)
 
         await modelo.save();
+
+        // const monto_desembolso = modelo.monto_capital;
+        // const recibo = resultado_validacion.recibo;
+
+        const modelo_pago = new PagoOperacionFinanciera();
+
+        modelo_pago.es_ingreso = false;
+
+        modelo_pago.diario = {
+            caja_diario: resultado_validacion.caja_diario,
+            // caja_diario: caja_diario.id,
+            caja: resultado_validacion.caja,
+            // caja: caja.id,
+            estado: 'Abierto'
+        };
+
+        modelo_pago.recibo = {
+            estado: 'Vigente',
+            serie: recibo.serie,
+            numero: recibo.numero,
+            fecha: recibo.fecha,
+            ejercicio: '2020',
+            monto_total: monto_desembolso.toFixed(1)
+        };
+
+        modelo_pago.producto = {
+            persona: id_socio,
+            operacion_financiera: modelo.id,
+            // monto_gasto: monto_total_gasto,
+            // monto_ahorro_inicial: monto_total_ahorro_inicial,
+            // monto_ahorro_voluntario: monto_total_ahorro_voluntario,
+            // monto_ahorro_programado: monto_total_ahorro_programado,
+            // monto_amortizacion_capital: monto_total_amortizacion_capital,
+            // monto_interes: monto_total_interes,
+            // monto_mora: monto_total_mora
+            monto_desembolso: monto_desembolso
+        };
+
+        modelo_pago.detalle = [];
+
+        // modelo_pago.detalle.push({
+        //     producto: {
+        //         // operacion_financiera_detalle: cuota.id,
+        //         numero_cuota: cuota.numero_cuota,
+        //         monto_gasto: monto_gasto_a_pagar,
+        //         monto_ahorro_inicial: monto_ahorro_inicial_a_pagar,
+        //         // monto_retiro_ahorro_inicial: cuota.monto_retiro_ahorro_inicial,
+        //         monto_ahorro_voluntario: monto_ahorro_voluntario_a_pagar,
+        //         // monto_retiro_ahorro_voluntario: cuota.monto_retiro_ahorro_voluntario,
+        //         monto_ahorro_programado: monto_ahorro_programado_a_pagar,
+        //         // monto_retiro_ahorro_programado: cuota.monto_retiro_ahorro_programado,
+        //         monto_amortizacion_capital: monto_amortizacion_capital_a_pagar,
+        //         monto_interes: monto_interes_a_pagar,
+        //         // monto_interes_ganado: cuota.monto_interes_ganado,
+        //         // monto_retiro_interes_ganado: cuota.monto_retiro_interes_ganado,
+        //         monto_mora: monto_mora_a_pagar
+        //     }
+        // });
+
+        // console.log(modelo_pago)
+
+        await modelo_pago.save();
+
+        // console.log('pasoo')
+
+        const data_recibo = {
+
+            institucion: {
+                denominacion: 'Buenavista La Bolsa S.A.C.',
+                agencia: 'Agencia Ayacucho',
+                ruc: '20574744599',
+                frase: ''
+            },
+            persona: {
+                documento_identidad: documento_identidad_socio,
+                nombre_completo: nombres_apellidos_socio
+            },
+
+
+            // documento_identidad_socio: documento_identidad_socio,
+            // nombres_apellidos_socio: nombres_apellidos_socio,
+            analista: 'XXX XXX XXX',
+            // analista: modelo.analista.usuario.persona.nombre +
+            //     ' ' + modelo.analista.usuario.persona.apellido_paterno +
+            //     ' ' + modelo.analista.usuario.persona.apellido_materno,
+
+            producto: {
+                descripcion: modelo.producto.tipo.descripcion,
+                // cuota: 0,
+                monto_desembolso: monto_desembolso
+                    // monto_gasto: monto_total_gasto.toFixed(2),
+                    // monto_ahorro_inicial: monto_total_ahorro_inicial.toFixed(2),
+                    // monto_ahorro_voluntario: monto_total_ahorro_voluntario.toFixed(2),
+                    // monto_ahorro_programado: monto_total_ahorro_programado.toFixed(2),
+                    // monto_amortizacion_capital: monto_total_amortizacion_capital.toFixed(2),
+                    // monto_interes: monto_total_interes.toFixed(2),
+                    // monto_mora: monto_total_mora.toFixed(2),
+            },
+            recibo: {
+                usuario: req.header('usuario_sesion'),
+                numero: recibo.numero,
+                fecha: recibo.fecha,
+                tipo_impresion: 'Original',
+                monto_total: monto_desembolso.toFixed(2)
+            }
+        };
+
+        // console.log(data_recibo)
+
         res.json({
             ok: true,
-            msg: "Desembolso realizado satisfactoriamente.",
-        });
+            recibo: data_recibo
+                // recibo: getRecibo(data_recibo)
+        })
+
+        // res.json({
+        //     ok: true,
+        //     msg: "Desembolso realizado satisfactoriamente.",
+        // });
 
     } catch (error) {
 
+        console.log(error);
         return res.status(500).json({
             ok: false,
             msg: error.msg,
@@ -134,6 +339,7 @@ const pagar_operacion_financiera = async(req, res) => {
             ip: ip,
             id_usuario_sesion: id_usuario_sesion,
             // caja: caja.id
+            es_ingreso: true
         };
 
         const resultado_validacion = await validarPago(data_validacion);
@@ -142,7 +348,7 @@ const pagar_operacion_financiera = async(req, res) => {
             return res.status(404).json(resultado_validacion)
                 // return resultado_validacion;
 
-        const dato_recibo = resultado_validacion.dato_recibo;
+        const recibo = resultado_validacion.recibo;
 
         let monto_recibido_actual = monto_recibido;
         let monto_ahorro_voluntario_actual = monto_ahorro_voluntario;
@@ -216,13 +422,14 @@ const pagar_operacion_financiera = async(req, res) => {
 
                 cuota.estado = 'Pagado';
 
-                console.log(dato_recibo)
+                // console.log(recibo)
 
                 cuota.pagos.push({
                     recibo: {
-                        serie_recibo: dato_recibo.serie_recibo,
-                        numero_recibo: dato_recibo.numero_recibo,
-                        fecha_recibo: dato_recibo.fecha_recibo
+                        local_atencion: recibo.local_atencion,
+                        serie: recibo.serie,
+                        numero: recibo.numero,
+                        fecha: recibo.fecha
                     },
                     ingresos: {
                         monto_gasto: monto_gasto_a_pagar,
@@ -362,9 +569,10 @@ const pagar_operacion_financiera = async(req, res) => {
 
                     cuota.pagos.push({
                         recibo: {
-                            serie_recibo: dato_recibo.serie_recibo,
-                            numero_recibo: dato_recibo.numero_recibo,
-                            fecha_recibo: dato_recibo.fecha_recibo,
+                            local_atencion: recibo.local_atencion,
+                            serie: recibo.serie,
+                            numero: recibo.numero,
+                            fecha: recibo.fecha,
                         },
                         ingresos: {
                             monto_gasto: monto_gasto_a_amortizar,
@@ -432,9 +640,10 @@ const pagar_operacion_financiera = async(req, res) => {
 
         modelo.recibo = {
             estado: 'Vigente',
-            serie: dato_recibo.serie_recibo,
-            numero: dato_recibo.numero_recibo,
-            fecha: dato_recibo.fecha_recibo,
+            local_atencion: recibo.local_atencion,
+            serie: recibo.serie,
+            numero: recibo.numero,
+            fecha: recibo.fecha,
             ejercicio: '2020',
             monto_total: monto_total.toFixed(1)
         };
@@ -473,8 +682,8 @@ const pagar_operacion_financiera = async(req, res) => {
                 }
             });
 
-        console.log(model_operacion_financiera)
-            // console.log(cuotas_pendientes)
+        // console.log(model_operacion_financiera)
+        // console.log(cuotas_pendientes)
 
         if (!cuotas_pendientes) {
             // if (cuotas_pendientes.length === 0) {
@@ -485,30 +694,70 @@ const pagar_operacion_financiera = async(req, res) => {
         }
 
         const data_recibo = {
-            agencia: 'Agencia Ayacucho',
-            numero_recibo: dato_recibo.numero_recibo,
-            documento_identidad_socio: documento_identidad_socio,
-            nombres_apellidos_socio: nombres_apellidos_socio,
-            nombres_apellidos_analista: model_operacion_financiera.analista.usuario.persona.nombre +
+
+            institucion: {
+                denominacion: 'Buenavista La Bolsa S.A.C.',
+                agencia: 'Agencia Ayacucho',
+                ruc: '20574744599',
+                frase: ''
+            },
+            persona: {
+                documento_identidad: documento_identidad_socio,
+                nombre_completo: nombres_apellidos_socio
+            },
+
+
+            // documento_identidad_socio: documento_identidad_socio,
+            // nombres_apellidos_socio: nombres_apellidos_socio,
+            analista: model_operacion_financiera.analista.usuario.persona.nombre +
                 ' ' + model_operacion_financiera.analista.usuario.persona.apellido_paterno +
                 ' ' + model_operacion_financiera.analista.usuario.persona.apellido_materno,
-            producto: model_operacion_financiera.producto.tipo.descripcion,
-            monto_total_amortizacion_capital: monto_total_amortizacion_capital,
-            monto_total_interes: monto_total_interes,
-            monto_total_ahorro_programado: monto_total_ahorro_programado,
-            monto_total_ahorro_voluntario: monto_total_ahorro_voluntario,
-            monto_total_mora: monto_total_mora,
-            monto_total_ahorro_inicial: monto_total_ahorro_inicial,
-            monto_total_gasto: monto_total_gasto,
-            monto_total: monto_total,
-            usuario: req.header('usuario_sesion'),
-            fecha_recibo: dato_recibo.fecha_recibo,
-            impresion: 'Original'
+
+            producto: {
+                descripcion: model_operacion_financiera.producto.tipo.descripcion,
+                cuota: 1,
+                monto_gasto: monto_total_gasto.toFixed(2),
+                monto_ahorro_inicial: monto_total_ahorro_inicial.toFixed(2),
+                monto_ahorro_voluntario: monto_total_ahorro_voluntario.toFixed(2),
+                monto_ahorro_programado: monto_total_ahorro_programado.toFixed(2),
+                monto_amortizacion_capital: monto_total_amortizacion_capital.toFixed(2),
+                monto_interes: monto_total_interes.toFixed(2),
+                monto_mora: monto_total_mora.toFixed(2),
+            },
+            recibo: {
+                usuario: req.header('usuario_sesion'),
+                numero: recibo.numero,
+                fecha: recibo.fecha,
+                tipo_impresion: 'Original',
+                monto_total: monto_total.toFixed(2)
+            }
         };
+        // const data_recibo = {
+        //     agencia: 'Agencia Ayacucho',
+        //     numero: recibo.numero,
+        //     documento_identidad_socio: documento_identidad_socio,
+        //     nombres_apellidos_socio: nombres_apellidos_socio,
+        //     nombres_apellidos_analista: model_operacion_financiera.analista.usuario.persona.nombre +
+        //         ' ' + model_operacion_financiera.analista.usuario.persona.apellido_paterno +
+        //         ' ' + model_operacion_financiera.analista.usuario.persona.apellido_materno,
+        //     producto: model_operacion_financiera.producto.tipo.descripcion,
+        //     monto_total_amortizacion_capital: monto_total_amortizacion_capital,
+        //     monto_total_interes: monto_total_interes,
+        //     monto_total_ahorro_programado: monto_total_ahorro_programado,
+        //     monto_total_ahorro_voluntario: monto_total_ahorro_voluntario,
+        //     monto_total_mora: monto_total_mora,
+        //     monto_total_ahorro_inicial: monto_total_ahorro_inicial,
+        //     monto_total_gasto: monto_total_gasto,
+        //     monto_total: monto_total,
+        //     usuario: req.header('usuario_sesion'),
+        //     fecha: recibo.fecha,
+        //     impresion: 'Original'
+        // };
 
         res.json({
             ok: true,
-            recibo: getRecibo(data_recibo)
+            recibo: data_recibo
+                // recibo: getRecibo(data_recibo)
         })
     } catch (error) {
 
@@ -521,8 +770,10 @@ const pagar_operacion_financiera = async(req, res) => {
 }
 
 const registrarIngresoEgreso = async(req, res = response) => {
-    const id_usuario_sesion = "5f48329023ab991c688ccca8"; //req.header("id_usuario_sesion");
-    const ip = "192.168.1.31"; //requestIp.getClientIp(req).replace("::ffff:", "");
+    // const id_usuario_sesion = "5f48329023ab991c688ccca8"; //req.header("id_usuario_sesion");
+    const id_usuario_sesion = req.header("id_usuario_sesion");
+    // const ip = "192.168.1.31"; //requestIp.getClientIp(req).replace("::ffff:", "");
+    const ip = requestIp.getClientIp(req).replace("::ffff:", "");
     const { es_ingreso } = req.body;
     try {
         const data_validacion = {
@@ -540,7 +791,7 @@ const registrarIngresoEgreso = async(req, res = response) => {
 
         // console.log(resultado_validacion)
 
-        const dato_recibo = resultado_validacion.dato_recibo;
+        const recibo = resultado_validacion.recibo;
 
         const modelo = new PagoOperacionFinanciera(req.body);
         modelo.diario = {
@@ -554,9 +805,9 @@ const registrarIngresoEgreso = async(req, res = response) => {
 
         modelo.recibo = {
             estado: "Vigente",
-            serie: dato_recibo.serie_recibo,
-            numero: dato_recibo.numero_recibo,
-            fecha: dato_recibo.fecha_recibo,
+            serie: recibo.serie,
+            numero: recibo.numero,
+            fecha: recibo.fecha,
             ejercicio: "2020",
             monto_total: req.body.monto,
         };
@@ -584,13 +835,13 @@ const registrarIngresoEgreso = async(req, res = response) => {
         console.log(concepto);
         const data_recibo = {
             agencia: "Agencia Ayacucho",
-            numero_recibo: dato_recibo.numero_recibo,
+            numero: recibo.numero,
             documento_identidad_responsable: documento_identidad_responsable,
             nombres_apellidos_responsable: nombres_apellidos_responsable,
             concepto: concepto.descripcion,
             monto_total: req.body.monto,
             usuario: req.header("usuario_sesion"),
-            fecha_recibo: dato_recibo.fecha_recibo,
+            fecha: recibo.fecha,
             impresion: "Original",
         };
         return res.json({
@@ -606,10 +857,89 @@ const registrarIngresoEgreso = async(req, res = response) => {
     }
 };
 
+const anular_recibo = async(req, res = response) => {
+
+    const id = req.params.id;
+    const now = dayjs();
+    const {
+        comentario
+    } = req.body;
+
+    try {
+
+        // console.log(id)
+        // console.log(comentario)
+
+        const modelo = await PagoOperacionFinanciera.findById(id);
+
+
+        if (modelo.diario.estado == 'Cerrado')
+            return res.status(404).json({
+                ok: false,
+                msg: 'El recibo no puede ser anulado por que caja diario ya fue cerrado.'
+            })
+
+        modelo.recibo.estado = 'Anulado';
+        // modelo.comentario.push();
+
+        modelo.comentario.push({
+            tipo: 'Editado',
+            id_usuario: req.header('id_usuario_sesion'),
+            usuario: req.header('usuario_sesion'),
+            nombre: req.header('nombre_sesion'),
+            fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
+            comentario: comentario
+        });
+
+        modelo.save();
+
+        // console.log(modelo)
+        // console.log(modelo.detalle.length)
+
+        // const modelo = new PagoOperacionFinanciera(req.body);
+
+        for (let i = 0; i < modelo.detalle.length; i++) {
+
+            const cuota = await OperacionFinancieraDetalle.findById(modelo.detalle[i].producto.operacion_financiera_detalle);
+
+            // console.log(cuota);
+
+            for (let j = 0; j < cuota.pagos.length; j++) {
+
+                if (cuota.pagos[j].recibo.serie === modelo.recibo.serie &&
+                    cuota.pagos[j].recibo.numero === modelo.recibo.numero) {
+
+                    cuota.pagos[j].es_vigente = false;
+                    // await cuota.save();
+                }
+            }
+
+            await cuota.save();
+        }
+
+        //TODO: anular recibo desembolso
+
+        return res.json({
+            ok: true,
+            // recibo: 'Anulación satisfactoriamente.',
+            msg: 'Se anuló el recibo satisfactoriamente.'
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            ok: false,
+            msg: error.msg,
+        });
+    }
+}
+
 module.exports = {
 
+    listar,
     listar_operaciones_financieras_detalle_vigentes,
     pagar_operacion_financiera,
     registrarIngresoEgreso,
-    desembolsar_operacion_financiera
+    desembolsar_operacion_financiera,
+    anular_recibo
 };

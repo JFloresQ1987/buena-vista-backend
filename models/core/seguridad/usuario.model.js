@@ -4,6 +4,11 @@ const { schemaAuditoria } = require('../../auditoria');
 
 const schema = {
 
+    persona: {
+        type: Schema.Types.ObjectId,
+        ref: 'Persona',
+        required: true
+    },
     usuario: {
         type: String,
         required: true,
@@ -12,6 +17,10 @@ const schema = {
     clave: {
         type: String,
         required: true
+    },
+    rol: {
+        type: [String],
+        default: []
     },
     debe_cambiar_clave_inicio_sesion: {
         type: Boolean,
@@ -23,13 +32,8 @@ const schema = {
         required: true,
         default: false
     },
-    persona: {
-        type: Schema.Types.ObjectId,
-        ref: 'Persona',
-        required: true
-    },
-    rol: {
-        type: [String],
+    comentario: {
+        type: [Object],
         default: []
     }
 };

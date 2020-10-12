@@ -178,6 +178,46 @@ const modelo = {
         required: true,
         default: 0
     },
+    desembolso: {
+        se_desembolso_prestamo: {
+            type: Boolean,
+            // required: false,
+            default: false
+        },
+        recibo: {
+            // type: {
+            local_atencion: {
+                type: String,
+                // required: true,
+                // jsonSchema: {
+                //     enum: ["Ayacucho", "Huanta", "San Francisco"],
+                // },
+                // default: 'Ayacucho'
+            },
+            serie: {
+                type: String,
+                // required: true
+
+            },
+            numero: {
+                type: String,
+                // required: true
+            },
+            fecha: {
+                type: String,
+                // required: true
+            },
+            monto_desembolso: {
+                type: Number,
+                // required: true,
+                // default: 0
+            },
+            es_vigente: {
+                type: Boolean,
+                default: true
+            }
+        }
+    },
     // tasa_aporte_inicial: {
     //     type: Number,
     //     required: true,
@@ -203,11 +243,11 @@ const modelo = {
     //     required: true,
     //     default: 0
     // },
-    se_desembolso_prestamo: {
-        type: Boolean,
-        // required: false,
-        default: false
-    },
+    // se_desembolso_prestamo: {
+    //     type: Boolean,
+    //     // required: false,
+    //     default: false
+    // },
     es_congelado: {
         type: Boolean,
         // required: false,
