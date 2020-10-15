@@ -31,13 +31,14 @@ const getMenu = (rol) => {
             submenu: [
                 { opcion: 'Pago Productos', url: '/caja/pago/producto-caja' },
                 { opcion: 'Ingresos y egresos', url: '/caja/gestion/ingresos-egresos' },
-                { opcion: 'Apertura de caja general', url: '/registro/gestion/cierre-caja' },
+                // { opcion: 'Apertura de caja general', url: '/registro/gestion/cierre-caja' },
                 { opcion: 'Apertura de caja individual', url: '/registro/gestion/cierre-caja' },
-                { opcion: 'Cierre de caja general', url: '/registro/gestion/cierre-caja' },
+                // { opcion: 'Cierre de caja general', url: '/registro/gestion/cierre-caja-general' },
                 { opcion: 'Cierre de caja individual', url: '/caja/pago/cierre-caja-individual' },
                 { opcion: 'Listar Cajas', url: '/caja/pago/cajas-lista' },
-                { opcion: 'Anular recibo', url: '/registro/gestion/cierre-caja' },
-                { opcion: 'Duplicado de recibo', url: '/registro/gestion/cierre-caja' }
+                { opcion: 'Listar Recibos', url: '/caja/gestion/lista-recibo' },
+                // { opcion: 'Anular recibo', url: '/registro/gestion/cierre-caja' },
+                // { opcion: 'Duplicado de recibo', url: '/registro/gestion/cierre-caja' }
             ]
         },
         {

@@ -110,16 +110,25 @@ const modelo = {
             ref: 'OperacionFinanciera',
             // required: true
         },
-        operacion_financiera_desembolso: {
-            type: Schema.Types.ObjectId,
-            ref: 'OperacionFinanciera',
-            // required: true
-        },
+        // operacion_financiera_desembolso: {
+        //     type: Schema.Types.ObjectId,
+        //     ref: 'OperacionFinanciera',
+        //     // required: true
+        // },
         // monto_total: {
         //     type: Number,
         //     required: true,
         //     default: 0
         // },
+        es_desembolso: {
+            type: Boolean,
+            default: false
+        },
+        monto_desembolso: {
+            type: Number,
+            // required: true,
+            default: 0
+        },
         monto_gasto: {
             type: Number,
             // required: true,

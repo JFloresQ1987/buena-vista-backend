@@ -3,10 +3,12 @@ const { check } = require("express-validator");
 const { validarCampos } = require("../../../middlewares/validar-campos");
 const { validarJWT } = require("../../../middlewares/validar-jwt");
 const {
+    listar,
     listar_operaciones_financieras_detalle_vigentes,
     registrarIngresoEgreso,
     pagar_operacion_financiera,
-    desembolsar_operacion_financiera
+    desembolsar_operacion_financiera,
+    anular_recibo
 } = require("../../../controllers/core/caja/operacion-financiera-pago.controller");
 
 const router = Router();
@@ -15,6 +17,12 @@ router.get(
     "/listar/:id_operacion_financiera",
     validarJWT,
     listar_operaciones_financieras_detalle_vigentes
+);
+
+router.get(
+    "/listar_pagos",
+    validarJWT,
+    listar
 );
 
 router.post(
@@ -36,6 +44,7 @@ router.post(
 
 router.post("/registrar-ingreso-egreso", [validarJWT], registrarIngresoEgreso);
 router.put("/desembolsar/:id", [validarJWT], desembolsar_operacion_financiera);
+router.put("/anular-recibo/:id", [validarJWT], anular_recibo);
 // router.post('/pagar/:id_operacion_financiera', [
 //     validarJWT,
 //     // check('documento_identidad', 'El documento de identidad es obligatorio').notEmpty(),

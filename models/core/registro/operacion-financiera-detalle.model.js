@@ -176,9 +176,28 @@ const modelo = {
     //     default: 0
     // },    
     pagos: [{
-        // type: [{
+        // pago_operacion_financiera: {
+        //     type: Schema.Types.ObjectId,
+        //     ref: 'PagoOperacionFinanciera',
+        //     // required: true
+        // },
         recibo: {
-            // type: {
+            // estado: {
+            //     type: String,
+            //     // required: true,
+            //     // jsonSchema: {
+            //     //     enum: ["Previgente", "Vigente", "Anulado"],
+            //     // },
+            //     // default: 'Previgente'
+            // },
+            local_atencion: {
+                type: String,
+                // required: true,
+                // jsonSchema: {
+                //     enum: ["Ayacucho", "Huanta", "San Francisco"],
+                // },
+                // default: 'Ayacucho'
+            },
             serie: {
                 type: String,
                 // required: true
@@ -264,6 +283,10 @@ const modelo = {
             }
             // },
             // default: {}
+        },
+        es_vigente: {
+            type: Boolean,
+            default: true
         }
         // }],
         // default: []
