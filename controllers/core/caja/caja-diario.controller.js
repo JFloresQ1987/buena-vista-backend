@@ -28,7 +28,9 @@ const cerrarCaja = async(req, res = response) => {
                 "recibo.estado": "Vigente",
                 "diario.caja_diario": modelo.id,
                 "diario.estado": "Abierto",
-                "diario.caja": modelo.caja
+                "diario.caja": modelo.caja,
+                es_vigente: true,
+                es_borrado: false
             }, "recibo.monto_total es_ingreso ",
             function(err, obj) {
                 let ingreso = []
