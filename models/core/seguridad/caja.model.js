@@ -45,7 +45,7 @@ const schema = {
     },
 };
 
-const CajaSchema = Schema(Object.assign(schema, schemaBase, schemaAuditoria));
+const CajaSchema = Schema(Object.assign(schema, schemaBase, schemaAuditoria), { collection: 'caja' });
 
 CajaSchema.method('toJSON', function() {
     const { __v, _id, clave, ...object } = this.toObject();

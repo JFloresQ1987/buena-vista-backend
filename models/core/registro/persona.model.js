@@ -86,7 +86,7 @@ const schema = {
     }
 };
 
-const PersonaSchema = Schema(Object.assign(schema, schemaBase, schemaAuditoria));
+const PersonaSchema = Schema(Object.assign(schema, schemaBase, schemaAuditoria), { collection: 'persona' });
 
 PersonaSchema.method('toJSON', function() {
     const { __v, _id, ...object } = this.toObject();

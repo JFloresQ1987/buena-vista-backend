@@ -34,7 +34,7 @@ const modelo = {
 };
 
 const schema = Schema(
-    Object.assign(modelo, schemaBase, schemaAuditoria), { collection: 'productos' });
+    Object.assign(modelo, schemaBase, schemaAuditoria), { collection: 'producto' });
 
 // const PersonaSchema = Schema(Object.assign(schema, schemaBase, schemaAuditoria), { collection: 'productos' });
 

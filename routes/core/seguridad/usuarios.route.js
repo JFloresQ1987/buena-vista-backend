@@ -4,11 +4,7 @@ const { validarCampos } = require('../../../middlewares/validar-campos');
 const { validarJWT, validarAuthorization } = require('../../../middlewares/validar-jwt');
 const { listar, crear, getUsuario, actualizar, listarxRol, cambiarClaveAdministrador, cambiarClaveUsuario, cambiarVigencia } = require('../../../controllers/core/seguridad/usuarios.controller');
 
-const { fake } = require('../../../controllers/test');
-
 const router = Router();
-
-router.post('/fake', fake);
 
 router.get('/', validarJWT, listar);
 router.get('/rol/:id', validarJWT, listarxRol);

@@ -39,7 +39,7 @@ const schema = {
 };
 
 const UsuarioSchema = Schema(
-    Object.assign(schema, schemaBase, schemaAuditoria)
+    Object.assign(schema, schemaBase, schemaAuditoria), { collection: 'usuario' }
 );
 
 UsuarioSchema.method("toJSON", function() {
