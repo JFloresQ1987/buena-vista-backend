@@ -3,17 +3,20 @@ const dayjs = require("dayjs");
 const Caja = require("../../../models/core/seguridad/caja.model");
 
 const crear = async (req, res = response) => {
-  const { id, comentario } = req.body;
+  const { id, ip, serie , comentario } = req.body;
 
   try {
-    const existe_registro = await Caja.findById(id);
+    const existe_ip = await Caja.findOne({ ip });
+    const existe_serie = await Caja.findOne({ serie });
 
-    if (existe_registro) {
+
+    if (existe_ip || existe_serie ) {
       return res.status(400).json({
         ok: false,
         msg: "La caja ya esta registrada.",
       });
     }
+
 
     const modelo = new Caja(req.body);
     const now = dayjs();

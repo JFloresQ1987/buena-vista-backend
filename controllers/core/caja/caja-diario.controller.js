@@ -28,7 +28,9 @@ const cerrarCaja = async(req, res = response) => {
                 "recibo.estado": "Vigente",
                 "diario.caja_diario": modelo.id,
                 "diario.estado": "Abierto",
-                "diario.caja": modelo.caja
+                "diario.caja": modelo.caja,
+                es_vigente: true,
+                es_borrado: false
             }, "recibo.monto_total es_ingreso ",
             function(err, obj) {
                 let ingreso = []
@@ -82,6 +84,7 @@ const cerrarCaja = async(req, res = response) => {
         
         // // obtener valores      
         modelo.cierre = {
+            fecha_cierre: now.format('YYYY-MM-DD'),
             cantidad_doscientos_soles_cierre: req.body.cantidad_doscientos_soles_cierre,
             cantidad_cien_soles_cierre: req.body.cantidad_cien_soles_cierre,
             cantidad_cincuenta_soles_cierre: req.body.cantidad_cincuenta_soles_cierre,
@@ -129,8 +132,8 @@ const cerrarCaja = async(req, res = response) => {
 
 const cargarCaja = async(req, res) => {
 
-    const id_usuario_sesion = "5f8236bedd1aaa4dc4109588"; //req.header("id_usuario_sesion");
-    const ip = "192.168.1.10"; //requestIp.getClientIp(req).replace("::ffff:", "");
+    const id_usuario_sesion = "5f8236bedd1aaa4dc4109589"; //req.header("id_usuario_sesion");
+    const ip = "192.168.0.10"; //requestIp.getClientIp(req).replace("::ffff:", "");
     
 
     try {
@@ -141,6 +144,7 @@ const cargarCaja = async(req, res) => {
             es_vigente: true,
             es_borrado: false,
           });   
+          console.log('aqui caja', caja);
 
         const cajaDiario = await  CajaDiario.findOne({ 
             caja: caja._id,
@@ -149,15 +153,14 @@ const cargarCaja = async(req, res) => {
             es_borrado: false 
         },"monto_total_apertura apertura.fecha_apertura id caja")
 
-        console.log(cajaDiario);
-            /* .populate({path:'caja', select:'usuario',
+           /* .populate({path:'caja', select:'usuario',
             populate: {path:'usuario'}}) */
 
         if (!cajaDiario) {
-            return {
+            return res.json({
               ok: false,
-              msg: "No hay caja abierta",
-            };
+              msg: "No hay caja abierta!!!!!!!!",
+            });
         }
 
         const cant_operaciones = await Operaciones.find({
@@ -207,11 +210,10 @@ const cargarCaja = async(req, res) => {
             })
 
    } catch (error) {
-    console.log(error);
     res.status(500).json({
         ok: false,
-        msg: 'Error inesperado.'
-    });
+        msg: error
+     });
     }
 }
 
@@ -240,9 +242,36 @@ const listarCajas = async(req, res) => {
     }
 }
 
+const listarCajasPorFecha = async(req, res) => {
+
+    fecha_apertura = req.params.fecha_apertura
+    console.log(fecha_apertura);
+    try {
+        const cajasFecha = await CajaDiario.findOne({"apertura.fecha_apertura":fecha_apertura }, 
+        "apertura.fecha_apertura comentario cierre cantidad_operaciones monto_total_apertura monto_total_operaciones monto_total_efectivo")
+        .populate({path: "caja", select: "usuario",
+            populate:{path:"usuario", select: "persona",
+                    populate:{path: "persona", select: "nombre apellido_paterno apellido_materno documento_identidad"}}})
+        /* .populate({path:"usuario", select:"persona usuario", 
+        populate:{path:"persona", select:"nombre apellido_paterno apellido_materno"}}); */
+
+        console.log(cajasFecha);
+        res.json({
+            ok: true,
+            cajasFecha
+        })
+    } catch (error) {
+        console.log(error);
+        res.json({
+            ok: false,
+            msg: 'Hable con el Admin!'
+        })
+    }
+}
 
 module.exports = {
     cerrarCaja,
     cargarCaja,
-    listarCajas
+    listarCajas,
+    listarCajasPorFecha
 };
