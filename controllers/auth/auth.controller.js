@@ -10,29 +10,46 @@ const login = async(req, res = respone) => {
 
     try {
 
-        const modeloDB = await Usuario.findOne({ usuario });
+        const modelo = await Usuario.findOne({ usuario });
 
-        if (!modeloDB) {
-            return res.status(400).json({
+        if (!modelo) {
+            return res.status(404).json({
                 ok: false,
                 msg: 'Usuario y/o clave incorrectos.'
             });
         }
 
-        const clave_valido = bcrypt.compareSync(clave, modeloDB.clave);
+        if (!modelo.es_vigente || modelo.es_borrado) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Usuario y/o clave incorrectos.'
+            });
+        }
+
+        const clave_valido = bcrypt.compareSync(clave, modelo.clave);
 
         if (!clave_valido) {
-            return res.status(400).json({
+            return res.status(404).json({
                 ok: false,
                 msg: 'Usuario y/o clave incorrectos.'
             });
         }
 
-        const token = await generarJWT(modeloDB.id);
+        if (modelo.es_bloqueado) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Usuario bloqueado, comunicarse con el administrador.'
+            });
+        }
+
+        const token = await generarJWT(modelo.id);
+
+        // console.log(modelo)
 
         res.json({
             ok: true,
             token,
+            debe_cambiar_clave_inicio_sesion: modelo.debe_cambiar_clave_inicio_sesion
         });
 
     } catch (error) {
@@ -55,11 +72,13 @@ const renovar_token = async(req, res = respone) => {
         .populate('persona', 'nombre apellido_paterno apellido_materno fecha_nacimiento es_masculino correo_electronico avatar');
 
     // console.log(usuario.rol)
+    // console.log(usuario)
 
     res.json({
         ok: true,
         token,
         usuario,
+        debe_cambiar_clave_inicio_sesion: usuario.debe_cambiar_clave_inicio_sesion,
         menu: getMenu(usuario.rol)
     });
 }

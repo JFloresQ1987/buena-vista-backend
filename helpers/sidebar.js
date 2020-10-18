@@ -45,8 +45,9 @@ const getMenu = (rol) => {
             opcion: 'Analista',
             icono: 'mdi mdi-gauge',
             submenu: [
-                { opcion: 'Ingresos y egresos', url: '/registro/gestion/caja-ingresos-egresos' },
-                { opcion: 'Cierre de caja', url: '/registro/gestion/cierre-caja' }
+                // { opcion: 'Ingresos y egresos', url: '/registro/gestion/caja-ingresos-egresos' },
+                // { opcion: 'Cierre de caja', url: '/registro/gestion/cierre-caja' }
+                { opcion: 'Recaudación', url: '/analista/gestion/producto-pre-pago' }
             ]
         }
     ];

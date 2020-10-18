@@ -90,7 +90,8 @@ const listar = async(req, res) => {
                 "es_vigente": true,
                 "es_borrado": false
             })
-            .sort({ "_id": -1 });
+            // .sort({ "_id": -1 });
+            .sort({ $natural: -1 });
 
         res.json({
             ok: true,
@@ -140,9 +141,6 @@ const desembolsar_operacion_financiera = async(req, res) => {
         if (!resultado_validacion.ok)
             return res.status(404).json(resultado_validacion);
 
-
-
-
         const modelo = await OperacionFinanciera.findById(id);
         // modelo.desembolso.se_desembolso_prestamo = true;
 
@@ -151,11 +149,10 @@ const desembolsar_operacion_financiera = async(req, res) => {
 
         // console.log(recibo)
 
-
-
         const desembolso = {
             se_desembolso_prestamo: true,
             recibo: {
+                local_atencion: recibo.local_atencion,
                 serie: recibo.serie,
                 numero: recibo.numero,
                 fecha: recibo.fecha,
@@ -331,14 +328,12 @@ const pagar_operacion_financiera = async(req, res) => {
         documento_identidad_socio,
         nombres_apellidos_socio
     } = req.body;
-    // const id_operacion_financiera = req.params.id_operacion_financiera;
 
     try {
 
         const data_validacion = {
             ip: ip,
             id_usuario_sesion: id_usuario_sesion,
-            // caja: caja.id
             es_ingreso: true
         };
 
@@ -346,7 +341,6 @@ const pagar_operacion_financiera = async(req, res) => {
 
         if (!resultado_validacion.ok)
             return res.status(404).json(resultado_validacion)
-                // return resultado_validacion;
 
         const recibo = resultado_validacion.recibo;
 
@@ -375,9 +369,6 @@ const pagar_operacion_financiera = async(req, res) => {
             else if (i > 0 && Number(monto_ahorro_voluntario_actual) > 0)
                 monto_ahorro_voluntario_actual = 0;
 
-            // monto_total_cuota += cuota.monto_ahorro_programado +
-            //     Math.ceil((cuota.monto_amortizacion_capital + cuota.monto_interes) * 10) / 10;
-
             let monto_gasto_pagado = 0;
             let monto_ahorro_inicial_pagado = 0;
             let monto_ahorro_voluntario_pagado = 0;
@@ -405,9 +396,6 @@ const pagar_operacion_financiera = async(req, res) => {
             let monto_interes_a_pagar = cuota.ingresos.monto_interes - monto_interes_pagado;
             let monto_mora_a_pagar = cuota.ingresos.monto_mora - monto_mora_pagado;
 
-            // monto_total_cuota += monto_ahorro_programado_a_pagar +
-            //     Math.ceil((monto_amortizacion_capital_a_pagar + monto_interes_a_pagar) * 10) / 10;
-
             const monto_total_cuota_a_pagar = monto_gasto_a_pagar +
                 monto_ahorro_inicial_a_pagar +
                 monto_ahorro_voluntario_a_pagar +
@@ -418,11 +406,7 @@ const pagar_operacion_financiera = async(req, res) => {
 
             if (monto_total_cuota_a_pagar <= monto_recibido_actual) {
 
-                // //console.log(monto_recibido_actual)
-
                 cuota.estado = 'Pagado';
-
-                // console.log(recibo)
 
                 cuota.pagos.push({
                     recibo: {
@@ -447,9 +431,6 @@ const pagar_operacion_financiera = async(req, res) => {
 
                 monto_recibido_actual -= monto_total_cuota_a_pagar;
 
-                // //console.log('entrooo 1')
-                // //console.log(modelo)
-
                 modelo.detalle.push({
                     producto: {
                         operacion_financiera_detalle: cuota.id,
@@ -469,23 +450,11 @@ const pagar_operacion_financiera = async(req, res) => {
                     }
                 });
 
-                // monto_total_cuota += cuota.monto_ahorro_programado +
-                //     Math.ceil((cuota.monto_amortizacion_capital + cuota.monto_interes) * 10) / 10;
-
-                // monto_total_cuota = monto_ahorro_programado_a_pagar +
-                //     monto_amortizacion_capital_a_pagar +
-                //     monto_interes_a_pagar;
-                // Math.ceil((monto_amortizacion_capital_a_pagar + monto_interes_a_pagar) * 10) / 10;
-                // monto_total_cuota += monto_ahorro_programado_a_pagar +
-                //     Math.ceil((monto_amortizacion_capital_a_pagar + monto_interes_a_pagar) * 10) / 10;
-
                 monto_total += monto_gasto_a_pagar + monto_ahorro_inicial_a_pagar +
                     // monto_ahorro_voluntario_a_pagar + monto_total_cuota +
                     monto_ahorro_voluntario_a_pagar + monto_ahorro_programado_a_pagar +
                     monto_amortizacion_capital_a_pagar + monto_interes_a_pagar +
                     monto_mora_a_pagar; // + parseInt(monto_ahorro_voluntario);
-
-                // //console.log(monto_total)
 
                 monto_total_gasto += monto_gasto_a_pagar;
                 monto_total_ahorro_inicial += monto_ahorro_inicial_a_pagar;
@@ -498,10 +467,6 @@ const pagar_operacion_financiera = async(req, res) => {
             } else {
 
                 if (monto_recibido_actual >= 0.1) {
-
-                    // //console.log(monto_recibido_actual)
-
-                    // cuota.estado = 'Amortizado';
 
                     let monto_gasto_a_amortizar = 0;
                     let monto_ahorro_inicial_a_amortizar = 0;
@@ -587,9 +552,6 @@ const pagar_operacion_financiera = async(req, res) => {
                         }
                     });
 
-                    // //console.log('entrooo 2')
-                    // //console.log(modelo)
-
                     modelo.detalle.push({
                         producto: {
                             operacion_financiera_detalle: cuota.id,
@@ -632,9 +594,7 @@ const pagar_operacion_financiera = async(req, res) => {
 
         modelo.diario = {
             caja_diario: resultado_validacion.caja_diario,
-            // caja_diario: caja_diario.id,
             caja: resultado_validacion.caja,
-            // caja: caja.id,
             estado: 'Abierto'
         };
 
@@ -682,13 +642,7 @@ const pagar_operacion_financiera = async(req, res) => {
                 }
             });
 
-        // console.log(model_operacion_financiera)
-        // console.log(cuotas_pendientes)
-
         if (!cuotas_pendientes) {
-            // if (cuotas_pendientes.length === 0) {
-
-            // const model_operacion_financiera = await OperacionFinanciera.findById({ "_id": operacion_financiera });
             model_operacion_financiera.estado = 'Pagado';
             await model_operacion_financiera.save();
         }
@@ -705,10 +659,6 @@ const pagar_operacion_financiera = async(req, res) => {
                 documento_identidad: documento_identidad_socio,
                 nombre_completo: nombres_apellidos_socio
             },
-
-
-            // documento_identidad_socio: documento_identidad_socio,
-            // nombres_apellidos_socio: nombres_apellidos_socio,
             analista: model_operacion_financiera.analista.usuario.persona.nombre +
                 ' ' + model_operacion_financiera.analista.usuario.persona.apellido_paterno +
                 ' ' + model_operacion_financiera.analista.usuario.persona.apellido_materno,
@@ -934,6 +884,41 @@ const anular_recibo = async(req, res = response) => {
     }
 }
 
+const pagar_operacion_financiera_por_analista = async(req, res = response) => {
+
+    // const operaion_financiera = req.params.id;
+    const now = dayjs();
+    const {
+        lista
+    } = req.body;
+
+    try {
+
+        // for (let i = 0; i < lista.length; i++) {
+
+        //     const operacion_financiera = await OperacionFinanciera.findById(lista[i].id);
+        //     const cuotas = await OperacionFinancieraDetalle.find({ 'operacion_financiera': operacion_financiera.id });
+
+
+        // }
+
+        console.log(lista)
+
+        return res.json({
+            ok: true,
+            // recibo: 'Anulación satisfactoriamente.',
+            msg: 'Se registró satisfactoriamente.'
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            ok: false,
+            msg: error.msg,
+        });
+    }
+}
+
 module.exports = {
 
     listar,
@@ -941,5 +926,6 @@ module.exports = {
     pagar_operacion_financiera,
     registrarIngresoEgreso,
     desembolsar_operacion_financiera,
-    anular_recibo
+    anular_recibo,
+    pagar_operacion_financiera_por_analista
 };

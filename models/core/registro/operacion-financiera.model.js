@@ -144,9 +144,11 @@ const modelo = {
         type: String,
         required: true,
         jsonSchema: {
-            enum: ["Previgente", "Vigente", "Pagado", "Anulado"],
+            enum: ["Vigente", "Pagado", "Anulado"],
+            // enum: ["Previgente", "Vigente", "Pagado", "Anulado"],
         },
-        default: 'Previgente'
+        default: 'Vigente'
+            // default: 'Previgente'
     },
     // numero_ciclo: {
     //     type: Number,

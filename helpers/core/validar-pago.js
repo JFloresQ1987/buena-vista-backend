@@ -27,7 +27,8 @@ const validarPago = async(data) => {
 
     // const modelo = new PagoOperacionFinanciera(req.body);
     const now = dayjs();
-    const fecha_apertura = now.format("DD/MM/YYYY");
+    const fecha_apertura = now.format("YYYY-MM-DD");
+    // const fecha_apertura = now.format("DD/MM/YYYY");
 
     const ultimo_caja_diario = await CajaDiario.findOne({
             caja: caja.id,
