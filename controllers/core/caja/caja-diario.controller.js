@@ -84,7 +84,7 @@ const cerrarCaja = async(req, res = response) => {
         
         // // obtener valores      
         modelo.cierre = {
-            //fecha_cierre: now.format('YYYY-MM-DD'),
+            fecha_cierre: now.format('YYYY-MM-DD'),
             cantidad_doscientos_soles_cierre: req.body.cantidad_doscientos_soles_cierre,
             cantidad_cien_soles_cierre: req.body.cantidad_cien_soles_cierre,
             cantidad_cincuenta_soles_cierre: req.body.cantidad_cincuenta_soles_cierre,
