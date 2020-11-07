@@ -44,9 +44,15 @@ const actualizar = async(req, res = response) => {
         modelo.numero_telefono = req.body.numero_telefono,
         modelo.numero_celular = req.body.numero_celular,
         modelo.correo_electronico = req.body.correo_electronico,
-        modelo.domicilio = req.body.domicilio,
+        modelo.domicilio = req.body.domicilio,        
         modelo.referencia_domicilio = req.body.referencia_domicilio,
         modelo.avatar = req.body.avatar,
+        modelo.ubigeo = {
+            cocigo: "101",
+            departamento: req.body.departamento,
+            provincia: req.body.provincia,
+            distrito: req.body.distrito,
+        }
         modelo.comentario.push({
             tipo: 'Editado',
             idUsuario: req.header('id_usuario_sesion'),
@@ -155,7 +161,7 @@ const buscar_id = async(req, res) => {
 
         const id = req.params.id;
         const persona = await Persona.findById(id);
-
+        console.log(persona);
         res.json({
             ok: true,
             persona
