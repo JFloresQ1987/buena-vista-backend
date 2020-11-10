@@ -1,69 +1,69 @@
-const { response } = require("express");
-const Persona = require("../../../models/core/registro/persona.model");
-const Ubigeo = require("../../../models/core/ubigeo.model");
-const dayjs = require("dayjs");
+const { response } = require('express');
+const Persona = require('../../../models/core/registro/persona.model');
+const dayjs = require('dayjs');
 
-const listar = async (req, res) => {
-  const modelo = await Persona.find({ es_borrado: false });
+const listar = async(req, res) => {
 
-  res.json({
-    ok: true,
-    modelo,
-  });
-};
+    const modelo = await Persona.find({ "es_borrado": false });
 
-const actualizar = async (req, res = response) => {
-  const id = req.params.id;
-  const uid = req.uid;
+    res.json({
+        ok: true,
+        modelo
+    })
+}
 
-  const { comentario } = req.body;
-  console.log(comentario);
 
-  try {
-    const persona = await Persona.findById(id);
+const actualizar = async(req, res = response) => {
 
-    if (!persona) {
-      return res.status(404).json({
-        ok: false,
-        msg: "Persona no encontrada",
-      });
-    }
+    const id = req.params.id;
+    const uid = req.uid;
 
-    const modelo = await Persona.findById(id);
-    const now = dayjs();
+    const { comentario } = req.body;
+    console.log(comentario);
 
-    (modelo.nombre = req.body.nombre),
-      (modelo.apellido_paterno = req.body.apellido_paterno),
-      (modelo.apellido_materno = req.body.apellido_materno),
-      (modelo.documento_identidad = req.body.documento_identidad),
-      (modelo.fecha_nacimiento = req.body.fecha_nacimiento),
-      (modelo.es_masculino = req.body.es_masculino),
-      (modelo.numero_telefono = req.body.numero_telefono),
-      (modelo.numero_celular = req.body.numero_celular),
-      (modelo.correo_electronico = req.body.correo_electronico),
-      (modelo.domicilio = req.body.domicilio),
-      (modelo.referencia_domicilio = req.body.referencia_domicilio),
-      (modelo.avatar = req.body.avatar),
-      modelo.comentario.push({
-        tipo: "Editado",
-        idUsuario: req.header("id_usuario_sesion"),
-        usuario: req.header("usuario_sesion"),
-        nombre: req.header("nombre_sesion"),
-        fecha: now.format("DD/MM/YYYY hh:mm:ss a"),
-        comentario,
-      });
+    try {
 
-    console.log(req.header("x-token"));
-    console.log(req.header("id_usuario_sesion"));
-    console.log(req.header("usuario_sesion"));
-    console.log(req.header("nombre_sesion"));
+        const persona = await Persona.findById(id)
+
+        if (!persona) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Persona no encontrada'
+            })
+        }
+
+        const modelo = await Persona.findById(id) 
+        const now = dayjs();
+
+        modelo.nombre = req.body.nombre,
+        modelo.apellido_paterno = req.body.apellido_paterno,                
+        modelo.apellido_materno = req.body.apellido_materno,
+        modelo.documento_identidad = req.body.documento_identidad,
+        modelo.fecha_nacimiento = req.body.fecha_nacimiento,
+        modelo.es_masculino = req.body.es_masculino,
+        modelo.numero_telefono = req.body.numero_telefono,
+        modelo.numero_celular = req.body.numero_celular,
+        modelo.correo_electronico = req.body.correo_electronico,
+        modelo.domicilio = req.body.domicilio,        
+        modelo.referencia_domicilio = req.body.referencia_domicilio,
+        modelo.avatar = req.body.avatar,
+        modelo.ubigeo = {
+            cocigo: "101",
+            departamento: req.body.departamento,
+            provincia: req.body.provincia,
+            distrito: req.body.distrito,
+        }
+        modelo.comentario.push({
+            tipo: 'Editado',
+            idUsuario: req.header('id_usuario_sesion'),
+            usuario: req.header('usuario_sesion'),
+            nombre: req.header('nombre_sesion'),
+            fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
+            comentario
+        });
+    
 
     await modelo.save();
-    /* const cambiosPersona = {
-            ...req.body,
-            usuario: uid
-        }
-        const personaActualizada = await Persona.findByIdAndUpdate(id, cambiosPersona, { new: true }) */
     res.json({
       ok: true,
       msg: "Actualizar socio",
