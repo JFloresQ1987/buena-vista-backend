@@ -3,7 +3,7 @@ const { check } = require('express-validator');
 const { validarCampos } = require('../../../middlewares/validar-campos');
 const { validarJWT } = require('../../../middlewares/validar-jwt');
 const { listar, crear, actualizar, buscar_por_documento_identidad, 
-    buscar_id, buscar_por_nombre, buscar_por_apellido, buscar_por_apellido_mat } = require('../../../controllers/core/registro/personas.controller');
+    buscar_id, buscar_por_nombre, buscar_por_apellido, buscar_por_apellido_mat, datos_persona_reporte } = require('../../../controllers/core/registro/personas.controller');
 
 const router = Router();
 
@@ -48,7 +48,8 @@ router.get('/buscar_socio_apellido_mat/:termino', validarJWT, buscar_por_apellid
 // Actualizar/editar socio/persona por DNI
 // ============================
 
-router.get('/:id', validarJWT, buscar_id)
+router.get('/:id', validarJWT, buscar_id);
+router.get('/datos-reporte/:id', validarJWT, datos_persona_reporte);
 
 router.put('/:id', [
     validarJWT,

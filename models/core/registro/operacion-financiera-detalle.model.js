@@ -330,6 +330,11 @@ schema.method('toJSON', function() {
     object.monto_ahorro_programado = ahorros.monto_ahorro_programado.toFixed(2)
     object.ingresos = ingresos;
     object.ahorros = ahorros;
+    object.monto_amortizacion_capital_2=ingresos.monto_amortizacion_capital;
+    object.monto_interes_2=ingresos.monto_interes;
+    object.monto_cuota_2=(ingresos.monto_gasto + ahorros.monto_ahorro_inicial +
+        ingresos.monto_amortizacion_capital + ingresos.monto_interes + ahorros.monto_ahorro_programado);
+    object.monto_ahorro_programado_2=ahorros.monto_ahorro_programado;
     return object;
 })
 
