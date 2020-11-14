@@ -100,7 +100,7 @@ const cerrarCaja = async(req, res = response) => {
         modelo.monto_total_efectivo = monto_total,
         modelo.monto_total_operaciones = monto_total_operaciones,
         // modelo.cantidad_operaciones = ,
-        //modelo.estado = "Cerrado",
+        modelo.estado = "Cerrado",
         modelo.comentario.push({
             tipo: 'Editado',
             idUsuario: req.header('id_usuario_sesion'),
@@ -132,8 +132,8 @@ const cerrarCaja = async(req, res = response) => {
 
 const cargarCaja = async(req, res) => {
 
-    const id_usuario_sesion = "5f8236bedd1aaa4dc4109589"; //req.header("id_usuario_sesion");
-    const ip = "192.168.0.10"; //requestIp.getClientIp(req).replace("::ffff:", "");
+    const id_usuario_sesion = /* "5f8236bedd1aaa4dc4109589"; */ req.header("id_usuario_sesion");
+    const ip = /* "192.168.0.10"; */ requestIp.getClientIp(req).replace("::ffff:", "");
     
 
     try {
@@ -144,8 +144,14 @@ const cargarCaja = async(req, res) => {
             es_vigente: true,
             es_borrado: false,
           });   
+          
           console.log('aqui caja', caja);
-
+          if (!caja) {
+            return res.json({
+              ok: false,
+              msg: "No hay caja!!!!!!!!",
+            });
+        }  
         const cajaDiario = await  CajaDiario.findOne({ 
             caja: caja._id,
             estado: "Abierto",
@@ -221,8 +227,6 @@ const listarCajas = async(req, res) => {
     const now = dayjs();
     const desde = req.query.desde || '2001-01-01'
     const hasta = req.query.hasta || now.format('YYYY-MM-DD')
-    console.log(desde);
-    console.log(hasta);
 
     try {
         const cajas = await CajaDiario.find({ "apertura.fecha_apertura": {"$gte":desde, "$lte": hasta } },
@@ -245,7 +249,7 @@ const listarCajas = async(req, res) => {
 const listarCajasPorFecha = async(req, res) => {
 
     fecha_apertura = req.params.fecha_apertura
-    console.log(fecha_apertura);
+
     try {
         const cajasFecha = await CajaDiario.findOne({"apertura.fecha_apertura":fecha_apertura }, 
         "apertura.fecha_apertura comentario cierre cantidad_operaciones monto_total_apertura monto_total_operaciones monto_total_efectivo")

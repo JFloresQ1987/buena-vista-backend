@@ -10,8 +10,8 @@ const e = require("cors");
 
 const verificarTotalRecibo = async(req, res = response) => {
 
-    const id_usuario_sesion = "5f8236bedd1aaa4dc4109589"; //req.header("id_usuario_sesion");
-    const ip = "192.168.0.10"; //requestIp.getClientIp(req).replace("::ffff:", "");
+    const id_usuario_sesion =req.header("id_usuario_sesion"); // "5f8236bedd1aaa4dc4109589"; //
+    const ip = requestIp.getClientIp(req).replace("::ffff:", "");// "192.168.0.10"; //
 
     const caja = await Caja.findOne({
         ip: ip,
@@ -73,8 +73,8 @@ const verificarTotalRecibo = async(req, res = response) => {
 
 const verificarIntegridadRecibo = async(req, res = response) => {
 
-    const id_usuario_sesion = "5f8236bedd1aaa4dc4109589"; //req.header("id_usuario_sesion");
-    const ip = "192.168.0.10"; //requestIp.getClientIp(req).replace("::ffff:", "");
+    const id_usuario_sesion =req.header("id_usuario_sesion"); // "5f8236bedd1aaa4dc4109589"; //
+    const ip = requestIp.getClientIp(req).replace("::ffff:", "");// "192.168.0.10"; //
 
     const caja = await Caja.findOne({
         ip: ip,
@@ -143,8 +143,8 @@ const verificarIntegridadRecibo = async(req, res = response) => {
 const verificarIntegridadOperacionF = async(req, res = response) => {
 
 
-    const id_usuario_sesion = "5f8236bedd1aaa4dc4109589"; //req.header("id_usuario_sesion");
-    const ip = "192.168.0.10"; //requestIp.getClientIp(req).replace("::ffff:", "");
+    const id_usuario_sesion =req.header("id_usuario_sesion"); // "5f8236bedd1aaa4dc4109589"; //
+    const ip = requestIp.getClientIp(req).replace("::ffff:", "");// "192.168.0.10"; //
 
     const caja = await Caja.findOne({
         ip: ip,
