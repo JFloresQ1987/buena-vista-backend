@@ -7,7 +7,7 @@ const listar = async (req, res = response) => {
   const desde = Number(req.query.desde) || 0;
   const [analistas, total] = await Promise.all([
     Analista.find(
-      { es_borrado: false },
+      { es_borrado: false, es_vigente: true },
       "descripcion producto usuario es_bloqueado es_vigente"
     )
       .populate({
