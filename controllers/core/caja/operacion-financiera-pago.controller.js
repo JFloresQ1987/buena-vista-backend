@@ -5,6 +5,7 @@ const OperacionFinancieraDetalle = require("../../../models/core/registro/operac
 const PagoOperacionFinanciera = require("../../../models/core/caja/operacion-financiera-pago.model");
 const PagoConcepto = require("../../../models/core/configuracion/pago-concepto.model");
 const Usuario = require("../../../models/core/seguridad/usuario.model");
+const Caja = require("../../../models/core/seguridad/caja.model");
 // const CajaDiario = require('../../../models/core/caja/caja-diario.model');
 // const Caja = require('../../../models/core/seguridad/caja.model');
 // const dayjs = require('dayjs');
@@ -84,19 +85,29 @@ const listar_operaciones_financieras_detalle_vigentes = async(req, res) => {
 const listar = async(req, res) => {
 
     // const { analista } = req.body;
+    const usuario = req.params.usuario;
     const analista = req.params.analista;
+    const ip = requestIp.getClientIp(req).replace("::ffff:", "");
 
     try {
 
-        // console.log(req)
-        // console.log(req.body)
+        // console.log(ip)
+        // console.log(usuario)
         // console.log(analista)
+
+        const caja = await Caja.findOne({
+            ip: ip,
+            usuario: usuario,
+            es_vigente: true,
+            es_borrado: false,
+        });
 
         let lista = [];
 
         if (analista === '0') {
 
             lista = await PagoOperacionFinanciera.find({
+                    "recibo.serie": caja.serie,
                     "es_vigente": true,
                     "es_borrado": false
                 })
@@ -106,6 +117,7 @@ const listar = async(req, res) => {
 
             lista = await PagoOperacionFinanciera.find({
                     // "comentario.[0].id_usuario": analista,
+                    "recibo.serie": caja.serie,
                     "comentario": { $elemMatch: { "id_usuario": analista } },
                     // "comentario": { "id_usuario": analista },
                     "es_vigente": true,

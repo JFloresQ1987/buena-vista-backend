@@ -22,7 +22,7 @@ router.get(
 );
 
 router.get(
-    "/listar_pagos/:analista",
+    "/listar_pagos/:usuario/:analista",
     validarJWT,
     listar
 );
