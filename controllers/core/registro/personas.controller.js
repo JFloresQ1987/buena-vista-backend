@@ -61,211 +61,235 @@ const actualizar = async(req, res = response) => {
             fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
             comentario
         });
+    
 
-        console.log(req.header('x-token'));
-        console.log(req.header('id_usuario_sesion'));
-        console.log(req.header('usuario_sesion'));
-        console.log(req.header('nombre_sesion'));
+    await modelo.save();
+    res.json({
+      ok: true,
+      msg: "Actualizar socio",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      ok: false,
+      msg: "Hable con el Adm",
+    });
+  }
+};
 
-        await modelo.save(); 
-        /* const cambiosPersona = {
-            ...req.body,
-            usuario: uid
+const crear = async (req, res = response) => {
+  const { documento_identidad, comentario } = req.body;
+
+  try {
+    const existe_registro = await Persona.findOne({ documento_identidad });
+
+    if (existe_registro) {
+      return res.status(400).json({
+        ok: false,
+        msg: "La persona ya esta registrada.",
+      });
+    }
+
+    const modelo = new Persona(req.body);
+    const now = dayjs();
+
+    modelo.comentario = [
+      {
+        tipo: "Nuevo",
+        usuario: req.header("id_usuario_sesion"),
+        usuario: req.header("usuario_sesion"),
+        nombre: req.header("nombre_sesion"),
+        fecha: now.format("DD/MM/YYYY hh:mm:ss a"),
+        comentario,
+      },
+    ];
+    await modelo.save();
+
+    res.json({
+      ok: true,
+      modelo,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      ok: false,
+      msg: "Error inesperado.",
+    });
+  }
+};
+
+const buscar_por_documento_identidad = async (req, res) => {
+  try {
+    const documento_identidad = req.params.documento_identidad;
+    const persona = await Persona.findOne({
+      documento_identidad: documento_identidad,
+      es_borrado: false,
+    });
+
+    res.json({
+      ok: true,
+      persona,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      ok: false,
+      msg: "Error inesperado.",
+    });
+  }
+};
+
+const buscar_id = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const persona = await Persona.findById(id);
+
+    res.json({
+      ok: true,
+      persona,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      ok: false,
+      msg: error.message,
+    });
+  }
+};
+
+const buscar_por_nombre = async (req, res) => {
+  const desde = Number(req.query.desde) || 0;
+  try {
+    let termino = req.params.termino;
+    let regex = new RegExp(termino, "i");
+
+    const persona = await Persona.find(
+      { nombre: regex },
+      "documento_identidad domicilio nombre apellido_paterno apellido_materno"
+    )
+      .limit(15)
+      .skip(desde)
+      .sort({ nombre: 1 });
+    const total = await Persona.find({ nombre: regex }).countDocuments();
+    res.json({
+      ok: true,
+      persona,
+      total,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      ok: false,
+      msg: error.message,
+    });
+  }
+};
+
+const buscar_por_apellido = async (req, res) => {
+  const desde = Number(req.query.desde) || 0;
+  try {
+    let termino = req.params.termino;
+    let regex = new RegExp(termino, "i");
+
+    const persona = await Persona.find(
+      { apellido_paterno: regex },
+      "documento_identidad domicilio nombre apellido_paterno apellido_materno"
+    )
+      .limit(15)
+      .skip(desde)
+      .sort({ nombre: 1 });
+    const total = await Persona.find({
+      apellido_paterno: regex,
+    }).countDocuments();
+
+    res.json({
+      ok: true,
+      persona,
+      total,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      ok: false,
+      msg: error.message,
+    });
+  }
+};
+
+const buscar_por_apellido_mat = async (req, res) => {
+  const desde = Number(req.query.desde) || 0;
+  try {
+    let termino = req.params.termino;
+    let regex = new RegExp(termino, "i");
+
+    const persona = await Persona.find(
+      { apellido_materno: regex },
+      "documento_identidad domicilio nombre apellido_paterno apellido_materno"
+    )
+      .limit(15)
+      .skip(desde)
+      .sort({ nombre: 1 });
+    const total = await Persona.find({
+      apellido_materno: regex,
+    }).countDocuments();
+    res.json({
+      ok: true,
+      persona,
+      total,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      ok: false,
+      msg: error.message,
+    });
+  }
+};
+
+const datos_persona_reporte = async (req, res) => {
+  const id = req.params.id;
+  const persona = await Persona.findById(
+    id,
+    "apellido_paterno apellido_materno nombre documento_identidad ubigeo domicilio numero_celular"
+  );
+  u = {};
+  console.log(persona.ubigeo.provincia)
+  const ubigeo = await Ubigeo.findById(persona.ubigeo.departamento);
+  u["departamento"] = ubigeo.departamento;
+  ubigeo.provincias.forEach((p) => {
+    if (String(p._id) === String(persona.ubigeo.provincia)) {
+      u["provincia"] = p.provincia;
+      p.distritos.forEach((d) => {
+        if (String(d._id) === String(persona.ubigeo.distrito)) {
+          u["distrito"] = d.distrito;
         }
-        const personaActualizada = await Persona.findByIdAndUpdate(id, cambiosPersona, { new: true }) */
-        res.json({
-            ok: true,
-            msg: 'Actualizar socio'
-             
-        })
-    } catch (error) {
-
-        console.log(error);
-        res.status(500).json({
-            ok: false,
-            msg: 'Hable con el Adm'
-        })
+      });
     }
-}
+  });
 
-
-const crear = async(req, res = response) => {
-
-    const { documento_identidad, comentario } = req.body;
-
-    try {
-
-        const existe_registro = await Persona.findOne({ documento_identidad });
-
-        if (existe_registro) {
-
-            return res.status(400).json({
-                ok: false,
-                msg: 'La persona ya esta registrada.'
-            });
-        }
-
-        const modelo = new Persona(req.body);
-        const now = dayjs();
-
-        modelo.comentario = [{
-            tipo: 'Nuevo',
-            usuario: req.header('id_usuario_sesion'),
-            usuario: req.header('usuario_sesion'),
-            nombre: req.header('nombre_sesion'),
-            fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
-            comentario
-        }];
-        await modelo.save();
-
-        res.json({
-            ok: true,
-            modelo
-        })
-
-    } catch (error) {
-
-        console.log(error);
-        res.status(500).json({
-            ok: false,
-            msg: 'Error inesperado.'
-        });
-    }
-}
-
-const buscar_por_documento_identidad = async(req, res) => {
-
-    try {
-
-        const documento_identidad = req.params.documento_identidad;
-        const persona = await Persona.findOne({ "documento_identidad": documento_identidad, "es_borrado": false });
-
-
-        res.json({
-            ok: true,
-            persona
-        })
-    } catch (error) {
-
-        console.log(error);
-        res.status(500).json({
-            ok: false,
-            msg: 'Error inesperado.'
-        });
-    }
-}
-
-const buscar_id = async(req, res) => {
-
-    try {
-
-        const id = req.params.id;
-        const persona = await Persona.findById(id);
-        console.log(persona);
-        res.json({
-            ok: true,
-            persona
-        })
-    } catch (error) {
-
-        console.log(error);
-        res.status(500).json({
-            ok: false,
-            msg: error.message
-        });
-    }
-}
-
-const buscar_por_nombre = async(req, res) => {
-    const desde = Number(req.query.desde) || 0;
-    try {
-        let termino = req.params.termino;
-        let regex = new RegExp(termino, 'i')
-
-        const persona = await Persona.find({nombre: regex}, 
-            "documento_identidad domicilio nombre apellido_paterno apellido_materno")
-            .limit(15)
-            .skip(desde)
-            .sort({"nombre": 1});
-        const total = await Persona.find({nombre: regex}).countDocuments()
-        res.json({
-            ok: true,
-            persona,
-            total
-        })
-        
-    } catch (error) {
-         console.log(error);
-        res.status(500).json({
-            ok: false,
-            msg: error.message
-        });
-    }
-}
-
-const buscar_por_apellido = async(req, res) => {
-    const desde = Number(req.query.desde) || 0;
-    try {
-        let termino = req.params.termino;
-        let regex = new RegExp(termino, 'i')
-
-        const persona = await Persona.find({apellido_paterno: regex}, 
-            "documento_identidad domicilio nombre apellido_paterno apellido_materno")
-            .limit(15)
-            .skip(desde)
-            .sort({"nombre": 1});;
-        const total = await Persona.find({apellido_paterno: regex}).countDocuments()
-        
-        res.json({
-            ok: true,
-            persona,
-            total
-        })
-        
-    } catch (error) {
-         console.log(error);
-        res.status(500).json({
-            ok: false,
-            msg: error.message
-        });
-    }
-}
-
-const buscar_por_apellido_mat = async(req, res) => {
-    const desde = Number(req.query.desde) || 0;
-    try {
-        let termino = req.params.termino;
-        let regex = new RegExp(termino, 'i')
-
-        const persona = await Persona.find({apellido_materno: regex}, 
-            "documento_identidad domicilio nombre apellido_paterno apellido_materno")
-            .limit(15)
-            .skip(desde)
-            .sort({"nombre": 1});;
-        const total = await Persona.find({apellido_materno: regex}).countDocuments()  
-        res.json({
-            ok: true,
-            persona,
-            total
-        })
-        
-    } catch (error) {
-         console.log(error);
-        res.status(500).json({
-            ok: false,
-            msg: error.message
-        });
-    }
-}
-
+  const model = {
+      numero_celular:persona.numero_celular,
+      nombre: persona.nombre,
+      documento_identidad: persona.documento_identidad,
+      domicilio: persona.domicilio,
+      apellido_paterno: persona.apellido_paterno,
+      apellido_materno: persona.apellido_materno,
+      ubigeo: u
+  }
+  return res.json({
+    ok: true,
+    persona: model,
+  });
+};
 
 module.exports = {
-    listar,
-    crear,
-    actualizar,
-    buscar_por_documento_identidad,
-    buscar_id,
-    buscar_por_nombre,
-    buscar_por_apellido,
-    buscar_por_apellido_mat
-}
+  listar,
+  crear,
+  actualizar,
+  buscar_por_documento_identidad,
+  buscar_id,
+  buscar_por_nombre,
+  buscar_por_apellido,
+  buscar_por_apellido_mat,
+  datos_persona_reporte,
+};
