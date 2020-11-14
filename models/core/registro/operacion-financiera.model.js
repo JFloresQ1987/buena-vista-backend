@@ -46,6 +46,11 @@ const modelo = {
             },
             default: 'inverse'
         },
+        es_prestamo: {
+            type: Boolean,
+            // required: false,
+            default: true
+        }
         // }
     },
     // producto: {
@@ -144,7 +149,7 @@ const modelo = {
         type: String,
         required: true,
         jsonSchema: {
-            enum: ["Vigente", "Pagado", "Anulado"],
+            enum: ["Vigente", "Previgente", "Pagado", "Anulado"],
             // enum: ["Previgente", "Vigente", "Pagado", "Anulado"],
         },
         default: 'Vigente'

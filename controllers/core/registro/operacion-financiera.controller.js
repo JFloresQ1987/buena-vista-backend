@@ -76,15 +76,23 @@ const listar_operaciones_financieras = async(req, res) => {
 
     // const { id } = req.body;
     const id_persona = req.params.id_persona;
+    const estado = (req.params.estado === 'historico' ? ["Pagado"] : ["Previgente", "Vigente"]);
+    const es_prestamo = (req.params.opcion === 'credito' ? true : false);
 
     try {
 
         const lista = await OperacionFinanciera.find({
                 "persona": id_persona,
-                "estado": { $in: ["Previgente", "Vigente"] },
+                "producto.es_prestamo": es_prestamo,
+                "estado": { $in: estado },
+                // "estado": { $in: ["Previgente", "Vigente"] },
                 "es_borrado": false
             })
-            .populate('producto.tipo', 'descripcion')
+            .populate({
+                path: 'producto.tipo',
+                // match: { es_prestamo: true },
+                select: 'descripcion'
+            })
             .populate({
                 path: "analista",
                 select: "usuario",
@@ -99,6 +107,24 @@ const listar_operaciones_financieras = async(req, res) => {
             });
 
         // console.log(lista)
+
+        if (!es_prestamo) {
+
+            for (let i = 0; i < lista.length; i++) {
+
+                // console.log(lista[i]._id)
+
+                const modelo = await OperacionFinancieraDetalle.aggregate(
+                    [
+                        { $match: { operacion_financiera: lista[i]._id } },
+                        { $group: { _id: "$operacion_financiera", monto_ahorro_voluntario: { $sum: "$ahorros.monto_ahorro_voluntario" }, monto_retiro_ahorro_voluntario: { $sum: "$ahorros.monto_retiro_ahorro_voluntario" } } }
+                    ]
+                )
+
+                lista[i].monto_capital = modelo[0].monto_ahorro_voluntario - modelo[0].monto_retiro_ahorro_voluntario;
+
+            }
+        }
 
         res.json({
             ok: true,
@@ -307,11 +333,56 @@ const anular = async(req, res = response) => {
     }
 }
 
+const congelar_descongelar = async(req, res = response) => {
+
+    const id = req.params.id;
+    const now = dayjs();
+    const {
+        // analista,
+        comentario
+    } = req.body;
+
+    try {
+
+        const modelo = await OperacionFinanciera.findById(id);
+
+        //TODO: validar pagos antes de anular
+
+        modelo.es_congelado = !modelo.es_congelado;
+        // modelo.comentario.push();
+
+        modelo.comentario.push({
+            tipo: 'Editado',
+            id_usuario: req.header('id_usuario_sesion'),
+            usuario: req.header('usuario_sesion'),
+            nombre: req.header('nombre_sesion'),
+            fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
+            comentario: comentario
+        });
+
+        modelo.save();
+
+        return res.json({
+            ok: true,
+            // recibo: 'Anulación satisfactoriamente.',
+            msg: 'Se realizó satisfactoriamente.'
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            ok: false,
+            msg: error.msg,
+        });
+    }
+}
+
 module.exports = {
     crear,
     listar_operaciones_financieras,
     listar_operacion_financiera,
     listar_operaciones_financieras_por_analista,
     cambiar_analista,
-    anular
+    anular,
+    congelar_descongelar
 }

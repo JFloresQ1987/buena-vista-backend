@@ -5,15 +5,37 @@ const dayjs = require("dayjs");
 
 const validarPago = async(data) => {
 
-    const caja = await Caja.findOne({
-        ip: data.ip,
-        usuario: data.id_usuario_sesion,
-        es_vigente: true,
-        es_borrado: false,
-    });
+    let caja;
 
-    // console.log(data)
-    // console.log(caja)
+    if (data.es_masivo) {
+
+        caja = await Caja.findOne({
+            // ip: data.ip,
+            // usuario: data.id_usuario_sesion,
+            es_caja_principal: true,
+            es_vigente: true,
+            es_borrado: false,
+        });
+    } else {
+
+        caja = await Caja.findOne({
+            ip: data.ip,
+            usuario: data.id_usuario_sesion,
+            es_vigente: true,
+            es_borrado: false,
+        });
+    }
+
+
+    // const caja = await Caja.findOne({
+    //     ip: data.ip,
+    //     usuario: data.id_usuario_sesion,
+    //     es_vigente: true,
+    //     es_borrado: false,
+    // });
+
+    // //console.log(data)
+    // //console.log(caja)
 
     if (!caja)
         return {
@@ -72,6 +94,14 @@ const validarPago = async(data) => {
         }
     }
 
+    if (!caja_diario && data.es_masivo) {
+
+        return {
+            ok: false,
+            msg: "Caja principal aún no se encuentra aperturado.",
+        };
+    }
+
     if (!caja_diario) {
         const apertura_caja_diario = new CajaDiario();
         apertura_caja_diario.caja = caja.id;
@@ -128,7 +158,7 @@ const validarPago = async(data) => {
     };
 
     const ultimo_pago = await PagoOperacionFinanciera.findOne({
-        "recibo.serie": "001",
+        "recibo.serie": caja.serie,
         "es_vigente": true,
         "es_borrado": false
     }).sort({ $natural: -1 });

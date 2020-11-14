@@ -8,12 +8,13 @@ const {
     listar_operacion_financiera,
     listar_operaciones_financieras_por_analista,
     cambiar_analista,
-    anular
+    anular,
+    congelar_descongelar
 } = require('../../../controllers/core/registro/operacion-financiera.controller');
 
 const router = Router();
 
-router.get('/listar-productos/:id_persona', validarJWT, listar_operaciones_financieras);
+router.get('/listar-productos/:id_persona/:opcion/:estado', validarJWT, listar_operaciones_financieras);
 
 router.get('/listar-productos-por-analista', validarJWT, listar_operaciones_financieras_por_analista);
 
@@ -37,6 +38,8 @@ router.post('/', [
 router.put("/cambiar-analista/:id", [validarJWT], cambiar_analista);
 
 router.put("/anular/:id", [validarJWT], anular);
+
+router.put("/congelar_descongelar/:id", [validarJWT], congelar_descongelar);
 
 // router.get('/buscar_socio/:documento_identidad', validarJWT, buscar_por_documento_identidad);
 

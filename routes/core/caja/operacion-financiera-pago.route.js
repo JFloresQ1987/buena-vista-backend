@@ -9,7 +9,8 @@ const {
     pagar_operacion_financiera,
     desembolsar_operacion_financiera,
     anular_recibo,
-    pagar_operacion_financiera_por_analista
+    pagar_operacion_financiera_por_analista,
+    confirmar_pago_analista
 } = require("../../../controllers/core/caja/operacion-financiera-pago.controller");
 
 const router = Router();
@@ -21,7 +22,7 @@ router.get(
 );
 
 router.get(
-    "/listar_pagos",
+    "/listar_pagos/:analista",
     validarJWT,
     listar
 );
@@ -76,5 +77,7 @@ router.post(
     ],
     pagar_operacion_financiera_por_analista
 );
+
+router.put("/confirmar-pago-analista/:id", [validarJWT], confirmar_pago_analista);
 
 module.exports = router;

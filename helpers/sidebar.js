@@ -22,6 +22,7 @@ const getMenu = (rol) => {
             icono: 'mdi mdi-chart-bubble',
             submenu: [
                 { opcion: 'Productos vigentes', url: '/operaciones/gestion/producto' },
+                { opcion: 'Ahorros', url: '/operaciones/gestion/ahorro-consulta' },
                 { opcion: 'Productos históricos', url: '/operaciones/consulta/producto-historico' }
             ]
         },
@@ -29,10 +30,12 @@ const getMenu = (rol) => {
             opcion: 'Caja',
             icono: 'mdi mdi-cart',
             submenu: [
-                { opcion: 'Pago Productos', url: '/caja/pago/producto-caja' },
+                { opcion: 'Pago producto', url: '/caja/pago/producto-caja' },
+                { opcion: 'Pago ahorro', url: 'caja/pago/ahorro-caja' },
+                // { opcion: 'Confirmar pago de analistas', url: '/caja/pago/confirmar-pago-analista' },
                 { opcion: 'Ingresos y egresos', url: '/caja/gestion/ingresos-egresos' },
                 // { opcion: 'Apertura de caja general', url: '/registro/gestion/cierre-caja' },
-                { opcion: 'Apertura de caja individual', url: '/registro/gestion/cierre-caja' },
+                // { opcion: 'Apertura de caja individual', url: '/registro/gestion/cierre-caja' },
                 // { opcion: 'Cierre de caja general', url: '/registro/gestion/cierre-caja-general' },
                 { opcion: 'Cierre de caja individual', url: '/caja/pago/cierre-caja-individual' },
                 { opcion: 'Listar Cajas', url: '/caja/pago/cajas-lista' },

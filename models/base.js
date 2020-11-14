@@ -2,7 +2,7 @@ const schemaBase = {
 
     observacion_administrador_base_datos: {
         type: [String],
-        default: ''
+        default: []
     },
     es_vigente: {
         type: Boolean,
