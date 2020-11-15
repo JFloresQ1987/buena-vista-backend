@@ -132,9 +132,10 @@ const cerrarCaja = async(req, res = response) => {
 
 const cargarCaja = async(req, res) => {
 
-    const id_usuario_sesion = /* "5f8236bedd1aaa4dc4109589"; */ req.header("id_usuario_sesion");
-    const ip = /* "192.168.0.10"; */ requestIp.getClientIp(req).replace("::ffff:", "");
-    
+    // const id_usuario_sesion = /* "5f8236bedd1aaa4dc4109589"; */ req.header("id_usuario_sesion");
+    // const ip = /* "192.168.0.10"; */ requestIp.getClientIp(req).replace("::ffff:", "");
+    const id_usuario_sesion =  "5f8236bedd1aaa4dc4109589";
+    const ip =  "192.168.0.10"; 
 
     try {
         
