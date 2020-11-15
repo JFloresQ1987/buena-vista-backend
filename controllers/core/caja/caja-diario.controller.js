@@ -6,7 +6,7 @@ const requestIp = require("request-ip");
 const CajaDiario = require("../../../models/core/caja/caja-diario.model");
 const Operaciones = require("../../../models/core/caja/operacion-financiera-pago.model");
 const Caja = require("../../../models/core/seguridad/caja.model");
-const requestIp = require("request-ip");
+// const requestIp = require("request-ip");
 
 const cerrarCaja = async(req, res = response) => {
     try {
