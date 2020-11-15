@@ -53,15 +53,11 @@ const verificarTotalRecibo = async(req, res = response) => {
 
     });
 
-    console.log(listaMontoError);
-    console.log(listaReciboMontoTotalError);
-    
     if (!control) {
       return res.json({
           ok: false,
           msg: `La suma de los montos ${listaMontoError}, no coinciden con el monto total ${listaReciboMontoTotalError}`,
           listaMontoError,
-          listaReciboError
       })  
     } 
 
