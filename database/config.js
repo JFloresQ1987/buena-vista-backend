@@ -10,7 +10,7 @@ const dbConnection = async() => {
             useUnifiedTopology: true,
             useCreateIndex: true
         });
-        console.log(getMessage('msg001'));
+        console.log(getMessage('msgConnBD'));
 
     } catch (error) {
 

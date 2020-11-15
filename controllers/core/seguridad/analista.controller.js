@@ -1,32 +1,33 @@
 const { response } = require("express");
 const bcrypt = require("bcryptjs");
-const dayjs = require("dayjs");
+const dayjs = require('dayjs');
+const logger = require('../../../helpers/logger');
+const { getMessage } = require('../../../helpers/messages');
 const Analista = require("../../../models/core/seguridad/analista.model");
 
-const listar = async (req, res = response) => {
-  const desde = Number(req.query.desde) || 0;
-  const [analistas, total] = await Promise.all([
-    Analista.find(
-      { es_borrado: false, es_vigente: true },
-      "descripcion producto usuario es_bloqueado es_vigente"
-    )
-      .populate({
-        path: "usuario",
-        select: "rol persona usuario",
-        populate: {
-          path: "persona",
-          select: "nombre apellido_paterno apellido_materno",
-        },
-      }).populate("producto","_id descripcion")
-      .skip(desde)
-      .limit(10),
-      Analista.find({es_borrado:false}).countDocuments()
-  ])
-  res.json({
-    ok: true,
-    analistas,
-    total
-  });
+const listar = async(req, res = response) => {
+    const desde = Number(req.query.desde) || 0;
+    const [analistas, total] = await Promise.all([
+        Analista.find({ es_borrado: false, es_vigente: true },
+            "descripcion producto usuario es_bloqueado es_vigente"
+        )
+        .populate({
+            path: "usuario",
+            select: "rol persona usuario",
+            populate: {
+                path: "persona",
+                select: "nombre apellido_paterno apellido_materno",
+            },
+        }).populate("producto", "_id descripcion")
+        .skip(desde)
+        .limit(10),
+        Analista.find({ es_borrado: false }).countDocuments()
+    ])
+    res.json({
+        ok: true,
+        analistas,
+        total
+    });
 };
 
 const crear = async(req, res = response) => {
@@ -77,9 +78,12 @@ const getAnalista = async(req, res = response) => {
             analista,
         });
     } catch (error) {
-        res.status(500).json({
+
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: error.message,
+            msg: getMessage('msgError500')
         });
     }
 };
@@ -113,9 +117,12 @@ const actualizar = async(req, res = response) => {
             msg: "Analista Actualizado correctamente",
         });
     } catch (error) {
+
+        logger.logError(req, error);
+
         return res.status(500).json({
             ok: false,
-            msg: error.message,
+            msg: getMessage('msgError500')
         });
     }
 };
@@ -136,17 +143,17 @@ const getListaDesplegablexProducto = async(req, res = response) => {
                 },
             });
 
-        // console.log(lista)
-
         res.json({
             ok: true,
             lista,
         });
     } catch (error) {
-        console.log(error)
-        res.status(500).json({
+
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: error.message,
+            msg: getMessage('msgError500')
         });
     }
 };

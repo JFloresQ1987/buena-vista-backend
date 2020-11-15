@@ -1,16 +1,15 @@
 const { response } = require('express');
+const dayjs = require('dayjs');
 const logger = require('../../../helpers/logger');
+const { getMessage } = require('../../../helpers/messages');
 const PagoOperacionFinanciera = require('../../../models/core/caja/operacion-financiera-pago.model');
 const OperacionFinanciera = require('../../../models/core/registro/operacion-financiera.model');
 const OperacionFinancieraDetalle = require('../../../models/core/registro/operacion-financiera-detalle.model');
 const Analista = require('../../../models/core/seguridad/analista.model');
-const dayjs = require('dayjs');
 
 const crear = async(req, res = response) => {
 
     const { detalle, comentario } = req.body;
-
-    // console.log(req.body)
 
     const session = await OperacionFinanciera.startSession();
     session.startTransaction();
@@ -29,8 +28,6 @@ const crear = async(req, res = response) => {
             comentario
         }];
 
-        // console.log(operacion_financiera)
-
         const modelo = await operacion_financiera.save(opts);
 
         let operacion_financiera_detalle;
@@ -38,8 +35,6 @@ const crear = async(req, res = response) => {
         // operacion_financiera_detalle = new OperacionFinancieraDetalle(detalle[i]);
 
         for (let i = 0; i < detalle.length; i++) {
-
-            // console.log(detalle[i]);
 
             operacion_financiera_detalle = new OperacionFinancieraDetalle(detalle[i]);
             operacion_financiera_detalle.operacion_financiera = modelo.id;
@@ -51,7 +46,9 @@ const crear = async(req, res = response) => {
         await session.commitTransaction();
         session.endSession();
 
-        logger.report.info('Transaccion Ok.');
+        // logger.report.info('Transaccion Ok.');
+        // logger.report.log()
+        // logger.logRequest(req);
 
         return res.json({
             ok: true,
@@ -61,13 +58,14 @@ const crear = async(req, res = response) => {
         await session.abortTransaction();
         session.endSession();
 
-        console.log(error)
+        // console.log(error)
 
-        logger.report.error('Transaccion NO Ok.');
+        // logger.report.error('Transaccion NO Ok.');
+        logger.logError(req, error);
 
         return res.status(500).json({
             ok: false,
-            msg: 'Transaccion NO Ok.'
+            msg: getMessage('msgError500')
         });
     }
 }
@@ -106,13 +104,9 @@ const listar_operaciones_financieras = async(req, res) => {
                 }
             });
 
-        // console.log(lista)
-
         if (!es_prestamo) {
 
             for (let i = 0; i < lista.length; i++) {
-
-                // console.log(lista[i]._id)
 
                 const modelo = await OperacionFinancieraDetalle.aggregate(
                     [
@@ -132,10 +126,11 @@ const listar_operaciones_financieras = async(req, res) => {
         })
     } catch (error) {
 
-        console.log(error);
-        res.status(500).json({
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: 'Error inesperado.'
+            msg: getMessage('msgError500')
         });
     }
 }
@@ -145,14 +140,10 @@ const listar_operaciones_financieras = async(req, res) => {
 //     // const { id } = req.body;
 //     const id_operacion_financiera = req.params.id_operacion_financiera;
 
-//     // console.log(id_operacion_financiera)
-
 //     try {
 
 //         const modelo = await OperacionFinanciera.findOne({ "_id": id_operacion_financiera, "es_borrado": false })
 //             .populate('producto.tipo', 'descripcion');
-
-//         // console.log(modelo)
 
 //         res.json({
 //             ok: true,
@@ -177,11 +168,7 @@ const listar_operaciones_financieras = async(req, res) => {
 
 //     try {
 
-//         // console.log(id_usuario);
-
 //         const analista = await Analista.findOne({ 'usuario': id_usuario });
-
-//         // console.log(analista);
 
 //         //TODO: verificar estado vigente en el producto
 //         let lista = [];
@@ -193,8 +180,6 @@ const listar_operaciones_financieras = async(req, res) => {
 //                 "es_borrado": false
 //             });
 //         // .populate('producto.tipo', 'descripcion');
-
-//         // console.log(lista)
 
 //         res.json({
 //             ok: true,
@@ -227,8 +212,6 @@ const listar_operaciones_financieras = async(req, res) => {
 //       },
 //     ];
 
-//     // console.log(operacion_financiera)
-
 //     const modelo = await operacion_financiera.save(opts);
 
 //     let operacion_financiera_detalle;
@@ -236,7 +219,6 @@ const listar_operaciones_financieras = async(req, res) => {
 //     // operacion_financiera_detalle = new OperacionFinancieraDetalle(detalle[i]);
 
 //     for (let i = 0; i < detalle.length; i++) {
-//       // console.log(detalle[i]);
 
 //       operacion_financiera_detalle = new OperacionFinancieraDetalle(detalle[i]);
 //       operacion_financiera_detalle.operacion_financiera = modelo.id;
@@ -293,8 +275,6 @@ const listar_operaciones_financieras = async(req, res) => {
 //         },
 //       });
 
-//     // console.log(lista)
-
 //     res.json({
 //       ok: true,
 //       lista,
@@ -311,8 +291,6 @@ const listar_operaciones_financieras = async(req, res) => {
 const listar_operacion_financiera = async(req, res) => {
     // const { id } = req.body;
     const id_operacion_financiera = req.params.id_operacion_financiera;
-
-    // console.log(id_operacion_financiera)
 
     try {
         const modelo = await OperacionFinanciera.findOne({
@@ -336,17 +314,18 @@ const listar_operacion_financiera = async(req, res) => {
 
         //const analista = await Analista.findById(modelo.analista);
         //const usuario = await Usuario.findById(analista.usuario,'persona').populate('persona','nombre apellido_paterno apellido_materno documento_identidad');
-        // console.log(modelo)
 
         res.json({
             ok: true,
             modelo,
         });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({
+
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: "Error inesperado.",
+            msg: getMessage('msgError500')
         });
     }
 };
@@ -358,11 +337,8 @@ const listar_operaciones_financieras_por_analista = async(req, res) => {
     // const id_analista = req.params.id_analista;
 
     try {
-        // console.log(id_usuario);
 
         const analista = await Analista.findOne({ usuario: id_usuario });
-
-        // console.log(analista);
 
         //TODO: verificar estado vigente en el producto
         let lista = [];
@@ -375,17 +351,17 @@ const listar_operaciones_financieras_por_analista = async(req, res) => {
             });
         // .populate('producto.tipo', 'descripcion');
 
-        // console.log(lista)
-
         res.json({
             ok: true,
             lista,
         });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({
+
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: "Error inesperado.",
+            msg: getMessage('msgError500')
         });
     }
 };
@@ -396,8 +372,6 @@ const cambiar_analista = async(req, res = response) => {
     const { analista, comentario } = req.body;
 
     try {
-        // console.log(id)
-        // console.log(comentario)
 
         const modelo = await OperacionFinanciera.findById(id);
 
@@ -421,10 +395,12 @@ const cambiar_analista = async(req, res = response) => {
             msg: "Se cambio analista satisfactoriamente.",
         });
     } catch (error) {
-        console.log(error);
+
+        logger.logError(req, error);
+
         return res.status(500).json({
             ok: false,
-            msg: error.msg,
+            msg: getMessage('msgError500')
         });
     }
 };
@@ -435,8 +411,6 @@ const anular = async(req, res = response) => {
     const { analista, comentario } = req.body;
 
     try {
-        // console.log(id)
-        // console.log(comentario)
 
         const pago = await PagoOperacionFinanciera.findOne({
             "producto.operacion_financiera": id,
@@ -476,8 +450,6 @@ const anular = async(req, res = response) => {
 
         //     // const cuota = await OperacionFinancieraDetalle.findById(modelo.detalle[i].producto.operacion_financiera_detalle);
 
-        //     // console.log(cuota);
-
         //     for (let j = 0; j < cuota.pagos.length; j++) {
 
         //         if (cuota.pagos[j].recibo.serie === modelo.recibo.serie &&
@@ -497,10 +469,12 @@ const anular = async(req, res = response) => {
             msg: "Se anuló satisfactoriamente.",
         });
     } catch (error) {
-        console.log(error);
+
+        logger.logError(req, error);
+
         return res.status(500).json({
             ok: false,
-            msg: error.msg,
+            msg: getMessage('msgError500')
         });
     }
 };
@@ -541,10 +515,12 @@ const congelar_descongelar = async(req, res = response) => {
         });
 
     } catch (error) {
-        console.log(error);
+
+        logger.logError(req, error);
+
         return res.status(500).json({
             ok: false,
-            msg: error.msg,
+            msg: getMessage('msgError500')
         });
     }
 }

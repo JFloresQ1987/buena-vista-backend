@@ -1,5 +1,7 @@
 const { response } = require('express');
+const dayjs = require('dayjs');
 const logger = require('../../../helpers/logger');
+const { getMessage } = require('../../../helpers/messages');
 const Producto = require('../../../models/core/configuracion/producto.model');
 
 const listar = async(req, res) => {
@@ -16,10 +18,11 @@ const listar = async(req, res) => {
         })
     } catch (error) {
 
-        console.log(error);
-        res.status(500).json({
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: 'Error inesperado.'
+            msg: getMessage('msgError500')
         });
     }
 }
@@ -39,10 +42,11 @@ const listar_programacion = async(req, res) => {
         })
     } catch (error) {
 
-        console.log(error);
-        res.status(500).json({
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: 'Error inesperado.'
+            msg: getMessage('msgError500')
         });
     }
 }

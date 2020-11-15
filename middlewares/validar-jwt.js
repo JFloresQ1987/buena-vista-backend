@@ -32,21 +32,15 @@ const validarAuthorization = async(req, res, next) => {
 
     const id = req.id;
 
-    // console.log(id)
-
     try {
 
         const modelo = await usuario.findById(id);
-
-        // console.log(modelo)
 
         if (!modelo)
             res.status(400).json({
                 ok: false,
                 msg: 'Usuario no existe.'
             });
-
-        // console.log(modelo.rol.includes('Administrador'))
 
         if (modelo.rol.includes('Administrador'))
             next();

@@ -34,9 +34,6 @@ const validarPago = async(data) => {
     //     es_borrado: false,
     // });
 
-    // //console.log(data)
-    // //console.log(caja)
-
     if (!caja)
         return {
             ok: false,

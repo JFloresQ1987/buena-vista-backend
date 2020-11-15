@@ -1,5 +1,8 @@
 const { response } = require("express");
-const logger = require("../../../helpers/logger");
+const dayjs = require('dayjs');
+const logger = require('../../../helpers/logger');
+const { getMessage } = require('../../../helpers/messages');
+const requestIp = require('request-ip');
 const OperacionFinanciera = require("../../../models/core/registro/operacion-financiera.model");
 const OperacionFinancieraDetalle = require("../../../models/core/registro/operacion-financiera-detalle.model");
 const PagoOperacionFinanciera = require("../../../models/core/caja/operacion-financiera-pago.model");
@@ -10,11 +13,9 @@ const Caja = require("../../../models/core/seguridad/caja.model");
 // const Caja = require('../../../models/core/seguridad/caja.model');
 // const dayjs = require('dayjs');
 // const RequestIp = require('@supercharge/request-ip')
-const requestIp = require('request-ip');
 const { getRecibo } = require('../../../helpers/core/recibo');
 const { validarPago } = require('../../../helpers/core/validar-pago');
 const { pagarProducto } = require('../../../helpers/core/pagar-producto');
-const dayjs = require('dayjs');
 const operacionFinancieraPagoModel = require("../../../models/core/caja/operacion-financiera-pago.model");
 const ObjectId = require('mongoose').Types.ObjectId;
 
@@ -32,8 +33,6 @@ const listar_operaciones_financieras_detalle_vigentes = async(req, res) => {
                 "es_borrado": false
             })
             .sort({ "numero_cuota": 1 });
-
-        // ////console.log(lista)
 
         for (let i = 0; i < lista.length; i++) {
 
@@ -74,10 +73,11 @@ const listar_operaciones_financieras_detalle_vigentes = async(req, res) => {
         })
     } catch (error) {
 
-        ////console.log(error);
-        res.status(500).json({
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: 'Error inesperado.'
+            msg: getMessage('msgError500')
         });
     }
 }
@@ -90,10 +90,6 @@ const listar = async(req, res) => {
     const ip = requestIp.getClientIp(req).replace("::ffff:", "");
 
     try {
-
-        // console.log(ip)
-        // console.log(usuario)
-        // console.log(analista)
 
         const caja = await Caja.findOne({
             ip: ip,
@@ -140,10 +136,11 @@ const listar = async(req, res) => {
         })
     } catch (error) {
 
-        ////console.log(error);
-        res.status(500).json({
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: 'Error inesperado.'
+            msg: getMessage('msgError500')
         });
     }
 }
@@ -165,9 +162,6 @@ const desembolsar_operacion_financiera = async(req, res) => {
         nombres_apellidos_socio
     } = req.body;
 
-    // //console.log(documento_identidad_socio)
-    // //console.log(nombres_apellidos_socio)
-
     try {
 
         const data_validacion = {
@@ -188,8 +182,6 @@ const desembolsar_operacion_financiera = async(req, res) => {
         const monto_desembolso = modelo.monto_capital;
         const recibo = resultado_validacion.recibo;
 
-        // //console.log(recibo)
-
         const desembolso = {
             se_desembolso_prestamo: true,
             recibo: {
@@ -200,8 +192,6 @@ const desembolsar_operacion_financiera = async(req, res) => {
                 monto_desembolso: monto_desembolso
             }
         };
-
-        // //console.log(desembolso)
 
         modelo.desembolso = desembolso;
 
@@ -220,8 +210,6 @@ const desembolsar_operacion_financiera = async(req, res) => {
             fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
             comentario: 'Se realizó desembolso'
         });
-
-        //console.log(modelo)
 
         await modelo.save();
 
@@ -283,11 +271,7 @@ const desembolsar_operacion_financiera = async(req, res) => {
         //     }
         // });
 
-        // //console.log(modelo_pago)
-
         await modelo_pago.save();
-
-        // //console.log('pasoo')
 
         const data_recibo = {
 
@@ -331,8 +315,6 @@ const desembolsar_operacion_financiera = async(req, res) => {
             }
         };
 
-        // //console.log(data_recibo)
-
         res.json({
             ok: true,
             recibo: data_recibo
@@ -346,10 +328,11 @@ const desembolsar_operacion_financiera = async(req, res) => {
 
     } catch (error) {
 
-        //console.log(error);
+        logger.logError(req, error);
+
         return res.status(500).json({
             ok: false,
-            msg: error.msg,
+            msg: getMessage('msgError500')
         });
     }
 }
@@ -408,321 +391,7 @@ const pagar_operacion_financiera = async(req, res) => {
 
         const recibo = resultado_validacion.recibo;
 
-
-
         const resultado_pago = await pagarProducto(data);
-
-        // let monto_recibido_actual = monto_recibido;
-        // let monto_ahorro_voluntario_actual = monto_ahorro_voluntario;
-        // let monto_total = 0;
-        // let monto_total_gasto = 0;
-        // let monto_total_ahorro_inicial = 0;
-        // let monto_total_ahorro_voluntario = 0;
-        // let monto_total_ahorro_programado = 0;
-        // let monto_total_amortizacion_capital = 0;
-        // let monto_total_interes = 0;
-        // let monto_total_mora = 0;
-
-        // const modelo = new PagoOperacionFinanciera(req.body);
-
-        // let cuota_menor = 0;
-        // let cuota_mayor = 0;
-
-        // for (let i = 0; i < cuotas.length; i++) {
-
-        //     const cuota = await OperacionFinancieraDetalle.findById({ "_id": cuotas[i] })
-
-        //     if (i == 0)
-        //         cuota_menor = cuota.numero_cuota
-
-        //     if (i == cuotas.length - 1)
-        //         cuota_mayor = cuota.numero_cuota
-
-        //     if (cuota.numero_cuota === 0)
-        //         await OperacionFinancieraDetalle.updateMany({ "operacion_financiera": operacion_financiera, "estado": "Prependiente", "es_borrado": false }, { "estado": "Pendiente" });
-
-        //     if (i === 0 && Number(monto_ahorro_voluntario_actual) > 0)
-        //         cuota.ahorros.monto_ahorro_voluntario += Number(monto_ahorro_voluntario_actual);
-        //     else if (i > 0 && Number(monto_ahorro_voluntario_actual) > 0)
-        //         monto_ahorro_voluntario_actual = 0;
-
-        //     let monto_gasto_pagado = 0;
-        //     let monto_ahorro_inicial_pagado = 0;
-        //     let monto_ahorro_voluntario_pagado = 0;
-        //     let monto_ahorro_programado_pagado = 0;
-        //     let monto_amortizacion_capital_pagado = 0;
-        //     let monto_interes_pagado = 0;
-        //     let monto_mora_pagado = 0;
-
-        //     for (let i = 0; i < cuota.pagos.length; i++) {
-
-        //         monto_gasto_pagado += cuota.pagos[i].ingresos.monto_gasto || 0;
-        //         monto_ahorro_inicial_pagado += cuota.pagos[i].ahorros.monto_ahorro_inicial || 0;
-        //         monto_ahorro_voluntario_pagado += cuota.pagos[i].ahorros.monto_ahorro_voluntario || 0;
-        //         monto_ahorro_programado_pagado += cuota.pagos[i].ahorros.monto_ahorro_programado || 0;
-        //         monto_amortizacion_capital_pagado += cuota.pagos[i].ingresos.monto_amortizacion_capital || 0;
-        //         monto_interes_pagado += cuota.pagos[i].ingresos.monto_interes || 0;
-        //         monto_mora_pagado += cuota.pagos[i].ingresos.monto_mora || 0;
-        //     }
-
-        //     let monto_gasto_a_pagar = cuota.ingresos.monto_gasto - monto_gasto_pagado;
-        //     let monto_ahorro_inicial_a_pagar = cuota.ahorros.monto_ahorro_inicial - monto_ahorro_inicial_pagado;
-        //     let monto_ahorro_voluntario_a_pagar = Number(monto_ahorro_voluntario_actual); //cuota.monto_ahorro_voluntario - monto_ahorro_voluntario_pagado;
-        //     let monto_ahorro_programado_a_pagar = cuota.ahorros.monto_ahorro_programado - monto_ahorro_programado_pagado;
-        //     let monto_amortizacion_capital_a_pagar = cuota.ingresos.monto_amortizacion_capital - monto_amortizacion_capital_pagado;
-        //     let monto_interes_a_pagar = cuota.ingresos.monto_interes - monto_interes_pagado;
-        //     let monto_mora_a_pagar = cuota.ingresos.monto_mora - monto_mora_pagado;
-
-        //     const monto_total_cuota_a_pagar = monto_gasto_a_pagar +
-        //         monto_ahorro_inicial_a_pagar +
-        //         monto_ahorro_voluntario_a_pagar +
-        //         monto_ahorro_programado_a_pagar +
-        //         monto_amortizacion_capital_a_pagar +
-        //         monto_interes_a_pagar +
-        //         monto_mora_a_pagar
-
-        //     if (monto_total_cuota_a_pagar <= monto_recibido_actual) {
-
-        //         cuota.estado = 'Pagado';
-
-        //         cuota.pagos.push({
-        //             recibo: {
-        //                 local_atencion: recibo.local_atencion,
-        //                 serie: recibo.serie,
-        //                 numero: recibo.numero,
-        //                 fecha: recibo.fecha
-        //             },
-        //             ingresos: {
-        //                 monto_gasto: monto_gasto_a_pagar,
-        //                 monto_amortizacion_capital: monto_amortizacion_capital_a_pagar,
-        //                 monto_interes: monto_interes_a_pagar,
-        //                 monto_mora: monto_mora_a_pagar
-        //             },
-        //             ahorros: {
-
-        //                 monto_ahorro_inicial: monto_ahorro_inicial_a_pagar,
-        //                 monto_ahorro_voluntario: monto_ahorro_voluntario_a_pagar,
-        //                 monto_ahorro_programado: monto_ahorro_programado_a_pagar,
-        //             }
-        //         });
-
-        //         monto_recibido_actual -= monto_total_cuota_a_pagar;
-
-        //         modelo.detalle.push({
-        //             producto: {
-        //                 operacion_financiera_detalle: cuota.id,
-        //                 numero_cuota: cuota.numero_cuota,
-        //                 monto_gasto: monto_gasto_a_pagar,
-        //                 monto_ahorro_inicial: monto_ahorro_inicial_a_pagar,
-        //                 // monto_retiro_ahorro_inicial: cuota.monto_retiro_ahorro_inicial,
-        //                 monto_ahorro_voluntario: monto_ahorro_voluntario_a_pagar,
-        //                 // monto_retiro_ahorro_voluntario: cuota.monto_retiro_ahorro_voluntario,
-        //                 monto_ahorro_programado: monto_ahorro_programado_a_pagar,
-        //                 // monto_retiro_ahorro_programado: cuota.monto_retiro_ahorro_programado,
-        //                 monto_amortizacion_capital: monto_amortizacion_capital_a_pagar,
-        //                 monto_interes: monto_interes_a_pagar,
-        //                 // monto_interes_ganado: cuota.monto_interes_ganado,
-        //                 // monto_retiro_interes_ganado: cuota.monto_retiro_interes_ganado,
-        //                 monto_mora: monto_mora_a_pagar
-        //             }
-        //         });
-
-        //         monto_total += monto_gasto_a_pagar + monto_ahorro_inicial_a_pagar +
-        //             // monto_ahorro_voluntario_a_pagar + monto_total_cuota +
-        //             monto_ahorro_voluntario_a_pagar + monto_ahorro_programado_a_pagar +
-        //             monto_amortizacion_capital_a_pagar + monto_interes_a_pagar +
-        //             monto_mora_a_pagar; // + parseInt(monto_ahorro_voluntario);
-
-        //         monto_total_gasto += monto_gasto_a_pagar;
-        //         monto_total_ahorro_inicial += monto_ahorro_inicial_a_pagar;
-        //         monto_total_ahorro_voluntario += monto_ahorro_voluntario_a_pagar;
-        //         monto_total_ahorro_programado += monto_ahorro_programado_a_pagar;
-        //         monto_total_amortizacion_capital += monto_amortizacion_capital_a_pagar;
-        //         monto_total_interes += monto_interes_a_pagar;
-        //         monto_total_mora += monto_mora_a_pagar;
-
-        //     } else {
-
-        //         if (monto_recibido_actual >= 0.1) {
-
-        //             let monto_gasto_a_amortizar = 0;
-        //             let monto_ahorro_inicial_a_amortizar = 0;
-        //             let monto_ahorro_voluntario_a_amortizar = 0;
-        //             let monto_ahorro_programado_a_amortizar = 0;
-        //             let monto_amortizacion_capital_a_amortizar = 0;
-        //             let monto_interes_a_amortizar = 0;
-        //             let monto_mora_a_amortizar = 0;
-
-        //             if (monto_recibido_actual > 0 && monto_ahorro_voluntario_a_pagar <= monto_recibido_actual) {
-        //                 monto_ahorro_voluntario_a_amortizar = monto_ahorro_voluntario_a_pagar;
-        //                 monto_recibido_actual -= monto_ahorro_voluntario_a_pagar;
-        //             } else if (monto_recibido_actual > 0 && monto_ahorro_voluntario_a_pagar > monto_recibido_actual) {
-        //                 monto_ahorro_voluntario_a_amortizar = monto_recibido_actual;
-        //                 monto_recibido_actual = 0;
-        //             }
-
-        //             if (monto_recibido_actual > 0 && monto_mora_a_pagar <= monto_recibido_actual) {
-        //                 monto_mora_a_amortizar = monto_mora_a_pagar;
-        //                 monto_recibido_actual -= monto_mora_a_pagar;
-        //             } else if (monto_recibido_actual > 0 && monto_mora_a_pagar > monto_recibido_actual) {
-        //                 monto_mora_a_amortizar = monto_recibido_actual;
-        //                 monto_recibido_actual = 0;
-        //             }
-
-        //             if (monto_recibido_actual > 0 && monto_interes_a_pagar <= monto_recibido_actual) {
-        //                 monto_interes_a_amortizar = monto_interes_a_pagar;
-        //                 monto_recibido_actual -= monto_interes_a_pagar;
-        //             } else if (monto_recibido_actual > 0 && monto_interes_a_pagar > monto_recibido_actual) {
-        //                 monto_interes_a_amortizar = monto_recibido_actual;
-        //                 monto_recibido_actual = 0;
-        //             }
-
-        //             if (monto_recibido_actual > 0 && monto_amortizacion_capital_a_pagar <= monto_recibido_actual) {
-        //                 monto_amortizacion_capital_a_amortizar = monto_amortizacion_capital_a_pagar;
-        //                 monto_recibido_actual -= monto_amortizacion_capital_a_pagar;
-        //             } else if (monto_recibido_actual > 0 && monto_amortizacion_capital_a_pagar > monto_recibido_actual) {
-        //                 monto_amortizacion_capital_a_amortizar = monto_recibido_actual;
-        //                 monto_recibido_actual = 0;
-        //             }
-
-        //             if (monto_recibido_actual > 0 && monto_ahorro_programado_a_pagar <= monto_recibido_actual) {
-        //                 monto_ahorro_programado_a_amortizar = monto_ahorro_programado_a_pagar;
-        //                 monto_recibido_actual -= monto_ahorro_programado_a_pagar;
-        //             } else if (monto_recibido_actual > 0 && monto_ahorro_programado_a_pagar > monto_recibido_actual) {
-        //                 monto_ahorro_programado_a_amortizar = monto_recibido_actual;
-        //                 monto_recibido_actual = 0;
-        //             }
-
-        //             if (monto_recibido_actual > 0 && monto_ahorro_inicial_a_pagar <= monto_recibido_actual) {
-        //                 monto_ahorro_inicial_a_amortizar = monto_ahorro_inicial_a_pagar;
-        //                 monto_recibido_actual -= monto_ahorro_inicial_a_pagar;
-        //             } else if (monto_recibido_actual > 0 && monto_ahorro_inicial_a_pagar > monto_recibido_actual) {
-        //                 monto_ahorro_inicial_a_amortizar = monto_recibido_actual;
-        //                 monto_recibido_actual = 0;
-        //             }
-
-        //             if (monto_recibido_actual > 0 && monto_gasto_a_pagar <= monto_recibido_actual) {
-        //                 monto_gasto_a_amortizar = monto_gasto_a_pagar;
-        //                 monto_recibido_actual -= monto_gasto_a_pagar;
-        //             } else if (monto_recibido_actual > 0 && monto_gasto_a_pagar > monto_recibido_actual) {
-        //                 monto_gasto_a_amortizar = monto_recibido_actual;
-        //                 monto_recibido_actual = 0;
-        //             }
-
-        //             cuota.pagos.push({
-        //                 recibo: {
-        //                     local_atencion: recibo.local_atencion,
-        //                     serie: recibo.serie,
-        //                     numero: recibo.numero,
-        //                     fecha: recibo.fecha,
-        //                 },
-        //                 ingresos: {
-        //                     monto_gasto: monto_gasto_a_amortizar,
-        //                     monto_amortizacion_capital: monto_amortizacion_capital_a_amortizar,
-        //                     monto_interes: monto_interes_a_amortizar,
-        //                     monto_mora: monto_mora_a_amortizar
-        //                 },
-        //                 ahorros: {
-        //                     monto_ahorro_inicial: monto_ahorro_inicial_a_amortizar,
-        //                     monto_ahorro_voluntario: monto_ahorro_voluntario_a_amortizar,
-        //                     monto_ahorro_programado: monto_ahorro_programado_a_amortizar
-        //                 }
-        //             });
-
-        //             modelo.detalle.push({
-        //                 producto: {
-        //                     operacion_financiera_detalle: cuota.id,
-        //                     numero_cuota: cuota.numero_cuota,
-        //                     monto_gasto: monto_gasto_a_amortizar,
-        //                     monto_ahorro_inicial: monto_ahorro_inicial_a_amortizar,
-        //                     // monto_retiro_ahorro_inicial: cuota.monto_retiro_ahorro_inicial,
-        //                     monto_ahorro_voluntario: monto_ahorro_voluntario_a_amortizar,
-        //                     // monto_retiro_ahorro_voluntario: cuota.monto_retiro_ahorro_voluntario,
-        //                     monto_ahorro_programado: monto_ahorro_programado_a_amortizar,
-        //                     // monto_retiro_ahorro_programado: cuota.monto_retiro_ahorro_programado,
-        //                     monto_amortizacion_capital: monto_amortizacion_capital_a_amortizar,
-        //                     monto_interes: monto_interes_a_amortizar,
-        //                     // monto_interes_ganado: cuota.monto_interes_ganado,
-        //                     // monto_retiro_interes_ganado: cuota.monto_retiro_interes_ganado,
-        //                     monto_mora: monto_mora_a_amortizar
-        //                 }
-        //             });
-
-        //             monto_total += monto_gasto_a_amortizar + monto_ahorro_inicial_a_amortizar +
-        //                 // monto_ahorro_voluntario_a_amortizar + monto_total_cuota +
-        //                 monto_ahorro_voluntario_a_amortizar + monto_ahorro_programado_a_amortizar +
-        //                 monto_amortizacion_capital_a_amortizar + monto_interes_a_amortizar +
-        //                 monto_mora_a_amortizar; // + parseInt(monto_ahorro_voluntario);
-
-        //             monto_total_gasto += monto_gasto_a_amortizar;
-        //             monto_total_ahorro_inicial += monto_ahorro_inicial_a_amortizar;
-        //             monto_total_ahorro_voluntario += monto_ahorro_voluntario_a_amortizar;
-        //             monto_total_ahorro_programado += monto_ahorro_programado_a_amortizar;
-        //             monto_total_amortizacion_capital += monto_amortizacion_capital_a_amortizar;
-        //             monto_total_interes += monto_interes_a_amortizar;
-        //             monto_total_mora += monto_mora_a_amortizar;
-        //         }
-        //     }
-
-        //     await cuota.save();
-        // }
-
-        // modelo.es_ingreso = true;
-
-        // modelo.diario = {
-        //     caja_diario: resultado_validacion.caja_diario,
-        //     caja: resultado_validacion.caja,
-        //     estado: 'Abierto'
-        // };
-
-        // modelo.recibo = {
-        //     estado: 'Vigente',
-        //     local_atencion: recibo.local_atencion,
-        //     serie: recibo.serie,
-        //     numero: recibo.numero,
-        //     fecha: recibo.fecha,
-        //     ejercicio: '2020',
-        //     monto_total: monto_total.toFixed(1)
-        // };
-
-        // modelo.producto = {
-        //     persona: id_socio,
-        //     operacion_financiera: operacion_financiera,
-        //     monto_gasto: monto_total_gasto,
-        //     monto_ahorro_inicial: monto_total_ahorro_inicial,
-        //     monto_ahorro_voluntario: monto_total_ahorro_voluntario,
-        //     monto_ahorro_programado: monto_total_ahorro_programado,
-        //     monto_amortizacion_capital: monto_total_amortizacion_capital,
-        //     monto_interes: monto_total_interes,
-        //     monto_mora: monto_total_mora
-        // };
-
-        // await modelo.save();
-
-        // const cuotas_pendientes = await OperacionFinancieraDetalle.findOne({ "operacion_financiera": operacion_financiera, "estado": "Pendiente", "es_borrado": false });
-
-        // const model_operacion_financiera = await OperacionFinanciera.findById({ "_id": operacion_financiera })
-        //     .populate({
-        //         path: "producto.tipo",
-        //         select: "descripcion",
-        //     })
-        //     .populate({
-        //         path: "analista",
-        //         select: "usuario",
-        //         populate: {
-        //             path: "usuario",
-        //             select: "persona",
-        //             populate: {
-        //                 path: "persona",
-        //                 select: "nombre apellido_paterno apellido_materno",
-        //             }
-        //         }
-        //     });
-
-        // if (!cuotas_pendientes) {
-        //     model_operacion_financiera.estado = 'Pagado';
-        //     await model_operacion_financiera.save();
-        // }
 
         const data_recibo = {
 
@@ -759,27 +428,6 @@ const pagar_operacion_financiera = async(req, res) => {
                 monto_total: resultado_pago.monto_total.toFixed(2)
             }
         };
-        // const data_recibo = {
-        //     agencia: 'Agencia Ayacucho',
-        //     numero: recibo.numero,
-        //     documento_identidad_socio: documento_identidad_socio,
-        //     nombres_apellidos_socio: nombres_apellidos_socio,
-        //     nombres_apellidos_analista: model_operacion_financiera.analista.usuario.persona.nombre +
-        //         ' ' + model_operacion_financiera.analista.usuario.persona.apellido_paterno +
-        //         ' ' + model_operacion_financiera.analista.usuario.persona.apellido_materno,
-        //     producto: model_operacion_financiera.producto.tipo.descripcion,
-        //     monto_total_amortizacion_capital: monto_total_amortizacion_capital,
-        //     monto_total_interes: monto_total_interes,
-        //     monto_total_ahorro_programado: monto_total_ahorro_programado,
-        //     monto_total_ahorro_voluntario: monto_total_ahorro_voluntario,
-        //     monto_total_mora: monto_total_mora,
-        //     monto_total_ahorro_inicial: monto_total_ahorro_inicial,
-        //     monto_total_gasto: monto_total_gasto,
-        //     monto_total: monto_total,
-        //     usuario: req.header('usuario_sesion'),
-        //     fecha: recibo.fecha,
-        //     impresion: 'Original'
-        // };
 
         res.json({
             ok: true,
@@ -788,10 +436,11 @@ const pagar_operacion_financiera = async(req, res) => {
         })
     } catch (error) {
 
-        //console.log(error);
-        res.status(500).json({
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: 'Error inesperado.'
+            msg: getMessage('msgError500')
         });
     }
 }
@@ -816,8 +465,6 @@ const registrarIngresoEgreso = async(req, res = response) => {
             return res.status(404).json(resultado_validacion);
         // return resultado_validacion;
 
-        // //console.log(resultado_validacion)
-
         const recibo = resultado_validacion.recibo;
 
         const modelo = new PagoOperacionFinanciera(req.body);
@@ -840,8 +487,6 @@ const registrarIngresoEgreso = async(req, res = response) => {
         };
 
         await modelo.save();
-        /* //console.log(req.body)
-        //console.log(modelo); */
         const responsable = await Usuario.findById(
             modelo.concepto.responsable,
             "id persona"
@@ -859,7 +504,6 @@ const registrarIngresoEgreso = async(req, res = response) => {
             responsable.persona.apellido_materno;
         const id = req.body.concepto.concepto;
         const concepto = await PagoConcepto.findById(id);
-        //console.log(concepto);
         const data_recibo = {
             agencia: "Agencia Ayacucho",
             numero: recibo.numero,
@@ -876,10 +520,12 @@ const registrarIngresoEgreso = async(req, res = response) => {
             recibo: getRecibo(data_recibo),
         });
     } catch (error) {
-        //console.log(error);
+
+        logger.logError(req, error);
+
         return res.status(500).json({
             ok: false,
-            msg: error.msg,
+            msg: getMessage('msgError500')
         });
     }
 };
@@ -894,11 +540,7 @@ const anular_recibo = async(req, res = response) => {
 
     try {
 
-        // //console.log(id)
-        // //console.log(comentario)
-
         const modelo = await PagoOperacionFinanciera.findById(id);
-
 
         if (modelo.diario.estado == 'Cerrado')
             return res.status(404).json({
@@ -920,16 +562,11 @@ const anular_recibo = async(req, res = response) => {
 
         modelo.save();
 
-        // //console.log(modelo)
-        // //console.log(modelo.detalle.length)
-
         // const modelo = new PagoOperacionFinanciera(req.body);
 
         for (let i = 0; i < modelo.detalle.length; i++) {
 
             const cuota = await OperacionFinancieraDetalle.findById(modelo.detalle[i].producto.operacion_financiera_detalle);
-
-            // //console.log(cuota);
 
             for (let j = 0; j < cuota.pagos.length; j++) {
 
@@ -953,10 +590,12 @@ const anular_recibo = async(req, res = response) => {
         });
 
     } catch (error) {
-        //console.log(error);
+
+        logger.logError(req, error);
+
         return res.status(500).json({
             ok: false,
-            msg: error.msg,
+            msg: getMessage('msgError500')
         });
     }
 }
@@ -1019,8 +658,6 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
 
         // try {
 
-        // //console.log(lista)
-
         const comentario = {
             tipo: 'Nuevo',
             id_usuario: req.header('id_usuario_sesion'),
@@ -1042,16 +679,12 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
                 "es_borrado": false
             }, '_id');
 
-            // //console.log(cuotas)
-
             let cuotas_procesada = [];
 
             for (let i = 0; i < cuotas.length; i++) {
 
                 cuotas_procesada.push(cuotas[i]._id);
             }
-
-            // //console.log(cuotas_procesada)
 
             const correlativo_recibo = parseInt(resultado_validacion.recibo.numero.split("-").pop()) + i;
             resultado_validacion.recibo.numero = "I-" + correlativo_recibo.toString().padStart(8, "00000000");
@@ -1070,11 +703,8 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
                 comentario: comentario
             };
 
-            // //console.log(data)
             const resultado_pago = await pagarProducto(data);
         }
-
-        // //console.log(lista)
 
         return res.json({
             ok: true,
@@ -1083,10 +713,12 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
         });
 
     } catch (error) {
-        //console.log(error);
+
+        logger.logError(req, error);
+
         return res.status(500).json({
             ok: false,
-            msg: error.msg,
+            msg: getMessage('msgError500')
         });
     }
 }
@@ -1101,9 +733,6 @@ const confirmar_pago_analista = async(req, res = response) => {
 
     try {
 
-        // //console.log(id)
-        // //console.log(comentario)
-
         // const modelo = await PagoOperacionFinanciera.findById(id);
 
         const comentario = {
@@ -1114,9 +743,6 @@ const confirmar_pago_analista = async(req, res = response) => {
             fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
             comentario: 'Confirmación de pagos de analista realizado por cajero'
         };
-
-        console.log(id)
-        console.log(comentario)
 
         await PagoOperacionFinanciera.updateMany({
             "comentario": { $elemMatch: { "id_usuario": id } },
@@ -1145,10 +771,12 @@ const confirmar_pago_analista = async(req, res = response) => {
         });
 
     } catch (error) {
-        console.log(error);
+
+        logger.logError(req, error);
+
         return res.status(500).json({
             ok: false,
-            msg: error.msg,
+            msg: getMessage('msgError500')
         });
     }
 }

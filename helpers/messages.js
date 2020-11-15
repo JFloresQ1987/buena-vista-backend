@@ -1,6 +1,7 @@
 const messages = [
-    { id: 'msg001', msg: 'BD iniciado.' },
-    { id: 'msg002', msg: 'Error inesperdo' },
+    { id: 'msgConnBD', msg: 'Conexión a Base de Datos iniciado correctamente.' },
+    { id: 'msgError500', msg: 'Ocurrió un error inesperado, favor de contactar con informática.' },
+    { id: 'msgErrorToken', msg: 'El token no es correcto.' },
     { id: 'msg003', msg: 'Error inesperdo' },
     { id: 'msg004', msg: 'Error inesperdo' },
 ];

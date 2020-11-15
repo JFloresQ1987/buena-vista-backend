@@ -1,6 +1,8 @@
 const { response } = require("express");
 const bcrypt = require("bcryptjs");
-const dayjs = require("dayjs");
+const dayjs = require('dayjs');
+const logger = require('../../../helpers/logger');
+const { getMessage } = require('../../../helpers/messages');
 const Usuario = require("../../../models/core/seguridad/usuario.model");
 const Persona = require("../../../models/core/registro/persona.model");
 
@@ -94,9 +96,12 @@ const crear = async(req, res = response) => {
             modelo,
         });
     } catch (error) {
-        res.status(500).json({
+
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: "Error inesperado.",
+            msg: getMessage('msgError500')
         });
     }
 };
@@ -120,9 +125,12 @@ const getUsuario = async(req, res) => {
             });
         }
     } catch (error) {
-        res.status(500).json({
+
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: error,
+            msg: getMessage('msgError500')
         });
     }
 };
@@ -173,9 +181,12 @@ const actualizar = async(req, res = response) => {
             msg: "Usuario editado Correctamente",
         });
     } catch (error) {
-        res.status(500).json({
+
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: error.message,
+            msg: getMessage('msgError500')
         });
     }
 };
@@ -203,16 +214,18 @@ const cambiarClaveAdministrador = async(req, res = response) => {
             msg: "Clave cambiada correctamente",
         });
     } catch (error) {
+
+        logger.logError(req, error);
+
         return res.status(500).json({
             ok: false,
-            msg: "Error inesperado",
+            msg: getMessage('msgError500')
         });
     }
 };
 
 const cambiarClaveUsuario = async(req, res = response) => {
     try {
-        console.log(req.body);
         const { usuario, old_password, password } = req.body;
         const modelo = await Usuario.findOne({ usuario });
 
@@ -236,9 +249,12 @@ const cambiarClaveUsuario = async(req, res = response) => {
             msg: "Clave cambiada correctamente",
         });
     } catch (error) {
+
+        logger.logError(req, error);
+
         return res.status(500).json({
             ok: false,
-            msg: "Error inesperado",
+            msg: getMessage('msgError500')
         });
     }
 };
@@ -265,9 +281,12 @@ const cambiarVigencia = async(req, res = response) => {
             msg: usuario.es_vigente ? "Usuario vigente!" : "Usuario dado de baja.",
         });
     } catch (error) {
+
+        logger.logError(req, error);
+
         return res.status(500).json({
             ok: false,
-            msg: error.message,
+            msg: getMessage('msgError500')
         });
     }
 };

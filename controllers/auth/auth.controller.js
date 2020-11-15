@@ -1,5 +1,8 @@
 const { response } = require('express');
 const bcrypt = require('bcryptjs');
+const dayjs = require('dayjs');
+const logger = require('../../helpers/logger');
+const { getMessage } = require('../../helpers/messages');
 const { generarJWT } = require('../../helpers/jwt');
 const { getMenu } = require('../../helpers/sidebar');
 const Usuario = require('../../models/core/seguridad/usuario.model');
@@ -44,8 +47,6 @@ const login = async(req, res = respone) => {
 
         const token = await generarJWT(modelo.id);
 
-        // console.log(modelo)
-
         res.json({
             ok: true,
             token,
@@ -54,10 +55,11 @@ const login = async(req, res = respone) => {
 
     } catch (error) {
 
-        console.log(error);
-        res.status(500).json({
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: 'Token no es correcto.'
+            msg: getMessage('msgErrorToken')
         });
     }
 }
@@ -70,9 +72,6 @@ const renovar_token = async(req, res = respone) => {
 
     const usuario = await Usuario.findById({ _id: id })
         .populate('persona', 'nombre apellido_paterno apellido_materno fecha_nacimiento es_masculino correo_electronico avatar');
-
-    // console.log(usuario.rol)
-    // console.log(usuario)
 
     res.json({
         ok: true,

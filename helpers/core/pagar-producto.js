@@ -7,8 +7,6 @@ const dayjs = require("dayjs");
 
 const pagarProducto = async(data) => {
 
-    // //console.log(data);
-
     const recibo = data.data_validacion.recibo;
 
     let monto_recibido_actual = data.monto_recibido;
@@ -50,12 +48,12 @@ const pagarProducto = async(data) => {
         if (i == data.cuotas.length - 1)
             cuota_mayor = cuota.numero_cuota
 
-        if (cuota.numero_cuota === 0)
-            await OperacionFinancieraDetalle.updateMany({
-                "operacion_financiera": data.operacion_financiera,
-                "estado": "Prependiente",
-                "es_borrado": false
-            }, { "estado": "Pendiente" });
+        // if (cuota.numero_cuota === 0)
+        //     await OperacionFinancieraDetalle.updateMany({
+        //         "operacion_financiera": data.operacion_financiera,
+        //         "estado": "Prependiente",
+        //         "es_borrado": false
+        //     }, { "estado": "Pendiente" });
 
         if (i === 0 && Number(monto_ahorro_voluntario_actual) > 0)
             cuota.ahorros.monto_ahorro_voluntario += Number(monto_ahorro_voluntario_actual);
@@ -285,6 +283,13 @@ const pagarProducto = async(data) => {
             }
         }
 
+        if (cuota.numero_cuota === 0 && cuota.estado === 'Pagado')
+            await OperacionFinancieraDetalle.updateMany({
+                "operacion_financiera": data.operacion_financiera,
+                "estado": "Prependiente",
+                "es_borrado": false
+            }, { "estado": "Pendiente" });
+
         await cuota.save();
     }
 
@@ -346,8 +351,6 @@ const pagarProducto = async(data) => {
         model_operacion_financiera.estado = 'Pagado';
         await model_operacion_financiera.save();
     }
-
-    //console.log('terminó!!!!');
 
     return {
         ok: true,
