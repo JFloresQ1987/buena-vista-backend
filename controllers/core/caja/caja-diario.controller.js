@@ -53,7 +53,6 @@ const cerrarCaja = async (req, res = response) => {
         return monto_total_operaciones;
       }
     );
-    console.log(monto_total_operaciones);
 
     const actualizarOperaciones = await Operaciones.updateMany(
       {
@@ -160,7 +159,6 @@ const cargarCaja = async (req, res) => {
       es_borrado: false,
     });
 
-    console.log("aqui caja", caja);
     if (!caja) {
       return res.json({
         ok: false,
