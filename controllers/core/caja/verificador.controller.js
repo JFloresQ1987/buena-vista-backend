@@ -29,7 +29,8 @@ const verificarTotalRecibo = async(req, res = response) => {
     
   
     const operaciones = await Operaciones.find({
-        "diario.caja_diario" : cajaDiario._id
+        "diario.caja_diario" : cajaDiario._id,
+        "recibo.estado" : "Vigente"
     }, "recibo.monto_total producto")
 
 
@@ -85,9 +86,10 @@ const verificarIntegridadRecibo = async(req, res = response) => {
         es_vigente: true,
         es_borrado: false 
     })
-    console.log('asdasdasd', cajaDiario._id);
+    
     const operaciones = await Operaciones.find({
-        "diario.caja_diario" : cajaDiario._id
+        "diario.caja_diario" : cajaDiario._id,
+        "recibo.estado" : "Vigente"
     }, "recibo.numero")
     
     let matrizControl = []
@@ -157,7 +159,8 @@ const verificarIntegridadOperacionF = async(req, res = response) => {
     })
 
     const operaciones = await Operaciones.find({
-        "diario.caja_diario" : cajaDiario._id
+        "diario.caja_diario" : cajaDiario._id,
+        "recibo.estado" : "Vigente"
     }, "producto.operacion_financiera recibo.monto_total detalle")
     // console.log(operaciones.producto);
     
@@ -177,7 +180,12 @@ const verificarIntegridadOperacionF = async(req, res = response) => {
         _id : {"$in": id_lista_detalle}
     })
     // console.log(operacionDetalle);
-    operacionDetalle.forEach(e => {            
+    operacionDetalle.forEach(e => {        
+        
+        if (e.concepto){
+            montoValidar= monto_total
+        }
+
         montoValidar += e.ingresos.monto_gasto + e.ingresos.monto_amortizacion_capital +
                         e.ingresos.monto_interes + e.ingresos.monto_mora
         montoValidar += e.ahorros.monto_ahorro_inicial - e.ahorros.monto_retiro_ahorro_inicial +
