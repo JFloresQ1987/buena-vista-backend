@@ -12,34 +12,34 @@ const getMenu = (rol) => {
             opcion: 'Registro',
             icono: 'mdi mdi-view-dashboard',
             submenu: [
-                { opcion: 'Socio', url: '/registro/gestion/socio/0' },
-                { opcion: 'Producto', url: '/registro/gestion/credito' },
-                { opcion: 'Ahorro', url: '/registro/gestion/ahorro' }
+                { opcion: 'Gestionar Socio', url: '/registro/gestion/socio/0' },
+                { opcion: 'Gestionar Producto', url: '/registro/gestion/producto' },
+                { opcion: 'Gestionar Ahorro', url: '/registro/gestion/ahorro' }
             ]
         },
         {
             opcion: 'Operaciones',
             icono: 'mdi mdi-chart-bubble',
             submenu: [
-                { opcion: 'Productos vigentes', url: '/operaciones/gestion/producto' },
-                { opcion: 'Ahorros', url: '/operaciones/gestion/ahorro-consulta' },
-                { opcion: 'Productos históricos', url: '/operaciones/consulta/producto-historico' }
+                { opcion: 'Gestionar Productos Vigentes', url: '/operaciones/gestion/producto' },
+                { opcion: 'Gestionar Ahorros', url: '/operaciones/gestion/ahorro-consulta' },
+                { opcion: 'Consultar Productos Históricos', url: '/operaciones/consulta/producto-historico' }
             ]
         },
         {
             opcion: 'Caja',
             icono: 'mdi mdi-cart',
             submenu: [
-                { opcion: 'Pago producto', url: '/caja/pago/producto-caja' },
-                { opcion: 'Pago ahorro', url: 'caja/pago/ahorro-caja' },
+                { opcion: 'Pagar Producto', url: '/caja/pago/producto-caja' },
+                { opcion: 'Pagar Ahorro', url: 'caja/pago/ahorro-caja' },
                 // { opcion: 'Confirmar pago de analistas', url: '/caja/pago/confirmar-pago-analista' },
-                { opcion: 'Ingresos y egresos', url: '/caja/gestion/ingresos-egresos' },
+                { opcion: 'Realizar Ingresos - Egresos', url: '/caja/gestion/ingresos-egresos' },
                 // { opcion: 'Apertura de caja general', url: '/registro/gestion/cierre-caja' },
                 // { opcion: 'Apertura de caja individual', url: '/registro/gestion/cierre-caja' },
                 // { opcion: 'Cierre de caja general', url: '/registro/gestion/cierre-caja-general' },
-                { opcion: 'Cierre de caja individual', url: '/caja/pago/cierre-caja-individual' },
-                { opcion: 'Listar Cajas', url: '/caja/pago/cajas-lista' },
-                { opcion: 'Listar Recibos', url: '/caja/gestion/lista-recibo' },
+                { opcion: 'Cerrar Caja Individual', url: '/caja/pago/cierre-caja-individual' },
+                { opcion: 'Consultar Cajas Individuales', url: '/caja/pago/cajas-lista' },
+                { opcion: 'Gestionar Transacciones', url: '/caja/gestion/lista-recibo' },
                 // { opcion: 'Anular recibo', url: '/registro/gestion/cierre-caja' },
                 // { opcion: 'Duplicado de recibo', url: '/registro/gestion/cierre-caja' }
             ]
@@ -50,7 +50,7 @@ const getMenu = (rol) => {
             submenu: [
                 // { opcion: 'Ingresos y egresos', url: '/registro/gestion/caja-ingresos-egresos' },
                 // { opcion: 'Cierre de caja', url: '/registro/gestion/cierre-caja' }
-                { opcion: 'Recaudación', url: '/analista/gestion/producto-pre-pago' }
+                { opcion: 'Registrar Recaudación', url: '/analista/gestion/producto-pre-pago' }
             ]
         }
     ];
@@ -61,12 +61,12 @@ const getMenu = (rol) => {
                 opcion: 'Seguridad',
                 icono: 'mdi mdi-account-key',
                 submenu: [
-                    { opcion: 'Usuarios', url: '/seguridad/gestion/usuario' },
+                    { opcion: 'Gestionar Usuarios', url: '/seguridad/gestion/usuario' },
                     // { opcion: 'Roles', url: '/seguridad/gestion/rol' },
                     // { opcion: 'Analistas', url: '/seguridad/gestion/rol' },
                     // { opcion: 'Cajeros', url: '/seguridad/gestion/rol' },
-                    { opcion: 'Caja', url: '/seguridad/gestion/caja' },
-                    { opcion: 'Analistas', url: '/seguridad/gestion/analista' },
+                    { opcion: 'Gestionar Cajas y Cajeros', url: '/seguridad/gestion/caja' },
+                    { opcion: 'Gestionar Analistas', url: '/seguridad/gestion/analista' },
                     // { opcion: 'Cajeros', url: '/seguridad/gestion/rol' }
                 ]
             }
