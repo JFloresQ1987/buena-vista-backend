@@ -132,10 +132,16 @@ const cerrarCaja = async(req, res = response) => {
             msg: "Caja actualizada",
         });
     } catch (error) {
-        console.log(error);
-        res.json({
+        // console.log(error);
+        // res.json({
+        //     ok: false,
+        //     msg: "Hable con el Admin!!!!!!!!",
+        // });
+        logger.logError(req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: "Hable con el Admin!!!!!!!!",
+            msg: getMessage('msgError500')
         });
     }
 };

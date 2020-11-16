@@ -7,256 +7,252 @@ const OperacionFinanciera = require("../../../models/core/registro/operacion-fin
 const requestIp = require("request-ip");
 const e = require("cors");
 
-const verificarTotalRecibo = async (req, res = response) => {
-  const id_usuario_sesion = req.header("id_usuario_sesion"); // "5f8236bedd1aaa4dc4109589"; //
-  const ip = requestIp.getClientIp(req).replace("::ffff:", ""); // "192.168.0.10"; //
+const verificarTotalRecibo = async(req, res = response) => {
+    const id_usuario_sesion = req.header("id_usuario_sesion"); // "5f8236bedd1aaa4dc4109589"; //
+    const ip = requestIp.getClientIp(req).replace("::ffff:", ""); // "192.168.0.10"; //
 
-  const caja = await Caja.findOne({
-    ip: ip,
-    usuario: id_usuario_sesion,
-    es_vigente: true,
-    es_borrado: false,
-  });
+    const caja = await Caja.findOne({
+        ip: ip,
+        usuario: id_usuario_sesion,
+        es_vigente: true,
+        es_borrado: false,
+    });
 
-  const cajaDiario = await CajaDiario.findOne({
-    caja: caja._id,
-    estado: "Abierto",
-    es_vigente: true,
-    es_borrado: false,
-  });
+    const cajaDiario = await CajaDiario.findOne({
+        caja: caja._id,
+        estado: "Abierto",
+        es_vigente: true,
+        es_borrado: false,
+    });
 
-  const operaciones = await Operaciones.find(
-    { "diario.caja_diario": cajaDiario._id, "recibo.estado": "Vigente" },
-    "recibo.monto_total producto es_ingreso concepto"
-  );
+    const operaciones = await Operaciones.find({ "diario.caja_diario": cajaDiario._id, "recibo.estado": "Vigente" },
+        "recibo.monto_total producto es_ingreso concepto"
+    );
 
-  let control = true;
-  let listaMontoError = [];
-  let listaReciboMontoTotalError = [];
+    let control = true;
+    let listaMontoError = [];
+    let listaReciboMontoTotalError = [];
 
-  operaciones.forEach((e) => {
-    let monto =
-      e.producto.monto_ahorro_voluntario -
-      e.producto.monto_desembolso +
-      e.producto.monto_ahorro_inicial +
-      e.producto.monto_ahorro_programado +
-      e.producto.monto_amortizacion_capital +
-      e.producto.monto_interes +
-      e.producto.monto_interes_ahorro +
-      e.producto.monto_mora +
-      e.producto.monto_gasto -
-      e.producto.monto_retiro_ahorro_voluntario -
-      e.producto.monto_retiro_ahorro_inicial -
-      e.producto.monto_retiro_ahorro_programado -
-      e.producto.monto_retiro_interes_ahorro;
+    operaciones.forEach((e) => {
+        let monto =
+            e.producto.monto_ahorro_voluntario -
+            e.producto.monto_desembolso +
+            e.producto.monto_ahorro_inicial +
+            e.producto.monto_ahorro_programado +
+            e.producto.monto_amortizacion_capital +
+            e.producto.monto_interes +
+            e.producto.monto_interes_ahorro +
+            e.producto.monto_mora +
+            e.producto.monto_gasto -
+            e.producto.monto_retiro_ahorro_voluntario -
+            e.producto.monto_retiro_ahorro_inicial -
+            e.producto.monto_retiro_ahorro_programado -
+            e.producto.monto_retiro_interes_ahorro;
 
-    if (e.es_ingreso == false) {
-      monto = monto * -1;
+        if (e.es_ingreso == false) {
+            monto = monto * -1;
+        } else {
+            monto;
+        }
+        if (e.concepto.detalle != undefined) {
+            e.recibo.monto_total = monto;
+        }
+
+        if (e.recibo.monto_total != monto) {
+            listaMontoError.push(monto);
+            listaReciboMontoTotalError.push(e.recibo.monto_total);
+            control = false;
+        }
+    });
+
+    if (!control) {
+        return res.json({
+            ok: false,
+            msg: `La suma de los montos ${listaMontoError}, no coinciden con el monto total ${listaReciboMontoTotalError}`,
+            listaMontoError,
+        });
+    }
+
+    return res.json({
+        ok: true,
+        msg: "Los montos coinciden!!!!!",
+    });
+};
+
+const verificarIntegridadRecibo = async(req, res = response) => {
+    const id_usuario_sesion = req.header("id_usuario_sesion"); // "5f8236bedd1aaa4dc4109589"; //
+    const ip = requestIp.getClientIp(req).replace("::ffff:", ""); // "192.168.0.10"; //
+
+    const caja = await Caja.findOne({
+        ip: ip,
+        usuario: id_usuario_sesion,
+        es_vigente: true,
+        es_borrado: false,
+    });
+
+    const cajaDiario = await CajaDiario.findOne({
+        caja: caja._id,
+        estado: "Abierto",
+        es_vigente: true,
+        es_borrado: false,
+    });
+
+    const operaciones = await Operaciones.find({
+            "diario.caja_diario": cajaDiario._id,
+            // "recibo.estado": "Vigente",
+        },
+        "recibo.numero"
+    );
+
+    let matrizControl = [];
+    let matrizRecibo = [];
+    let listaReciboError = [];
+    let a = 0;
+    let err = true;
+
+    for (let i = 0; i < operaciones.length; i++) {
+        const e = Number(operaciones[0].recibo.numero.slice(-8));
+        a = e - 1;
+    }
+
+    operaciones.forEach((e) => {
+        let convertir = Number(e.recibo.numero.slice(-8));
+        a++;
+        matrizControl.push(a);
+        matrizRecibo.push(convertir);
+    });
+    console.log(matrizControl);
+    console.log(matrizRecibo);
+
+    matrizControl.forEach((e) => {
+        if (!matrizRecibo.includes(e)) {
+            err = false;
+            listaReciboError.push(e);
+            // console.log(`No existe el recibo ${e}`);
+            return;
+        }
+    });
+
+    // console.log(listaReciboError);
+
+    if (!err) {
+        return res.json({
+            ok: false,
+            msg: `Los recibos 0000${listaReciboError} no coinciden, por favor revise!`,
+            listaReciboError,
+        });
+    }
+
+    return res.json({
+        ok: true,
+        msg: "Todos los recibos coinciden!!!!!",
+    });
+};
+
+const verificarIntegridadOperacionF = async(req, res = response) => {
+    const id_usuario_sesion = req.header("id_usuario_sesion"); // "5f8236bedd1aaa4dc4109589"; //
+    const ip = requestIp.getClientIp(req).replace("::ffff:", ""); // "192.168.0.10"; //
+
+    const caja = await Caja.findOne({
+        ip: ip,
+        usuario: id_usuario_sesion,
+        es_vigente: true,
+        es_borrado: false,
+    });
+
+    const cajaDiario = await CajaDiario.findOne({
+        caja: caja._id,
+        estado: "Abierto",
+        es_vigente: true,
+        es_borrado: false,
+    });
+
+    const operaciones = await Operaciones.find({
+            "diario.caja_diario": cajaDiario._id,
+            "recibo.estado": "Vigente",
+        },
+        "producto.operacion_financiera recibo.monto_total detalle"
+    );
+    // console.log(operaciones.producto);
+
+    let id_lista_detalle = [];
+    let monto_total = 0;
+    operaciones.forEach((e) => {
+        monto_total = e.recibo.monto_total;
+        e.detalle.forEach((i) => {
+            id_lista_detalle.push(i.producto.operacion_financiera_detalle);
+        });
+    });
+    console.log(monto_total);
+
+    let montoValidar = 0;
+    const operacionDetalle = await OperacionFinanciera.find({
+        _id: { $in: id_lista_detalle },
+    });
+    // console.log(operacionDetalle);
+    operacionDetalle.forEach((e) => {
+        if (e.concepto) {
+            montoValidar = monto_total;
+        }
+
+        montoValidar +=
+            e.ingresos.monto_gasto +
+            e.ingresos.monto_amortizacion_capital +
+            e.ingresos.monto_interes +
+            e.ingresos.monto_mora;
+        montoValidar +=
+            e.ahorros.monto_ahorro_inicial -
+            e.ahorros.monto_retiro_ahorro_inicial +
+            e.ahorros.monto_ahorro_voluntario -
+            e.ahorros.monto_retiro_ahorro_voluntario +
+            e.ahorros.monto_ahorro_programado -
+            e.ahorros.monto_retiro_ahorro_programado +
+            e.ahorros.monto_interes_ganado -
+            e.ahorros.monto_retiro_interes_ganado;
+    });
+
+    if (monto_total != montoValidar) {
+        return res.json({
+            ok: false,
+            msg: "Los montos en la operacion financiera detalle y el pago operacion financiera no coinciden",
+        });
     } else {
-      monto;
-    }
-    if (e.concepto.detalle != undefined) {
-      e.recibo.monto_total = monto;
-    }
-
-    if (e.recibo.monto_total != monto) {
-      listaMontoError.push(monto);
-      listaReciboMontoTotalError.push(e.recibo.monto_total);
-      control = false;
-    }
-  });
-
-  if (!control) {
-    return res.json({
-      ok: false,
-      msg: `La suma de los montos ${listaMontoError}, no coinciden con el monto total ${listaReciboMontoTotalError}`,
-      listaMontoError,
-    });
-  }
-
-  return res.json({
-    ok: true,
-    msg: "Los montos coinciden!!!!!",
-  });
-};
-
-const verificarIntegridadRecibo = async (req, res = response) => {
-  const id_usuario_sesion = req.header("id_usuario_sesion"); // "5f8236bedd1aaa4dc4109589"; //
-  const ip = requestIp.getClientIp(req).replace("::ffff:", ""); // "192.168.0.10"; //
-
-  const caja = await Caja.findOne({
-    ip: ip,
-    usuario: id_usuario_sesion,
-    es_vigente: true,
-    es_borrado: false,
-  });
-
-  const cajaDiario = await CajaDiario.findOne({
-    caja: caja._id,
-    estado: "Abierto",
-    es_vigente: true,
-    es_borrado: false,
-  });
-
-  const operaciones = await Operaciones.find(
-    {
-      "diario.caja_diario": cajaDiario._id,
-      "recibo.estado": "Vigente",
-    },
-    "recibo.numero"
-  );
-
-  let matrizControl = [];
-  let matrizRecibo = [];
-  let listaReciboError = [];
-  let a = 0;
-  let err = true;
-
-  for (let i = 0; i < operaciones.length; i++) {
-    const e = Number(operaciones[0].recibo.numero.slice(-8));
-    a = e - 1;
-  }
-
-  operaciones.forEach((e) => {
-    let convertir = Number(e.recibo.numero.slice(-8));
-    a++;
-    matrizControl.push(a);
-    matrizRecibo.push(convertir);
-  });
-  console.log(matrizControl);
-  console.log(matrizRecibo);
-
-  matrizControl.forEach((e) => {
-    if (!matrizRecibo.includes(e)) {
-      err = false;
-      listaReciboError.push(e);
-      // console.log(`No existe el recibo ${e}`);
-      return;
-    }
-  });
-
-  // console.log(listaReciboError);
-
-  if (!err) {
-    return res.json({
-      ok: false,
-      msg: `Los recibos 0000${listaReciboError} no coinciden, por favor revise!`,
-      listaReciboError,
-    });
-  }
-
-  return res.json({
-    ok: true,
-    msg: "Todos los recibos coinciden!!!!!",
-  });
-};
-
-const verificarIntegridadOperacionF = async (req, res = response) => {
-  const id_usuario_sesion = req.header("id_usuario_sesion"); // "5f8236bedd1aaa4dc4109589"; //
-  const ip = requestIp.getClientIp(req).replace("::ffff:", ""); // "192.168.0.10"; //
-
-  const caja = await Caja.findOne({
-    ip: ip,
-    usuario: id_usuario_sesion,
-    es_vigente: true,
-    es_borrado: false,
-  });
-
-  const cajaDiario = await CajaDiario.findOne({
-    caja: caja._id,
-    estado: "Abierto",
-    es_vigente: true,
-    es_borrado: false,
-  });
-
-  const operaciones = await Operaciones.find(
-    {
-      "diario.caja_diario": cajaDiario._id,
-      "recibo.estado": "Vigente",
-    },
-    "producto.operacion_financiera recibo.monto_total detalle"
-  );
-  // console.log(operaciones.producto);
-
-  let id_lista_detalle = [];
-  let monto_total = 0;
-  operaciones.forEach((e) => {
-    monto_total = e.recibo.monto_total;
-    e.detalle.forEach((i) => {
-      id_lista_detalle.push(i.producto.operacion_financiera_detalle);
-    });
-  });
-  console.log(monto_total);
-
-  let montoValidar = 0;
-  const operacionDetalle = await OperacionFinanciera.find({
-    _id: { $in: id_lista_detalle },
-  });
-  // console.log(operacionDetalle);
-  operacionDetalle.forEach((e) => {
-    if (e.concepto) {
-      montoValidar = monto_total;
+        return res.json({
+            ok: true,
+            msg: "Los montos coinciden",
+        });
     }
 
-    montoValidar +=
-      e.ingresos.monto_gasto +
-      e.ingresos.monto_amortizacion_capital +
-      e.ingresos.monto_interes +
-      e.ingresos.monto_mora;
-    montoValidar +=
-      e.ahorros.monto_ahorro_inicial -
-      e.ahorros.monto_retiro_ahorro_inicial +
-      e.ahorros.monto_ahorro_voluntario -
-      e.ahorros.monto_retiro_ahorro_voluntario +
-      e.ahorros.monto_ahorro_programado -
-      e.ahorros.monto_retiro_ahorro_programado +
-      e.ahorros.monto_interes_ganado -
-      e.ahorros.monto_retiro_interes_ganado;
-  });
-
-  if (monto_total != montoValidar) {
-    return res.json({
-      ok: false,
-      msg:
-        "Los montos en la operacion financiera detalle y el pago operacion financiera no coinciden",
-    });
-  } else {
-    return res.json({
-      ok: true,
-      msg: "Los montos coinciden",
-    });
-  }
-
-  // let a = 0
-  // operaciones.forEach(async ope  => {
-  //     let montoValidar = 0
-  //     ope.detalle.forEach(async e  => {
-  //         let op_detalle = e.producto.operacion_financiera_detalle
-  //         console.log(op_detalle);
-  //         const operacionDetalle = await OperacionFinanciera.find({
-  //             '_id' : op_detalle
-  //         });
-  //         console.log('cantidad de detalles: ', operacionDetalle.length);
-  //         operacionDetalle.forEach(e => {
-  //             montoValidar += e.ingresos.monto_gasto + e.ingresos.monto_amortizacion_capital +
-  //                             e.ingresos.monto_interes + e.ingresos.monto_mora
-  //             montoValidar -= e.ahorros.monto_ahorro_inicial - e.ahorros.monto_retiro_ahorro_inicial +
-  //                             e.ahorros.monto_ahorro_voluntario - e.ahorros.monto_retiro_ahorro_voluntario + e.ahorros.monto_ahorro_programado -
-  //                             e.ahorros.monto_retiro_ahorro_programado + e.ahorros.monto_interes_ganado - e.ahorros.monto_retiro_interes_ganado
-  //         });
-  //         montoValidarTotal.push(montoValidar)
-  //         a += montoValidar
-  //         console.log(a);
-  //     });
-  //     console.log(a);
-  // });
-  // console.log(montoValidarTotal);
+    // let a = 0
+    // operaciones.forEach(async ope  => {
+    //     let montoValidar = 0
+    //     ope.detalle.forEach(async e  => {
+    //         let op_detalle = e.producto.operacion_financiera_detalle
+    //         console.log(op_detalle);
+    //         const operacionDetalle = await OperacionFinanciera.find({
+    //             '_id' : op_detalle
+    //         });
+    //         console.log('cantidad de detalles: ', operacionDetalle.length);
+    //         operacionDetalle.forEach(e => {
+    //             montoValidar += e.ingresos.monto_gasto + e.ingresos.monto_amortizacion_capital +
+    //                             e.ingresos.monto_interes + e.ingresos.monto_mora
+    //             montoValidar -= e.ahorros.monto_ahorro_inicial - e.ahorros.monto_retiro_ahorro_inicial +
+    //                             e.ahorros.monto_ahorro_voluntario - e.ahorros.monto_retiro_ahorro_voluntario + e.ahorros.monto_ahorro_programado -
+    //                             e.ahorros.monto_retiro_ahorro_programado + e.ahorros.monto_interes_ganado - e.ahorros.monto_retiro_interes_ganado
+    //         });
+    //         montoValidarTotal.push(montoValidar)
+    //         a += montoValidar
+    //         console.log(a);
+    //     });
+    //     console.log(a);
+    // });
+    // console.log(montoValidarTotal);
 };
 
 module.exports = {
-  verificarTotalRecibo,
-  verificarIntegridadRecibo,
-  verificarIntegridadOperacionF,
+    verificarTotalRecibo,
+    verificarIntegridadRecibo,
+    verificarIntegridadOperacionF,
 };
 
 // let idOpe = ope.detalle[0].producto.operacion_financiera_detalle;
