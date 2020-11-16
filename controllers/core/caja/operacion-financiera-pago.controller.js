@@ -504,21 +504,80 @@ const registrarIngresoEgreso = async(req, res = response) => {
             responsable.persona.apellido_materno;
         const id = req.body.concepto.concepto;
         const concepto = await PagoConcepto.findById(id);
+
+        // const data_recibo = {
+        //     agencia: "Agencia Ayacucho",
+        //     numero: recibo.numero,
+        //     documento_identidad_responsable: documento_identidad_responsable,
+        //     nombres_apellidos_responsable: nombres_apellidos_responsable,
+        //     concepto: concepto.descripcion,
+        //     monto_total: req.body.monto,
+        //     usuario: req.header("usuario_sesion"),
+        //     fecha: recibo.fecha,
+        //     impresion: "Original",
+        // };
+        // return res.json({
+        //     ok: true,
+        //     recibo: getRecibo(data_recibo),
+        // });
+
+
         const data_recibo = {
-            agencia: "Agencia Ayacucho",
-            numero: recibo.numero,
-            documento_identidad_responsable: documento_identidad_responsable,
-            nombres_apellidos_responsable: nombres_apellidos_responsable,
-            concepto: concepto.descripcion,
-            monto_total: req.body.monto,
-            usuario: req.header("usuario_sesion"),
-            fecha: recibo.fecha,
-            impresion: "Original",
+
+            institucion: {
+                denominacion: 'Buenavista La Bolsa S.A.C.',
+                agencia: 'Agencia Ayacucho',
+                ruc: '20574744599',
+                frase: ''
+            },
+            // persona: {
+            //     documento_identidad: documento_identidad_socio,
+            //     nombre_completo: nombres_apellidos_socio
+            // },
+
+            responsable: {
+                documento_identidad: documento_identidad_responsable,
+                nombre_completo: nombres_apellidos_responsable
+            },
+
+
+            // documento_identidad_socio: documento_identidad_socio,
+            // nombres_apellidos_socio: nombres_apellidos_socio,
+            // analista: 'XXX XXX XXX',
+            // analista: modelo.analista.usuario.persona.nombre +
+            //     ' ' + modelo.analista.usuario.persona.apellido_paterno +
+            //     ' ' + modelo.analista.usuario.persona.apellido_materno,
+
+            // producto: {
+            //     descripcion: modelo.producto.tipo.descripcion,
+            //     // cuota: 0,
+            //     monto_desembolso: monto_desembolso
+            //         // monto_gasto: monto_total_gasto.toFixed(2),
+            //         // monto_ahorro_inicial: monto_total_ahorro_inicial.toFixed(2),
+            //         // monto_ahorro_voluntario: monto_total_ahorro_voluntario.toFixed(2),
+            //         // monto_ahorro_programado: monto_total_ahorro_programado.toFixed(2),
+            //         // monto_amortizacion_capital: monto_total_amortizacion_capital.toFixed(2),
+            //         // monto_interes: monto_total_interes.toFixed(2),
+            //         // monto_mora: monto_total_mora.toFixed(2),
+            // },
+            concepto: {
+                descripcion: concepto.descripcion,
+                sub_concepto: 'XXX XXX XXX'
+            },
+            recibo: {
+                usuario: req.header('usuario_sesion'),
+                numero: recibo.numero,
+                fecha: recibo.fecha,
+                tipo_impresion: 'Original',
+                monto_total: req.body.monto.toFixed(2)
+            }
         };
-        return res.json({
+
+        res.json({
             ok: true,
-            recibo: getRecibo(data_recibo),
-        });
+            recibo: data_recibo
+                // recibo: getRecibo(data_recibo)
+        })
     } catch (error) {
 
         logger.logError(req, error);
