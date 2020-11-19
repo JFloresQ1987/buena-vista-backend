@@ -35,19 +35,19 @@ const verificarTotalRecibo = async(req, res = response) => {
 
     operaciones.forEach((e) => {
         let monto =
-            e.producto.monto_ahorro_voluntario -
-            e.producto.monto_desembolso +
-            e.producto.monto_ahorro_inicial +
-            e.producto.monto_ahorro_programado +
-            e.producto.monto_amortizacion_capital +
-            e.producto.monto_interes +
-            e.producto.monto_interes_ahorro +
-            e.producto.monto_mora +
-            e.producto.monto_gasto -
-            e.producto.monto_retiro_ahorro_voluntario -
-            e.producto.monto_retiro_ahorro_inicial -
-            e.producto.monto_retiro_ahorro_programado -
-            e.producto.monto_retiro_interes_ahorro;
+            Number((e.producto.monto_ahorro_voluntario -
+                e.producto.monto_desembolso +
+                e.producto.monto_ahorro_inicial +
+                e.producto.monto_ahorro_programado +
+                e.producto.monto_amortizacion_capital +
+                e.producto.monto_interes +
+                e.producto.monto_interes_ahorro +
+                e.producto.monto_mora +
+                e.producto.monto_gasto -
+                e.producto.monto_retiro_ahorro_voluntario -
+                e.producto.monto_retiro_ahorro_inicial -
+                e.producto.monto_retiro_ahorro_programado -
+                e.producto.monto_retiro_interes_ahorro).toFixed(2));
 
         if (e.es_ingreso == false) {
             monto = monto * -1;

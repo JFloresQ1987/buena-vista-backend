@@ -3,6 +3,7 @@ const dayjs = require('dayjs');
 const logger = require('../../../helpers/logger');
 const { getMessage } = require('../../../helpers/messages');
 const Persona = require('../../../models/core/registro/persona.model');
+const Ubigeo = require('../../../models/core/ubigeo.model');
 
 const listar = async(req, res) => {
 

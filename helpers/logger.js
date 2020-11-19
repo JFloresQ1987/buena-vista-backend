@@ -38,11 +38,14 @@ const logError = async(req, error) => {
 
     const header = {
         date: fecha,
-        referer: req.headers ? req.headers.referer : req
+        host: req.headers.host,
+        origin: req.headers.origin,
+        referer: req.headers ? req.headers.referer : req,
+        userAgent: req.headers['user-agent']
     };
 
     logger.error(
-        `{ 'Date': '${header.date}', 'Message': { 'tipo': 'ERROR', 'Endpoint': '${header.referer}', 'Message': '${error}' } }`
+        `{ 'Date': '${header.date}', 'Message': { 'tipo': 'ERROR', 'Host': '${header.host}', 'Origin': '${header.origin}', 'Endpoint': '${header.referer}', 'UserAgent': '${header.userAgent}', 'Error': '${error}' } }`
     );
 };
 
