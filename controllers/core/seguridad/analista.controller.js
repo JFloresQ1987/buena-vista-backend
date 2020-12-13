@@ -100,21 +100,50 @@ const actualizar = async(req, res = response) => {
                 msg: "Error al actualizar los datos",
             });
         }
+        analista.codigo = req.body.codigo;
         analista.descripcion = req.body.descripcion;
         analista.producto = req.body.producto;
+        analista.local_atencion = req.body.local_atencion;
         analista.usuario = req.body.usuario;
-        analista.comentario.push({
-            tipo: "Editado",
-            idusuario: req.header("id_usuario_sesion"),
-            usuario: req.header("usuario_sesion"),
-            nombre: req.header("nombre_sesion"),
-            fecha: now.format("DD/MM/YYYY hh:mm:ss a"),
-            comentario,
-        });
+        analista.nombre_usuario = req.body.nombre_usuario,
+            analista.documento_identidad_usuario = req.body.documento_identidad_usuario,
+            analista.comentario.push({
+                tipo: "Editado",
+                idusuario: req.header("id_usuario_sesion"),
+                usuario: req.header("usuario_sesion"),
+                nombre: req.header("nombre_sesion"),
+                fecha: now.format("DD/MM/YYYY hh:mm:ss a"),
+                comentario,
+            });
         await analista.save();
         return res.json({
             ok: true,
             msg: "Analista Actualizado correctamente",
+        });
+    } catch (error) {
+
+        logger.logError(req, error);
+
+        return res.status(500).json({
+            ok: false,
+            msg: getMessage('msgError500')
+        });
+    }
+};
+
+const getListaDesplegable = async(req, res = response) => {
+
+    try {
+
+        const producto = req.params.producto;
+        const lista = await Analista.find({
+            "es_vigente": true,
+            "es_borrado": false
+        }, "id nombre_usuario");
+
+        res.json({
+            ok: true,
+            lista,
         });
     } catch (error) {
 
@@ -132,16 +161,21 @@ const getListaDesplegablexProducto = async(req, res = response) => {
     try {
 
         const producto = req.params.producto;
-        const lista = await Analista.find({ "producto": producto, "es_vigente": true, "es_borrado": false }, "id")
-            .populate({
-                path: "usuario",
-                select: "persona",
-                populate: {
-                    path: "persona",
-                    select: "nombre apellido_paterno apellido_materno",
-                    // $concat: ["$nombre", "$apellido_paterno", "$apellido_materno"]
-                },
-            });
+        const lista = await Analista.find({
+            "producto": producto,
+            "es_vigente": true,
+            "es_borrado": false
+        }, "id nombre_usuario");;
+        // const lista = await Analista.find({ "producto": producto, "es_vigente": true, "es_borrado": false }, "id")
+        //     .populate({
+        //         path: "usuario",
+        //         select: "persona",
+        //         populate: {
+        //             path: "persona",
+        //             select: "nombre apellido_paterno apellido_materno",
+        //             // $concat: ["$nombre", "$apellido_paterno", "$apellido_materno"]
+        //         },
+        //     });
 
         res.json({
             ok: true,
@@ -163,5 +197,6 @@ module.exports = {
     crear,
     getAnalista,
     actualizar,
+    getListaDesplegable,
     getListaDesplegablexProducto
 };

@@ -8,6 +8,7 @@ const OperacionFinancieraDetalle = require("../../../models/core/registro/operac
 const PagoOperacionFinanciera = require("../../../models/core/caja/operacion-financiera-pago.model");
 const PagoConcepto = require("../../../models/core/configuracion/pago-concepto.model");
 const Usuario = require("../../../models/core/seguridad/usuario.model");
+const Analista = require("../../../models/core/seguridad/analista.model");
 const Caja = require("../../../models/core/seguridad/caja.model");
 // const CajaDiario = require('../../../models/core/caja/caja-diario.model');
 // const Caja = require('../../../models/core/seguridad/caja.model');
@@ -115,7 +116,9 @@ const listar = async(req, res) => {
             lista = await PagoOperacionFinanciera.find({
                     // "comentario.[0].id_usuario": analista,
                     "recibo.serie": caja.serie,
-                    "comentario": { $elemMatch: { "id_usuario": analista } },
+                    "producto.analista": analista,
+                    "recibo.estado": "Previgente",
+                    // "comentario": { $elemMatch: { "id_usuario": analista } },
                     // "comentario": { "id_usuario": analista },
                     "es_vigente": true,
                     "es_borrado": false
@@ -150,6 +153,7 @@ const desembolsar_operacion_financiera = async(req, res) => {
 
     const id = req.params.id;
     const id_usuario_sesion = req.header("id_usuario_sesion");
+    const local_atencion = req.header("local_atencion");
     const now = dayjs();
     const ip = requestIp.getClientIp(req).replace("::ffff:", "");
 
@@ -168,6 +172,7 @@ const desembolsar_operacion_financiera = async(req, res) => {
         const data_validacion = {
             ip: ip,
             id_usuario_sesion: id_usuario_sesion,
+            local_atencion: local_atencion,
             es_ingreso: false,
             // caja: caja.id
         };
@@ -177,9 +182,31 @@ const desembolsar_operacion_financiera = async(req, res) => {
         if (!resultado_validacion.ok)
             return res.status(404).json(resultado_validacion);
 
-        const modelo = await OperacionFinanciera.findById(id);
+        const modelo = await OperacionFinanciera.findById(id)
+            .populate({
+                path: "producto.tipo",
+                select: "codigo descripcion",
+            })
+            .populate({
+                path: "persona",
+                select: "nombre apellido_paterno apellido_materno documento_identidad",
+            })
+            .populate({
+                path: "analista",
+                select: "usuario nombre_usuario documento_identidad_usuario"
+                    /*,
+                                populate: {
+                                    path: "usuario",
+                                    select: "persona",
+                                    populate: {
+                                        path: "persona",
+                                        select: "nombre apellido_paterno apellido_materno",
+                                    }
+                                }*/
+            });
         // modelo.desembolso.se_desembolso_prestamo = true;
 
+        // const analista = await Analista.findById({ '_id': modelo.analista._id });
         const monto_desembolso = modelo.monto_capital;
         const recibo = resultado_validacion.recibo;
 
@@ -190,7 +217,8 @@ const desembolsar_operacion_financiera = async(req, res) => {
                 serie: recibo.serie,
                 numero: recibo.numero,
                 fecha: recibo.fecha,
-                monto_desembolso: monto_desembolso
+                monto_desembolso: monto_desembolso,
+                es_vigente: true
             }
         };
 
@@ -226,20 +254,37 @@ const desembolsar_operacion_financiera = async(req, res) => {
             // caja_diario: caja_diario.id,
             caja: resultado_validacion.caja,
             // caja: caja.id,
+            cajero: resultado_validacion.cajero,
             estado: 'Abierto'
         };
 
         modelo_pago.recibo = {
             estado: 'Vigente',
+            local_atencion: req.header('local_atencion'),
+            documento_identidad_cajero: resultado_validacion.documento_identidad_cajero,
             serie: recibo.serie,
             numero: recibo.numero,
             fecha: recibo.fecha,
-            ejercicio: '2020',
-            monto_total: monto_desembolso.toFixed(1)
+            ejercicio: now.format('YYYY'),
+            monto_total: monto_desembolso.toFixed(1),
+            frase: ''
         };
 
         modelo_pago.producto = {
-            persona: id_socio,
+            producto: modelo.producto.tipo,
+            codigo: modelo.producto.codigo,
+            codigo: modelo.producto.descripcion,
+            codigo_programacion: modelo.producto.codigo_programacion,
+            descripcion_programacion: modelo.producto.descripcion_programacion,
+            persona: modelo.persona._id, //id_socio,
+            nombre_persona: modelo.persona.apellido_paterno +
+                ' ' + modelo.persona.apellido_materno +
+                ', ' + modelo.persona.nombre,
+            documento_identidad_persona: modelo.persona.documento_identidad, //TODO verificar
+            analista: modelo.analista._id, //TODO verificar
+            nombre_analista: modelo.analista.nombre_usuario, //TODO verificar
+            documento_identidad_analista: modelo.analista.documento_identidad_usuario,
+
             operacion_financiera: modelo.id,
             // monto_gasto: monto_total_gasto,
             // monto_ahorro_inicial: monto_total_ahorro_inicial,
@@ -248,6 +293,7 @@ const desembolsar_operacion_financiera = async(req, res) => {
             // monto_amortizacion_capital: monto_total_amortizacion_capital,
             // monto_interes: monto_total_interes,
             // monto_mora: monto_total_mora
+            es_desembolso: true,
             monto_desembolso: monto_desembolso
         };
 
@@ -283,22 +329,24 @@ const desembolsar_operacion_financiera = async(req, res) => {
                 frase: ''
             },
             persona: {
-                documento_identidad: documento_identidad_socio,
-                nombre_completo: nombres_apellidos_socio
+                documento_identidad: modelo.persona.documento_identidad,
+                nombre_completo: modelo.persona.apellido_paterno +
+                    ' ' + modelo.persona.apellido_materno +
+                    ', ' + modelo.persona.nombre
             },
 
 
             // documento_identidad_socio: documento_identidad_socio,
             // nombres_apellidos_socio: nombres_apellidos_socio,
-            analista: 'XXX XXX XXX',
+            analista: modelo.analista.nombre_usuario,
             // analista: modelo.analista.usuario.persona.nombre +
             //     ' ' + modelo.analista.usuario.persona.apellido_paterno +
             //     ' ' + modelo.analista.usuario.persona.apellido_materno,
 
             producto: {
-                descripcion: modelo.producto.tipo.descripcion,
+                descripcion: modelo.producto.programacion, //TODO corregir programacion
                 // cuota: 0,
-                monto_desembolso: monto_desembolso
+                monto_desembolso: monto_desembolso.toFixed(2)
                     // monto_gasto: monto_total_gasto.toFixed(2),
                     // monto_ahorro_inicial: monto_total_ahorro_inicial.toFixed(2),
                     // monto_ahorro_voluntario: monto_total_ahorro_voluntario.toFixed(2),
@@ -342,6 +390,8 @@ const pagar_operacion_financiera = async(req, res) => {
 
     // const { id_operacion_financiera } = req.body;
     const id_usuario_sesion = req.header('id_usuario_sesion');
+    const usuario_sesion = req.header('usuario_sesion');
+    const local_atencion = req.header("local_atencion");
     const ip = requestIp.getClientIp(req).replace('::ffff:', '');
     const now = dayjs();
 
@@ -360,6 +410,8 @@ const pagar_operacion_financiera = async(req, res) => {
         const data_validacion = {
             ip: ip,
             id_usuario_sesion: id_usuario_sesion,
+            local_atencion: local_atencion,
+            // cajero: usuario_sesion,
             es_ingreso: true,
             es_masivo: false
         };
@@ -404,12 +456,12 @@ const pagar_operacion_financiera = async(req, res) => {
                 frase: ''
             },
             persona: {
-                documento_identidad: documento_identidad_socio,
-                nombre_completo: nombres_apellidos_socio
+                documento_identidad: resultado_pago.model_operacion_financiera.persona.documento_identidad,
+                nombre_completo: resultado_pago.model_operacion_financiera.persona.nombre +
+                    ' ' + resultado_pago.model_operacion_financiera.persona.apellido_paterno +
+                    ' ' + resultado_pago.model_operacion_financiera.persona.apellido_materno
             },
-            analista: resultado_pago.model_operacion_financiera.analista.usuario.persona.nombre +
-                ' ' + resultado_pago.model_operacion_financiera.analista.usuario.persona.apellido_paterno +
-                ' ' + resultado_pago.model_operacion_financiera.analista.usuario.persona.apellido_materno,
+            analista: resultado_pago.model_operacion_financiera.analista.nombre_usuario,
             producto: {
                 descripcion: resultado_pago.model_operacion_financiera.producto.tipo.descripcion,
                 cuota: resultado_pago.cuota_menor === resultado_pago.cuota_mayor ? resultado_pago.cuota_menor : resultado_pago.cuota_menor + ' - ' + resultado_pago.cuota_mayor,
@@ -449,16 +501,29 @@ const pagar_operacion_financiera = async(req, res) => {
 const registrarIngresoEgreso = async(req, res = response) => {
     // const id_usuario_sesion = "5f48329023ab991c688ccca8"; //req.header("id_usuario_sesion");
     const id_usuario_sesion = req.header("id_usuario_sesion");
+    const local_atencion = req.header("local_atencion");
     // const ip = "192.168.1.31"; //requestIp.getClientIp(req).replace("::ffff:", "");
     const ip = requestIp.getClientIp(req).replace("::ffff:", "");
     const { es_ingreso } = req.body;
+    const now = dayjs();
+
     try {
         const data_validacion = {
             ip: ip,
             id_usuario_sesion: id_usuario_sesion,
+            local_atencion: local_atencion,
             es_ingreso,
             // caja: caja.id
             es_masivo: false
+        };
+
+        const comentario = {
+            tipo: 'Nuevo',
+            id_usuario: req.header('id_usuario_sesion'),
+            usuario: req.header('usuario_sesion'),
+            nombre: req.header('nombre_sesion'),
+            fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
+            comentario: 'Pago concepto realizado por cajero'
         };
 
         const resultado_validacion = await validarPago(data_validacion);
@@ -469,11 +534,15 @@ const registrarIngresoEgreso = async(req, res = response) => {
 
         const recibo = resultado_validacion.recibo;
 
+        // console.log(req.body)
+
         const modelo = new PagoOperacionFinanciera(req.body);
+
         modelo.diario = {
             caja_diario: resultado_validacion.caja_diario,
             // caja_diario: caja_diario.id,
             caja: resultado_validacion.caja,
+            cajero: resultado_validacion.cajero,
             // caja: caja.id,
             estado: "Abierto",
         };
@@ -481,31 +550,46 @@ const registrarIngresoEgreso = async(req, res = response) => {
 
         modelo.recibo = {
             estado: "Vigente",
+            local_atencion: recibo.local_atencion,
+            documento_identidad_cajero: resultado_validacion.documento_identidad_cajero,
             serie: recibo.serie,
             numero: recibo.numero,
             fecha: recibo.fecha,
-            ejercicio: "2020",
+            ejercicio: now.format('YYYY'),
             monto_total: req.body.monto,
+            frase: ''
         };
 
+        modelo.comentario.push(comentario);
+
+        // console.log(modelo)
+
         await modelo.save();
-        const responsable = await Usuario.findById(
-            modelo.concepto.responsable,
-            "id persona"
-        ).populate(
-            "persona",
-            "nombre apellido_paterno apellido_materno documento_identidad"
-        );
-        const documento_identidad_responsable =
-            responsable.persona.documento_identidad;
-        const nombres_apellidos_responsable =
-            responsable.persona.nombre +
-            ", " +
-            responsable.persona.apellido_paterno +
-            " " +
-            responsable.persona.apellido_materno;
-        const id = req.body.concepto.concepto;
-        const concepto = await PagoConcepto.findById(id);
+
+        // if (modelo.concepto.responsable) {
+
+        //     const responsable = await Usuario.findById(
+        //         modelo.concepto.responsable,
+        //         "id persona"
+        //     ).populate(
+        //         "persona",
+        //         "nombre apellido_paterno apellido_materno documento_identidad"
+        //     );
+        //     const documento_identidad_responsable =
+        //         responsable.persona.documento_identidad;
+        //     const nombres_apellidos_responsable =
+        //         responsable.persona.nombre +
+        //         ", " +
+        //         responsable.persona.apellido_paterno +
+        //         " " +
+        //         responsable.persona.apellido_materno;
+        // }
+
+        // const id = req.body.concepto.concepto;
+        // const concepto = await PagoConcepto.findById(id);
+
+        // console.log(modelo);
+        // console.log(concepto);
 
         // const data_recibo = {
         //     agencia: "Agencia Ayacucho",
@@ -538,8 +622,8 @@ const registrarIngresoEgreso = async(req, res = response) => {
             // },
 
             responsable: {
-                documento_identidad: documento_identidad_responsable,
-                nombre_completo: nombres_apellidos_responsable
+                documento_identidad: modelo.concepto.documento_identidad_responsable,
+                nombre_completo: modelo.concepto.nombre_responsable
             },
 
 
@@ -563,8 +647,13 @@ const registrarIngresoEgreso = async(req, res = response) => {
             //         // monto_mora: monto_total_mora.toFixed(2),
             // },
             concepto: {
-                descripcion: concepto.descripcion,
-                sub_concepto: 'XXX XXX XXX'
+                producto: modelo.es_ingreso ? 'Ingresos institución' : 'Egresos institución',
+                descripcion: modelo.concepto.descripcion,
+                sub_concepto: modelo.concepto.descripcion_sub_concepto,
+                detalle: modelo.concepto.detalle,
+                numero_comprobante: modelo.concepto.numero_comprobante
+                    // descripcion: concepto.descripcion,
+                    // sub_concepto: 'XXX XXX XXX'
             },
             recibo: {
                 usuario: req.header('usuario_sesion'),
@@ -642,7 +731,25 @@ const anular_recibo = async(req, res = response) => {
             await cuota.save();
         }
 
-        //TODO: anular recibo desembolso
+        //TODO validar que si hay pagos de cuota 0 no permita anular desembolso
+
+        if (modelo.producto.es_desembolso) {
+
+            const producto = await OperacionFinanciera.findById(modelo.producto.operacion_financiera);
+
+            producto.desembolso.se_desembolso_prestamo = false;
+            producto.desembolso.recibo = {};
+            producto.comentario.push({
+                tipo: 'Editado',
+                id_usuario: req.header('id_usuario_sesion'),
+                usuario: req.header('usuario_sesion'),
+                nombre: req.header('nombre_sesion'),
+                fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
+                comentario: comentario
+            });
+
+            await producto.save();
+        }
 
         return res.json({
             ok: true,
@@ -665,6 +772,7 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
 
     // const { id_operacion_financiera } = req.body;
     const id_usuario_sesion = req.header('id_usuario_sesion');
+    const local_atencion = req.header("local_atencion");
     const ip = requestIp.getClientIp(req).replace('::ffff:', '');
     const now = dayjs();
 
@@ -688,6 +796,7 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
         const data_validacion = {
             ip: ip,
             id_usuario_sesion: id_usuario_sesion,
+            local_atencion: local_atencion,
             es_ingreso: true,
             es_masivo: true
         };
@@ -786,7 +895,11 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
 
 const confirmar_pago_analista = async(req, res = response) => {
 
-    const id = req.params.id;
+    // const id = req.params.id;
+    const id_usuario_sesion = req.header('id_usuario_sesion');
+    const analista = req.params.analista;
+    const local_atencion = req.header("local_atencion");
+    const ip = requestIp.getClientIp(req).replace('::ffff:', '');
     const now = dayjs();
     // const {
     //     comentario
@@ -805,8 +918,33 @@ const confirmar_pago_analista = async(req, res = response) => {
             comentario: 'Confirmación de pagos de analista realizado por cajero'
         };
 
+        const data_validacion = {
+            ip: ip,
+            id_usuario_sesion: id_usuario_sesion,
+            local_atencion: local_atencion,
+            // cajero: usuario_sesion,
+            es_ingreso: true,
+            es_masivo: false
+        };
+
+        const resultado_validacion = await validarPago(data_validacion);
+
+        /*
+        return {
+        ok: true,
+        caja_diario: caja_diario.id,
+        caja: caja.id,
+        cajero: caja.usuario,
+        documento_identidad_cajero: caja.documento_identidad_cajero,
+        recibo,
+    };
+        */
+
         await PagoOperacionFinanciera.updateMany({
-            "comentario": { $elemMatch: { "id_usuario": id } },
+            // "recibo.serie": caja.serie,
+            "diario.caja_diario": resultado_validacion.caja_diario,
+            "producto.analista": analista,
+            // "comentario": { $elemMatch: { "id_usuario": id } },
             // "comentario": { "id_usuario": analista },
             "recibo.estado": "Previgente",
             "es_vigente": true,
@@ -845,6 +983,8 @@ const confirmar_pago_analista = async(req, res = response) => {
 const crear_pagar_ahorro = async(req, res) => {
 
     const id_usuario_sesion = req.header('id_usuario_sesion');
+    const local_atencion = req.header("local_atencion");
+    // const usuario_sesion = req.header('usuario_sesion');
     const ip = requestIp.getClientIp(req).replace('::ffff:', '');
     const now = dayjs();
 
@@ -877,6 +1017,8 @@ const crear_pagar_ahorro = async(req, res) => {
         const operacion_financiera = new OperacionFinanciera(req.body);
         // const operacion_financiera = new OperacionFinanciera(req.body);
         const now = dayjs();
+
+        operacion_financiera.local_atencion = req.header('local_atencion');
 
         operacion_financiera.comentario = [{
             tipo: 'Nuevo',
@@ -931,6 +1073,8 @@ const crear_pagar_ahorro = async(req, res) => {
         const data_validacion = {
             ip: ip,
             id_usuario_sesion: id_usuario_sesion,
+            local_atencion: local_atencion,
+            // cajero: req.header('usuario_sesion'),
             es_ingreso: true,
             es_masivo: false
         };
@@ -983,6 +1127,44 @@ const crear_pagar_ahorro = async(req, res) => {
 
         const resultado_pago = await pagarAhorro(data);
 
+        // const data_recibo = {
+
+        //     institucion: {
+        //         // denominacion: 'Buenavista La Bolsa S.A.C.',
+        //         denominacion: 'BUENAVISTA LA BOLSA S.A.C.',
+        //         agencia: 'Agencia Ayacucho',
+        //         ruc: '20574744599',
+        //         frase: ''
+        //     },
+        //     persona: {
+        //         documento_identidad: '12345678', //documento_identidad_socio,
+        //         nombre_completo: 'XXX XXX XXX', //nombres_apellidos_socio
+        //     },
+        //     // analista: resultado_pago.model_operacion_financiera.analista.usuario.persona.nombre +
+        //     //     ' ' + resultado_pago.model_operacion_financiera.analista.usuario.persona.apellido_paterno +
+        //     //     ' ' + resultado_pago.model_operacion_financiera.analista.usuario.persona.apellido_materno,
+        //     producto: {
+        //         descripcion: resultado_pago.model_operacion_financiera.producto.tipo.descripcion,
+        //         // cuota: resultado_pago.cuota_menor === resultado_pago.cuota_mayor ? resultado_pago.cuota_menor : resultado_pago.cuota_menor + ' - ' + resultado_pago.cuota_mayor,
+        //         // monto_gasto: resultado_pago.monto_total_gasto.toFixed(2),
+        //         // monto_ahorro_inicial: resultado_pago.monto_total_ahorro_inicial.toFixed(2),
+        //         monto_ahorro_voluntario: resultado_pago.monto_total_ahorro_voluntario //.toFixed(2),
+        //             // monto_ahorro_programado: resultado_pago.monto_total_ahorro_programado.toFixed(2),
+        //             // monto_amortizacion_capital: resultado_pago.monto_total_amortizacion_capital.toFixed(2),
+        //             // monto_interes: resultado_pago.monto_total_interes.toFixed(2),
+        //             // monto_mora: resultado_pago.monto_total_mora.toFixed(2),
+        //     },
+        //     recibo: {
+        //         usuario: req.header('usuario_sesion'),
+        //         numero: recibo.numero,
+        //         fecha: recibo.fecha,
+        //         tipo_impresion: 'Original',
+        //         monto_total: resultado_pago.monto_total //.toFixed(2)
+        //     }
+        // };
+
+        // console.log(resultado_pago);
+
         const data_recibo = {
 
             institucion: {
@@ -993,8 +1175,10 @@ const crear_pagar_ahorro = async(req, res) => {
                 frase: ''
             },
             persona: {
-                documento_identidad: '12345678', //documento_identidad_socio,
-                nombre_completo: 'XXX XXX XXX', //nombres_apellidos_socio
+                documento_identidad: resultado_pago.model_operacion_financiera.persona.documento_identidad,
+                nombre_completo: resultado_pago.model_operacion_financiera.persona.nombre +
+                    ' ' + resultado_pago.model_operacion_financiera.persona.apellido_paterno +
+                    ' ' + resultado_pago.model_operacion_financiera.persona.apellido_materno
             },
             // analista: resultado_pago.model_operacion_financiera.analista.usuario.persona.nombre +
             //     ' ' + resultado_pago.model_operacion_financiera.analista.usuario.persona.apellido_paterno +
@@ -1004,18 +1188,19 @@ const crear_pagar_ahorro = async(req, res) => {
                 // cuota: resultado_pago.cuota_menor === resultado_pago.cuota_mayor ? resultado_pago.cuota_menor : resultado_pago.cuota_menor + ' - ' + resultado_pago.cuota_mayor,
                 // monto_gasto: resultado_pago.monto_total_gasto.toFixed(2),
                 // monto_ahorro_inicial: resultado_pago.monto_total_ahorro_inicial.toFixed(2),
-                monto_ahorro_voluntario: resultado_pago.monto_total_ahorro_voluntario //.toFixed(2),
-                    // monto_ahorro_programado: resultado_pago.monto_total_ahorro_programado.toFixed(2),
-                    // monto_amortizacion_capital: resultado_pago.monto_total_amortizacion_capital.toFixed(2),
-                    // monto_interes: resultado_pago.monto_total_interes.toFixed(2),
-                    // monto_mora: resultado_pago.monto_total_mora.toFixed(2),
+                monto_ahorro_voluntario: resultado_pago.monto_recibido.toFixed(2),
+                // monto_ahorro_programado: resultado_pago.monto_total_ahorro_programado.toFixed(2),
+                // monto_amortizacion_capital: resultado_pago.monto_total_amortizacion_capital.toFixed(2),
+                // monto_interes: resultado_pago.monto_total_interes.toFixed(2),
+                // monto_mora: resultado_pago.monto_total_mora.toFixed(2),
             },
             recibo: {
                 usuario: req.header('usuario_sesion'),
                 numero: recibo.numero,
                 fecha: recibo.fecha,
                 tipo_impresion: 'Original',
-                monto_total: resultado_pago.monto_total //.toFixed(2)
+                monto_total: resultado_pago.monto_total.toFixed(2)
+                    // monto_total: resultado_pago.monto_total.toFixed(2)
             }
         };
 
@@ -1041,6 +1226,7 @@ const crear_pagar_ahorro = async(req, res) => {
 const pagar_ahorro = async(req, res) => {
 
     const id_usuario_sesion = req.header('id_usuario_sesion');
+    const local_atencion = req.header("local_atencion");
     const ip = requestIp.getClientIp(req).replace('::ffff:', '');
     const now = dayjs();
 
@@ -1060,6 +1246,7 @@ const pagar_ahorro = async(req, res) => {
         const data_validacion = {
             ip: ip,
             id_usuario_sesion: id_usuario_sesion,
+            local_atencion: local_atencion,
             es_ingreso: es_ingreso,
             es_masivo: false
         };
@@ -1112,6 +1299,44 @@ const pagar_ahorro = async(req, res) => {
 
         const resultado_pago = await pagarAhorro(data);
 
+        // const data_recibo = {
+
+        //     institucion: {
+        //         // denominacion: 'Buenavista La Bolsa S.A.C.',
+        //         denominacion: 'BUENAVISTA LA BOLSA S.A.C.',
+        //         agencia: 'Agencia Ayacucho',
+        //         ruc: '20574744599',
+        //         frase: ''
+        //     },
+        //     persona: {
+        //         documento_identidad: documento_identidad_socio,
+        //         nombre_completo: nombres_apellidos_socio
+        //     },
+        //     // analista: resultado_pago.model_operacion_financiera.analista.usuario.persona.nombre +
+        //     //     ' ' + resultado_pago.model_operacion_financiera.analista.usuario.persona.apellido_paterno +
+        //     //     ' ' + resultado_pago.model_operacion_financiera.analista.usuario.persona.apellido_materno,
+        //     producto: {
+        //         descripcion: resultado_pago.model_operacion_financiera.producto.tipo.descripcion,
+        //         // cuota: resultado_pago.cuota_menor === resultado_pago.cuota_mayor ? resultado_pago.cuota_menor : resultado_pago.cuota_menor + ' - ' + resultado_pago.cuota_mayor,
+        //         // monto_gasto: resultado_pago.monto_total_gasto.toFixed(2),
+        //         // monto_ahorro_inicial: resultado_pago.monto_total_ahorro_inicial.toFixed(2),
+        //         monto_ahorro_voluntario: resultado_pago.monto_total_ahorro_voluntario //.toFixed(2),
+        //             // monto_ahorro_programado: resultado_pago.monto_total_ahorro_programado.toFixed(2),
+        //             // monto_amortizacion_capital: resultado_pago.monto_total_amortizacion_capital.toFixed(2),
+        //             // monto_interes: resultado_pago.monto_total_interes.toFixed(2),
+        //             // monto_mora: resultado_pago.monto_total_mora.toFixed(2),
+        //     },
+        //     recibo: {
+        //         usuario: req.header('usuario_sesion'),
+        //         numero: recibo.numero,
+        //         fecha: recibo.fecha,
+        //         tipo_impresion: 'Original',
+        //         monto_total: resultado_pago.monto_total //.toFixed(2)
+        //     }
+        // };
+
+        // console.log(resultado_pago)
+
         const data_recibo = {
 
             institucion: {
@@ -1122,8 +1347,10 @@ const pagar_ahorro = async(req, res) => {
                 frase: ''
             },
             persona: {
-                documento_identidad: documento_identidad_socio,
-                nombre_completo: nombres_apellidos_socio
+                documento_identidad: resultado_pago.model_operacion_financiera.persona.documento_identidad,
+                nombre_completo: resultado_pago.model_operacion_financiera.persona.nombre +
+                    ' ' + resultado_pago.model_operacion_financiera.persona.apellido_paterno +
+                    ' ' + resultado_pago.model_operacion_financiera.persona.apellido_materno
             },
             // analista: resultado_pago.model_operacion_financiera.analista.usuario.persona.nombre +
             //     ' ' + resultado_pago.model_operacion_financiera.analista.usuario.persona.apellido_paterno +
@@ -1133,18 +1360,19 @@ const pagar_ahorro = async(req, res) => {
                 // cuota: resultado_pago.cuota_menor === resultado_pago.cuota_mayor ? resultado_pago.cuota_menor : resultado_pago.cuota_menor + ' - ' + resultado_pago.cuota_mayor,
                 // monto_gasto: resultado_pago.monto_total_gasto.toFixed(2),
                 // monto_ahorro_inicial: resultado_pago.monto_total_ahorro_inicial.toFixed(2),
-                monto_ahorro_voluntario: resultado_pago.monto_total_ahorro_voluntario //.toFixed(2),
-                    // monto_ahorro_programado: resultado_pago.monto_total_ahorro_programado.toFixed(2),
-                    // monto_amortizacion_capital: resultado_pago.monto_total_amortizacion_capital.toFixed(2),
-                    // monto_interes: resultado_pago.monto_total_interes.toFixed(2),
-                    // monto_mora: resultado_pago.monto_total_mora.toFixed(2),
+                monto_ahorro_voluntario: es_ingreso ? Number(resultado_pago.monto_recibido).toFixed(2) : 0,
+                monto_retiro_ahorro_voluntario: es_ingreso ? 0 : Number(resultado_pago.monto_recibido).toFixed(2),
+                // monto_ahorro_programado: resultado_pago.monto_total_ahorro_programado.toFixed(2),
+                // monto_amortizacion_capital: resultado_pago.monto_total_amortizacion_capital.toFixed(2),
+                // monto_interes: resultado_pago.monto_total_interes.toFixed(2),
+                // monto_mora: resultado_pago.monto_total_mora.toFixed(2),
             },
             recibo: {
                 usuario: req.header('usuario_sesion'),
                 numero: recibo.numero,
                 fecha: recibo.fecha,
                 tipo_impresion: 'Original',
-                monto_total: resultado_pago.monto_total //.toFixed(2)
+                monto_total: resultado_pago.monto_total.toFixed(2)
             }
         };
 

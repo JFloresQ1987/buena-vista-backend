@@ -6,7 +6,7 @@ const validarJWT = (req, res = response, next) => {
     const token = req.header('x-token');
 
     if (!token) {
-        return res.status(400).json({
+        return res.status(404).json({
             ok: false,
             msg: 'No hay token en la petición.'
         });
@@ -31,21 +31,25 @@ const validarJWT = (req, res = response, next) => {
 const validarAuthorization = async(req, res, next) => {
 
     const id = req.id;
+    // const roles = rol ? rol : 'Administrador'
 
     try {
 
         const modelo = await usuario.findById(id);
 
         if (!modelo)
-            res.status(400).json({
+            res.status(404).json({
                 ok: false,
                 msg: 'Usuario no existe.'
             });
 
-        if (modelo.rol.includes('Administrador'))
+        // if (modelo.rol.includes(roles))
+        if (modelo.rol.includes('Administrador') ||
+            modelo.rol.includes('Analista') ||
+            modelo.rol.includes('Cajero'))
             next();
         else
-            res.status(400).json({
+            res.status(404).json({
                 ok: false,
                 msg: 'Usuario no autorizado.'
             });

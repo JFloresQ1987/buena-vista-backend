@@ -87,8 +87,11 @@ const actualizar = async(req, res = response) => {
 
         modelo.descripcion = req.body.descripcion,
             modelo.ip = req.body.ip,
+            modelo.codigo = req.body.codigo,
             modelo.pc_nombre = req.body.pc_nombre,
             modelo.usuario = req.body.usuario,
+            modelo.nombre_usuario = req.body.nombre_usuario,
+            modelo.documento_identidad_usuario = req.body.documento_identidad_usuario,
             modelo.serie = req.body.serie,
             modelo.es_caja_principal = req.body.es_caja_principal,
             modelo.local_atencion = req.body.local_atencion,

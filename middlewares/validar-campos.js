@@ -3,11 +3,11 @@ const { validationResult } = require('express-validator');
 
 const validarCampos = (req, res = response, next) => {
 
-    const validaciones = validationResult( req );    
+    const validaciones = validationResult(req);
 
-    if(!validaciones.isEmpty()){
-        
-        return res.status(400).json({
+    if (!validaciones.isEmpty()) {
+
+        return res.status(404).json({
             ok: false,
             msg: validaciones.mapped()
         });

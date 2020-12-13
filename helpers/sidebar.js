@@ -25,34 +25,34 @@ const getMenu = (rol) => {
                 { opcion: 'Gestionar Ahorros', url: '/operaciones/gestion/ahorro-consulta' },
                 { opcion: 'Consultar Productos Históricos', url: '/operaciones/consulta/producto-historico' }
             ]
-        },
-        {
-            opcion: 'Caja',
-            icono: 'mdi mdi-cart',
-            submenu: [
-                { opcion: 'Pagar Producto', url: '/caja/pago/producto-caja' },
-                { opcion: 'Pagar Ahorro', url: 'caja/pago/ahorro-caja' },
-                // { opcion: 'Confirmar pago de analistas', url: '/caja/pago/confirmar-pago-analista' },
-                { opcion: 'Realizar Ingresos - Egresos', url: '/caja/gestion/ingresos-egresos' },
-                // { opcion: 'Apertura de caja general', url: '/registro/gestion/cierre-caja' },
-                // { opcion: 'Apertura de caja individual', url: '/registro/gestion/cierre-caja' },
-                // { opcion: 'Cierre de caja general', url: '/registro/gestion/cierre-caja-general' },
-                { opcion: 'Cerrar Caja Individual', url: '/caja/pago/cierre-caja-individual' },
-                { opcion: 'Consultar Cajas Individuales', url: '/caja/pago/cajas-lista' },
-                { opcion: 'Gestionar Transacciones', url: '/caja/gestion/lista-recibo' },
-                // { opcion: 'Anular recibo', url: '/registro/gestion/cierre-caja' },
-                // { opcion: 'Duplicado de recibo', url: '/registro/gestion/cierre-caja' }
-            ]
-        },
-        {
-            opcion: 'Analista',
-            icono: 'mdi mdi-gauge',
-            submenu: [
-                // { opcion: 'Ingresos y egresos', url: '/registro/gestion/caja-ingresos-egresos' },
-                // { opcion: 'Cierre de caja', url: '/registro/gestion/cierre-caja' }
-                { opcion: 'Registrar Recaudación', url: '/analista/gestion/producto-pre-pago' }
-            ]
         }
+        // {
+        //     opcion: 'Caja',
+        //     icono: 'mdi mdi-cart',
+        //     submenu: [
+        //         { opcion: 'Pagar Producto', url: '/caja/pago/producto-caja' },
+        //         { opcion: 'Pagar Ahorro', url: 'caja/pago/ahorro-caja' },
+        //         // { opcion: 'Confirmar pago de analistas', url: '/caja/pago/confirmar-pago-analista' },
+        //         { opcion: 'Realizar Ingresos - Egresos', url: '/caja/gestion/ingresos-egresos' },
+        //         // { opcion: 'Apertura de caja general', url: '/registro/gestion/cierre-caja' },
+        //         // { opcion: 'Apertura de caja individual', url: '/registro/gestion/cierre-caja' },
+        //         // { opcion: 'Cierre de caja general', url: '/registro/gestion/cierre-caja-general' },
+        //         { opcion: 'Cerrar Caja Individual', url: '/caja/pago/cierre-caja-individual' },
+        //         { opcion: 'Consultar Cajas Individuales', url: '/caja/pago/cajas-lista' },
+        //         { opcion: 'Gestionar Transacciones', url: '/caja/gestion/lista-recibo' },
+        //         // { opcion: 'Anular recibo', url: '/registro/gestion/cierre-caja' },
+        //         // { opcion: 'Duplicado de recibo', url: '/registro/gestion/cierre-caja' }
+        //     ]
+        // },
+        // {
+        //     opcion: 'Analista',
+        //     icono: 'mdi mdi-gauge',
+        //     submenu: [
+        //         // { opcion: 'Ingresos y egresos', url: '/registro/gestion/caja-ingresos-egresos' },
+        //         // { opcion: 'Cierre de caja', url: '/registro/gestion/cierre-caja' }
+        //         { opcion: 'Registrar Recaudación', url: '/analista/gestion/producto-pre-pago' }
+        //     ]
+        // }
     ];
 
     if (rol.includes('Administrador')) {
@@ -78,6 +78,41 @@ const getMenu = (rol) => {
                         ]
                     }*/
         );
+    }
+
+    if (rol.includes('Administrador') || rol.includes('Analista')) {
+        // menu[1].submenu.unshift({});
+        menu.push({
+            opcion: 'Analista',
+            icono: 'mdi mdi-gauge',
+            submenu: [
+                // { opcion: 'Ingresos y egresos', url: '/registro/gestion/caja-ingresos-egresos' },
+                // { opcion: 'Cierre de caja', url: '/registro/gestion/cierre-caja' }
+                { opcion: 'Registrar Recaudación', url: '/analista/gestion/producto-pre-pago' }
+            ]
+        });
+    }
+
+    if (rol.includes('Administrador') || rol.includes('Cajero')) {
+        // menu[1].submenu.unshift({});
+        menu.push({
+            opcion: 'Caja',
+            icono: 'mdi mdi-cart',
+            submenu: [
+                { opcion: 'Pagar Producto', url: '/caja/pago/producto-caja' },
+                { opcion: 'Pagar Ahorro', url: 'caja/pago/ahorro-caja' },
+                // { opcion: 'Confirmar pago de analistas', url: '/caja/pago/confirmar-pago-analista' },
+                { opcion: 'Realizar Ingresos - Egresos', url: '/caja/gestion/ingresos-egresos' },
+                // { opcion: 'Apertura de caja general', url: '/registro/gestion/cierre-caja' },
+                // { opcion: 'Apertura de caja individual', url: '/registro/gestion/cierre-caja' },
+                // { opcion: 'Cierre de caja general', url: '/registro/gestion/cierre-caja-general' },
+                { opcion: 'Cerrar Caja Individual', url: '/caja/pago/cierre-caja-individual' },
+                { opcion: 'Consultar Cajas Individuales', url: '/caja/pago/cajas-lista' },
+                { opcion: 'Gestionar Transacciones', url: '/caja/gestion/lista-recibo' },
+                // { opcion: 'Anular recibo', url: '/registro/gestion/cierre-caja' },
+                // { opcion: 'Duplicado de recibo', url: '/registro/gestion/cierre-caja' }
+            ]
+        });
     }
 
     return menu;

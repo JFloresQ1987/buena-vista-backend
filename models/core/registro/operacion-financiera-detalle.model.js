@@ -27,11 +27,11 @@ const modelo = {
         ref: 'Persona',
         required: true
     },
-    // analista: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'Persona',
-    //     required: true
-    // }
+    analista: {
+        type: Schema.Types.ObjectId,
+        ref: 'Analista',
+        // required: true
+    },
     // producto: {
     //     type: String,
     //     required: true,
@@ -330,11 +330,11 @@ schema.method('toJSON', function() {
     object.monto_ahorro_programado = ahorros.monto_ahorro_programado.toFixed(2)
     object.ingresos = ingresos;
     object.ahorros = ahorros;
-    object.monto_amortizacion_capital_2=ingresos.monto_amortizacion_capital;
-    object.monto_interes_2=ingresos.monto_interes;
-    object.monto_cuota_2=(ingresos.monto_gasto + ahorros.monto_ahorro_inicial +
+    object.monto_amortizacion_capital_2 = ingresos.monto_amortizacion_capital;
+    object.monto_interes_2 = ingresos.monto_interes;
+    object.monto_cuota_2 = (ingresos.monto_gasto + ahorros.monto_ahorro_inicial +
         ingresos.monto_amortizacion_capital + ingresos.monto_interes + ahorros.monto_ahorro_programado);
-    object.monto_ahorro_programado_2=ahorros.monto_ahorro_programado;
+    object.monto_ahorro_programado_2 = ahorros.monto_ahorro_programado;
     object.monto_cuota_pagada = 0;
     object.monto_ahorro_voluntario = 0;
     object.monto_pago_mora = 0;

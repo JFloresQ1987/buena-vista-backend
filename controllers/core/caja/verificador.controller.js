@@ -97,35 +97,70 @@ const verificarIntegridadRecibo = async(req, res = response) => {
         es_borrado: false,
     });
 
-    const operaciones = await Operaciones.find({
+    const operaciones_ingresos = await Operaciones.find({
             "diario.caja_diario": cajaDiario._id,
+            "es_ingreso": true,
             // "recibo.estado": "Vigente",
         },
         "recibo.numero"
     );
 
-    let matrizControl = [];
-    let matrizRecibo = [];
+    const operaciones_egresos = await Operaciones.find({
+            "diario.caja_diario": cajaDiario._id,
+            "es_ingreso": false,
+            // "recibo.estado": "Vigente",
+        },
+        "recibo.numero"
+    );
+
+    let matrizControl_ingresos = [];
+    let matrizRecibo_ingresos = [];
+    let matrizControl_egresos = [];
+    let matrizRecibo_egresos = [];
     let listaReciboError = [];
     let a = 0;
     let err = true;
 
-    for (let i = 0; i < operaciones.length; i++) {
-        const e = Number(operaciones[0].recibo.numero.slice(-8));
+    for (let i = 0; i < operaciones_ingresos.length; i++) {
+        const e = Number(operaciones_ingresos[0].recibo.numero.slice(-8));
         a = e - 1;
     }
 
-    operaciones.forEach((e) => {
+    operaciones_ingresos.forEach((e) => {
         let convertir = Number(e.recibo.numero.slice(-8));
         a++;
-        matrizControl.push(a);
-        matrizRecibo.push(convertir);
+        matrizControl_ingresos.push(a);
+        matrizRecibo_ingresos.push(convertir);
     });
-    console.log(matrizControl);
-    console.log(matrizRecibo);
 
-    matrizControl.forEach((e) => {
-        if (!matrizRecibo.includes(e)) {
+    for (let i = 0; i < operaciones_egresos.length; i++) {
+        const e = Number(operaciones_egresos[0].recibo.numero.slice(-8));
+        a = e - 1;
+    }
+
+    operaciones_egresos.forEach((e) => {
+        let convertir = Number(e.recibo.numero.slice(-8));
+        a++;
+        matrizControl_egresos.push(a);
+        matrizRecibo_egresos.push(convertir);
+    });
+
+    console.log(matrizControl_ingresos);
+    console.log(matrizRecibo_ingresos);
+    console.log(matrizControl_egresos);
+    console.log(matrizRecibo_egresos);
+
+    matrizControl_ingresos.forEach((e) => {
+        if (!matrizRecibo_ingresos.includes(e)) {
+            err = false;
+            listaReciboError.push(e);
+            // console.log(`No existe el recibo ${e}`);
+            return;
+        }
+    });
+
+    matrizControl_egresos.forEach((e) => {
+        if (!matrizRecibo_egresos.includes(e)) {
             err = false;
             listaReciboError.push(e);
             // console.log(`No existe el recibo ${e}`);

@@ -17,7 +17,12 @@ const crear = async(req, res = response) => {
         const opts = { session };
 
         const operacion_financiera = new OperacionFinanciera(req.body);
+
+        // console.log(req.body);
+
         const now = dayjs();
+
+        operacion_financiera.local_atencion = req.header('local_atencion');
 
         operacion_financiera.comentario = [{
             tipo: 'Nuevo',
@@ -333,12 +338,13 @@ const listar_operacion_financiera = async(req, res) => {
 const listar_operaciones_financieras_por_analista = async(req, res) => {
     // const { id } = req.body;
     const id_usuario = req.header("id_usuario_sesion");
+    const local_atencion = req.header("local_atencion");
 
     // const id_analista = req.params.id_analista;
 
     try {
 
-        const analista = await Analista.findOne({ usuario: id_usuario });
+        const analista = await Analista.findOne({ usuario: id_usuario /*, local_atencion: local_atencion*/ }); //TODO habilitar local de atencion
 
         //TODO: verificar estado vigente en el producto
         let lista = [];
@@ -348,7 +354,8 @@ const listar_operaciones_financieras_por_analista = async(req, res) => {
                 analista: analista.id,
                 estado: { $in: ["Vigente"] },
                 es_borrado: false,
-            });
+            })
+            .populate("persona", "nombre apellido_paterno apellido_materno documento_identidad");
         // .populate('producto.tipo', 'descripcion');
 
         res.json({

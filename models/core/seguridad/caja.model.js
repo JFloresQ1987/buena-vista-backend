@@ -4,6 +4,11 @@ const { schemaAuditoria } = require('../../auditoria');
 
 const schema = {
 
+    codigo: {
+        type: String,
+        default: "",
+        // required: true,
+    },
     descripcion: {
         type: String,
         required: true,
@@ -12,9 +17,9 @@ const schema = {
         type: String,
         // required: true,
         jsonSchema: {
-            enum: ["Ayacucho", "Huanta", "San Francisco"],
+            enum: ["Agencia Ayacucho", "Agencia Huanta", "Agencia San Francisco"],
         },
-        default: 'Ayacucho'
+        default: 'Agencia Ayacucho'
     },
     ip: {
         type: String,
@@ -38,6 +43,16 @@ const schema = {
         type: Schema.Types.ObjectId,
         ref: 'Usuario',
         required: true
+    },
+    nombre_usuario: {
+        type: String,
+        default: "",
+        // required: true,
+    },
+    documento_identidad_usuario: {
+        type: String,
+        default: "",
+        // required: true,
     },
     comentario: {
         type: [Object],

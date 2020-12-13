@@ -14,6 +14,22 @@ const modelo = {
             ref: 'Producto',
             required: true
         },
+        codigo: {
+            type: String,
+            // required: true,
+            // jsonSchema: {
+            //     enum: ["inverse", "info", "primary", "danger", "warning", "success"],
+            // },
+            default: ''
+        },
+        descripcion: {
+            type: String,
+            // required: true,
+            // jsonSchema: {
+            //     enum: ["inverse", "info", "primary", "danger", "warning", "success"],
+            // },
+            default: ''
+        },
         codigo_programacion: {
             type: String,
             // required: true,
@@ -121,6 +137,14 @@ const modelo = {
         ref: 'Analista',
         // required: true
     },
+    local_atencion: {
+        type: String,
+        // required: true,
+        jsonSchema: {
+            enum: ["Agencia Ayacucho", "Agencia Huanta", "Agencia San Francisco"],
+        },
+        default: 'Agencia Ayacucho'
+    },
     // programacion: {
     //     type: String,
     //     required: true,
@@ -169,6 +193,10 @@ const modelo = {
         type: String,
         // required: true,
         default: ''
+    },
+    ejercicio: {
+        type: String,
+        // required: true
     },
     monto_gasto: {
         type: Number,

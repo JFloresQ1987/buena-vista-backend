@@ -4,17 +4,22 @@ const { schemaAuditoria } = require('../../auditoria');
 
 const modelo = {
 
+    codigo: {
+        type: String,
+        required: true,
+        unique: true
+    },
     descripcion: {
         type: String,
         required: true,
         default: ''
     },
-    abreviatura: {
-        type: String,
-        required: true,
-        default: ''
-    },
     es_prestamo: {
+        type: Boolean,
+        required: true,
+        default: true
+    },
+    es_personal: {
         type: Boolean,
         required: true,
         default: true
@@ -30,6 +35,11 @@ const modelo = {
     comentario: {
         type: [Object],
         default: []
+    },
+    color: {
+        type: String,
+        required: true,
+        default: ''
     }
 };
 

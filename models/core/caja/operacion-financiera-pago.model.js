@@ -16,6 +16,10 @@ const modelo = {
             ref: 'Caja',
             required: true
         },
+        cajero: {
+            type: Schema.Types.ObjectId,
+            ref: 'Usuario',
+        },
         estado: {
             type: String,
             required: true,
@@ -24,11 +28,6 @@ const modelo = {
             },
             default: 'Abierto'
         }
-        // cajero: {
-        //     type: Schema.Types.ObjectId,
-        //     ref: 'Persona',
-        //     // required: true
-        // }
         // },
         // default: {}
     },
@@ -67,13 +66,31 @@ const modelo = {
             },
             default: 'Previgente'
         },
+        // institucion: {
+        //     type: String,
+        //     default: 'BUENAVISTA LA BOLSA S.A.C.'
+        //         // ref: 'Persona',
+        //         // required: true
+        // },
+        // ruc: {
+        //     type: String,
+        //     default: '20574744599'
+        //         // ref: 'Persona',
+        //         // required: true
+        // },
         local_atencion: {
             type: String,
             // required: true,
             jsonSchema: {
-                enum: ["Ayacucho", "Huanta", "San Francisco"],
+                enum: ["Agencia Ayacucho", "Agencia Huanta", "Agencia San Francisco"],
             },
-            default: 'Ayacucho'
+            default: 'Agencia Ayacucho'
+        },
+        documento_identidad_cajero: {
+            type: String,
+            default: ''
+                // ref: 'Persona',
+                // required: true
         },
         serie: {
             type: String,
@@ -94,16 +111,67 @@ const modelo = {
         monto_total: {
             type: Number,
             required: true
-        }
+        },
         // },
         // default: {}
+        frase: {
+            type: String,
+            default: ''
+                // ref: 'Persona',
+                // required: true
+        }
     },
     producto: {
         // type: {
+        producto: {
+            type: Schema.Types.ObjectId,
+            ref: 'Producto'
+        },
+        codigo: {
+            type: String,
+            default: ''
+        },
+        descripcion: {
+            type: String,
+            default: ''
+        },
+        codigo_programacion: {
+            type: String,
+            default: ''
+        },
+        descripcion_programacion: {
+            type: String,
+            default: ''
+        },
         persona: {
             type: Schema.Types.ObjectId,
             ref: 'Persona',
             // required: true
+        },
+        nombre_persona: {
+            type: String,
+            default: ''
+                // required: true
+        },
+        documento_identidad_persona: {
+            type: String,
+            default: ''
+                // required: true
+        },
+        analista: {
+            type: Schema.Types.ObjectId,
+            ref: 'Analista'
+                // required: true
+        },
+        nombre_analista: {
+            type: String,
+            default: ''
+                // required: true
+        },
+        documento_identidad_analista: {
+            type: String,
+            default: ''
+                // required: true
         },
         operacion_financiera: {
             type: Schema.Types.ObjectId,
@@ -199,14 +267,42 @@ const modelo = {
             ref: 'Concepto',
             // required: true
         },
+        codigo_concepto: {
+            type: String,
+            default: ''
+                // required: true
+        },
+        descripcion: {
+            type: String,
+            default: ''
+                // required: true
+        },
         sub_concepto: {
             type: Schema.Types.ObjectId,
             // required: true
             // default: ''
         },
+        codigo_sub_concepto: {
+            type: String,
+            default: ''
+                // required: true
+        },
+        descripcion_sub_concepto: {
+            type: String,
+            default: ''
+        },
         responsable: {
             type: Schema.Types.ObjectId,
             ref: 'Usuario'
+                // required: true
+        },
+        nombre_responsable: {
+            type: String,
+            default: ''
+        },
+        documento_identidad_responsable: {
+            type: String,
+            default: ''
                 // required: true
         },
         // monto_total: {
@@ -217,12 +313,12 @@ const modelo = {
         numero_comprobante: {
             type: String,
             // required: true
-            // default: ''
+            default: ''
         },
         detalle: {
             type: String,
             // required: true
-            // default: ''
+            default: ''
         }
         // },
         // default: {}

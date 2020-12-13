@@ -16,6 +16,9 @@ const listar_operaciones_financieras_detalle = async(req, res) => {
             es_vigente: true,
         }).sort({ numero_cuota: 1 });
 
+        // console.log(id_operacion_financiera)
+        // console.log(lista)
+
         res.json({
             ok: true,
             lista,

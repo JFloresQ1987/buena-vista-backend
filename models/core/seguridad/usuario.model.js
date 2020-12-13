@@ -18,6 +18,14 @@ const schema = {
         type: String,
         required: true
     },
+    local_atencion: {
+        type: String,
+        // required: true,
+        jsonSchema: {
+            enum: ["Agencia Ayacucho", "Agencia Huanta", "Agencia San Francisco"],
+        },
+        default: 'Agencia Ayacucho'
+    },
     rol: {
         type: [String],
         default: []

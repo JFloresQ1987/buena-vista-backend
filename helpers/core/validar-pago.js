@@ -12,6 +12,7 @@ const validarPago = async(data) => {
         caja = await Caja.findOne({
             // ip: data.ip,
             // usuario: data.id_usuario_sesion,
+            local_atencion: data.local_atencion,
             es_caja_principal: true,
             es_vigente: true,
             es_borrado: false,
@@ -20,6 +21,7 @@ const validarPago = async(data) => {
 
         caja = await Caja.findOne({
             ip: data.ip,
+            local_atencion: data.local_atencion,
             usuario: data.id_usuario_sesion,
             es_vigente: true,
             es_borrado: false,
@@ -102,6 +104,9 @@ const validarPago = async(data) => {
     if (!caja_diario) {
         const apertura_caja_diario = new CajaDiario();
         apertura_caja_diario.caja = caja.id;
+        apertura_caja_diario.cajero = caja.usuario;
+        apertura_caja_diario.nombre_cajero = caja.nombre_usuario;
+        apertura_caja_diario.documento_identidad_cajero = caja.documento_identidad_usuario;
         apertura_caja_diario.estado = "Abierto";
         apertura_caja_diario.apertura.fecha_apertura = fecha_apertura;
 
@@ -155,7 +160,9 @@ const validarPago = async(data) => {
     };
 
     const ultimo_pago = await PagoOperacionFinanciera.findOne({
+        "recibo.local_atencion": caja.local_atencion,
         "recibo.serie": caja.serie,
+        "es_ingreso": data.es_ingreso,
         "es_vigente": true,
         "es_borrado": false
     }).sort({ $natural: -1 });
@@ -175,6 +182,8 @@ const validarPago = async(data) => {
         ok: true,
         caja_diario: caja_diario.id,
         caja: caja.id,
+        cajero: caja.usuario,
+        documento_identidad_cajero: caja.documento_identidad_usuario,
         recibo,
     };
     // return res.json({

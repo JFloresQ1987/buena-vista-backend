@@ -17,9 +17,27 @@ const cerrarCaja = async(req, res = response) => {
         //const cajaDiario = await CajaDiario.findById(id);
         const modelo = await CajaDiario.findOne({ caja: id, estado: "Abierto" });
         if (!modelo) {
-            return res.json({
+            return res.status(404).json({
                 ok: false,
                 msg: "No hay caja abierta",
+            });
+        }
+
+        const recibos_previgentes = await Operaciones.findOne({
+            "recibo.estado": "Previgente",
+            "diario.caja_diario": modelo.id,
+            "diario.estado": "Abierto",
+            "diario.caja": modelo.caja,
+            es_vigente: true,
+            es_borrado: false,
+        });
+
+        // console.log(recibos_previgentes)
+
+        if (recibos_previgentes) {
+            return res.status(404).json({
+                ok: false,
+                msg: "Existen recibos previgentes que faltan confirmar.",
             });
         }
 
@@ -124,6 +142,14 @@ const cerrarCaja = async(req, res = response) => {
 
         // Guardar cambios
 
+        const caja = Caja.findById(modelo.caja);
+
+        //TODO: aqui va entrega parcial
+
+        modelo.cajero = caja.usuario;
+        modelo.nombre_cajero = caja.nombre_usuario;
+        modelo.documento_identidad_cajero = caja.documento_identidad_usuario;
+
         await modelo.save();
         res.json({
             ok: true,
@@ -227,8 +253,8 @@ const cargarCaja = async(req, res) => {
 
                 return res.json({
                     ok: true,
-                    monto_total_operaciones,
-                    monto_total_apertura: cajaDiario["monto_total_apertura"],
+                    monto_total_operaciones: Number(monto_total_operaciones.toFixed(1)),
+                    monto_total_apertura: Number(cajaDiario["monto_total_apertura"].toFixed(1)),
                     cant_operaciones,
                     idCaja: cajaDiario.caja,
                     fecha_apertura: cajaDiario.apertura.fecha_apertura,

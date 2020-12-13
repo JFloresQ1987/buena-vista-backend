@@ -22,6 +22,29 @@ const modelo = {
         ref: 'Caja',
         required: true
     },
+    cajero: {
+        type: Schema.Types.ObjectId,
+        ref: 'Usuario',
+        // required: true
+    },
+    nombre_cajero: {
+        type: String,
+        default: "",
+        // required: true,
+    },
+    documento_identidad_cajero: {
+        type: String,
+        default: "",
+        // required: true,
+    },
+    estado_caja_general: {
+        type: String,
+        required: true,
+        jsonSchema: {
+            enum: ["Abierto", "Cerrado"],
+        },
+        default: 'Abierto'
+    },
     estado: {
         type: String,
         required: true,
@@ -160,6 +183,11 @@ const modelo = {
         default: 0
     },
     monto_total_apertura: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    monto_total_entrega_parcial: {
         type: Number,
         required: true,
         default: 0

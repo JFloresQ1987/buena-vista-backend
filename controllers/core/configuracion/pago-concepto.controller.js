@@ -11,7 +11,7 @@ const listarConceptos = async(req, res = response) => {
         es_ingreso = true;
     }
     const conceptos = await PagoConcepto.find({ es_ingreso: es_ingreso },
-        "id descripcion es_ingreso"
+        "id codigo descripcion es_ingreso"
     );
     return res.json({
         ok: true,

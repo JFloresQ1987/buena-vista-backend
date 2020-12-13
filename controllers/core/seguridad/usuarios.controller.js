@@ -17,7 +17,7 @@ const listar = async(req, res) => {
             },
             "usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente rol"
         )
-        .populate("persona", "nombre apellido_paterno apellido_materno")
+        .populate("persona", "nombre apellido_paterno apellido_materno documento_identidad")
         .sort({ persona: -1 })
         .skip(desde)
         .limit(10),
@@ -37,7 +37,7 @@ const listarxRol = async(req, res = response) => {
         es_borrado: false,
         es_vigente: true,
         rol: { $in: id },
-    }).populate("persona", "nombre apellido_paterno apellido_materno");
+    }).populate("persona", "nombre apellido_paterno apellido_materno documento_identidad");
     return res.json({
         ok: true,
         usuarios,
@@ -46,7 +46,6 @@ const listarxRol = async(req, res = response) => {
 
 const crear = async(req, res = response) => {
     //const { usuario, clave } = req.body;
-
     try {
         const { documento_identidad, comentario } = req.body;
         const existe_registro = await Persona.findOne({ documento_identidad });
@@ -148,6 +147,7 @@ const actualizar = async(req, res = response) => {
             });
         }
         usuarioM.rol = rol;
+        usuarioM.local_atencion = req.body.local_atencion;
         await usuarioM.save();
 
         const persona = await Persona.findOne({ documento_identidad });
@@ -167,6 +167,7 @@ const actualizar = async(req, res = response) => {
         persona.correo_electronico = req.body.correo_electronico;
         persona.domicilio = req.body.domicilio;
         persona.referencia_domicilio = req.body.referencia_domicilio;
+        // persona.local_atencion = req.body.local_atencion;
         persona.comentario.push({
             tipo: "Editado",
             usuario: req.header("id_usuario_sesion"),
