@@ -16,7 +16,7 @@ const router = Router();
 
 router.get('/listar-productos/:id_persona/:opcion/:estado', validarJWT, listar_operaciones_financieras);
 
-router.get('/listar-productos-por-analista', validarJWT, listar_operaciones_financieras_por_analista);
+router.get('/listar-productos-por-analista/:tipo', validarJWT, listar_operaciones_financieras_por_analista);
 
 router.get('/listar-producto/:id_operacion_financiera', validarJWT, listar_operacion_financiera);
 

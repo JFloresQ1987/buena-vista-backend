@@ -325,6 +325,7 @@ const desembolsar_operacion_financiera = async(req, res) => {
             institucion: {
                 denominacion: 'Buenavista La Bolsa S.A.C.',
                 agencia: 'Agencia Ayacucho',
+                direccion: 'Jr. Roma N° 170',
                 ruc: '20574744599',
                 frase: ''
             },
@@ -452,6 +453,7 @@ const pagar_operacion_financiera = async(req, res) => {
                 // denominacion: 'Buenavista La Bolsa S.A.C.',
                 denominacion: 'BUENAVISTA LA BOLSA S.A.C.',
                 agencia: 'Agencia Ayacucho',
+                direccion: 'Jr. Roma N° 170',
                 ruc: '20574744599',
                 frase: ''
             },
@@ -613,6 +615,7 @@ const registrarIngresoEgreso = async(req, res = response) => {
             institucion: {
                 denominacion: 'Buenavista La Bolsa S.A.C.',
                 agencia: 'Agencia Ayacucho',
+                direccion: 'Jr. Roma N° 170',
                 ruc: '20574744599',
                 frase: ''
             },
@@ -1171,6 +1174,7 @@ const crear_pagar_ahorro = async(req, res) => {
                 // denominacion: 'Buenavista La Bolsa S.A.C.',
                 denominacion: 'BUENAVISTA LA BOLSA S.A.C.',
                 agencia: 'Agencia Ayacucho',
+                direccion: 'Jr. Roma N° 170',
                 ruc: '20574744599',
                 frase: ''
             },
@@ -1343,6 +1347,7 @@ const pagar_ahorro = async(req, res) => {
                 // denominacion: 'Buenavista La Bolsa S.A.C.',
                 denominacion: 'BUENAVISTA LA BOLSA S.A.C.',
                 agencia: 'Agencia Ayacucho',
+                direccion: 'Jr. Roma N° 170',
                 ruc: '20574744599',
                 frase: ''
             },

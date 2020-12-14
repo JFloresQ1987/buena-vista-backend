@@ -339,6 +339,7 @@ const listar_operaciones_financieras_por_analista = async(req, res) => {
     // const { id } = req.body;
     const id_usuario = req.header("id_usuario_sesion");
     const local_atencion = req.header("local_atencion");
+    const tipo = req.params.tipo;
 
     // const id_analista = req.params.id_analista;
 
@@ -352,6 +353,7 @@ const listar_operaciones_financieras_por_analista = async(req, res) => {
         if (analista)
             lista = await OperacionFinanciera.find({
                 analista: analista.id,
+                "producto.tipo": tipo,
                 estado: { $in: ["Vigente"] },
                 es_borrado: false,
             })
