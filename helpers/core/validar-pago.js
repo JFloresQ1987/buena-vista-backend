@@ -133,9 +133,10 @@ const validarPago = async(data) => {
                 ultimo_caja_diario.cierre.cantidad_cien_soles_cierre;
             apertura_caja_diario.apertura.cantidad_discientos_soles_apertura =
                 ultimo_caja_diario.cierre.cantidad_discientos_soles_cierre;
-            apertura_caja_diario.monto_total_apertura =
-                ultimo_caja_diario.monto_total_apertura +
-                ultimo_caja_diario.monto_total_operaciones;
+            // apertura_caja_diario.monto_total_apertura =
+            //     ultimo_caja_diario.monto_total_apertura +
+            //     ultimo_caja_diario.monto_total_operaciones;
+            apertura_caja_diario.monto_total_apertura = ultimo_caja_diario.monto_total_efectivo;
         }
 
         caja_diario = await apertura_caja_diario.save();

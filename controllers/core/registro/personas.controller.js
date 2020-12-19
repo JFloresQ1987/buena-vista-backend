@@ -50,7 +50,7 @@ const actualizar = async(req, res = response) => {
             modelo.referencia_domicilio = req.body.referencia_domicilio,
             modelo.avatar = req.body.avatar,
             modelo.ubigeo = {
-                cocigo: "101",
+                // cocigo: "101",
                 departamento: req.body.departamento,
                 provincia: req.body.provincia,
                 distrito: req.body.distrito,
@@ -95,6 +95,14 @@ const crear = async(req, res = response) => {
         }
 
         const modelo = new Persona(req.body);
+
+        modelo.ubigeo = {
+            // cocigo: "101",
+            departamento: req.body.departamento,
+            provincia: req.body.provincia,
+            distrito: req.body.distrito,
+        }
+
         const now = dayjs();
 
         modelo.comentario = [{

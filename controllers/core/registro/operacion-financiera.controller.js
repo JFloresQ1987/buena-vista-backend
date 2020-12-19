@@ -115,7 +115,7 @@ const listar_operaciones_financieras = async(req, res) => {
 
                 const modelo = await OperacionFinancieraDetalle.aggregate(
                     [
-                        { $match: { operacion_financiera: lista[i]._id } },
+                        { $match: { operacion_financiera: lista[i]._id, estado: "Vigente", es_vigente: true, es_borrado: false } },
                         { $group: { _id: "$operacion_financiera", monto_ahorro_voluntario: { $sum: "$ahorros.monto_ahorro_voluntario" }, monto_retiro_ahorro_voluntario: { $sum: "$ahorros.monto_retiro_ahorro_voluntario" } } }
                     ]
                 )
