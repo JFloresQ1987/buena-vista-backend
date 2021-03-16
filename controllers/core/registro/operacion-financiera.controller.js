@@ -111,7 +111,12 @@ const listar_operaciones_financieras = async(req, res) => {
 
         if (!es_prestamo) {
 
+            // console.log('llego...')
+            // console.log(lista)
+
             for (let i = 0; i < lista.length; i++) {
+
+                // console.log(lista[i]._id)
 
                 const modelo = await OperacionFinancieraDetalle.aggregate(
                     [
@@ -119,6 +124,8 @@ const listar_operaciones_financieras = async(req, res) => {
                         { $group: { _id: "$operacion_financiera", monto_ahorro_voluntario: { $sum: "$ahorros.monto_ahorro_voluntario" }, monto_retiro_ahorro_voluntario: { $sum: "$ahorros.monto_retiro_ahorro_voluntario" } } }
                     ]
                 )
+
+                // console.log(modelo);
 
                 lista[i].monto_capital = modelo[0].monto_ahorro_voluntario - modelo[0].monto_retiro_ahorro_voluntario;
 
@@ -363,6 +370,7 @@ const listar_operaciones_financieras_por_analista = async(req, res) => {
         res.json({
             ok: true,
             lista,
+            analista: analista._id
         });
     } catch (error) {
 

@@ -178,6 +178,27 @@ const modelo = {
             ref: 'OperacionFinanciera',
             // required: true
         },
+        bancomunal: {
+            // type: {
+            grupo_bancomunal: {
+                type: Schema.Types.ObjectId,
+                ref: 'GrupoBancomunal',
+            },
+            codigo: {
+                type: String,
+                default: ''
+            },
+            descripcion: {
+                type: String,
+                default: ''
+            },
+            numero_ciclo: {
+                type: Number,
+                default: 0
+            }
+            // },
+            // default: {}
+        },
         // operacion_financiera_desembolso: {
         //     type: Schema.Types.ObjectId,
         //     ref: 'OperacionFinanciera',

@@ -34,6 +34,8 @@ app.use('/api/pago-concepto', require('./routes/core/configuracion/pago-concepto
 app.use('/api/grupo-bancomunal', require('./routes/core/registro/grupo-bancomunal.route'));
 app.use('/api/dia-feriado', require('./routes/core/configuracion/dia-feriado.route'));
 
+app.use('/api/reporte', require('./routes/core/reporte/reporte.route'));
+
 
 // app.use('/api/shared', require('./routes/shared/images.route'));
 // app.get('*', (req, res) => {

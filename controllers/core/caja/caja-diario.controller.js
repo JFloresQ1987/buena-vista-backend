@@ -127,8 +127,8 @@ const cerrarCaja = async(req, res = response) => {
             cantidad_veinte_centimos_cierre: req.body.cantidad_veinte_centimos_cierre,
             cantidad_diez_centimos_cierre: req.body.cantidad_diez_centimos_cierre,
         }),
-        (modelo.monto_total_efectivo = monto_total),
-        (modelo.monto_total_operaciones = monto_total_operaciones),
+        (modelo.monto_total_efectivo = monto_total.toFixed(1)),
+        (modelo.monto_total_operaciones = monto_total_operaciones.toFixed(1)),
         // modelo.cantidad_operaciones = ,
         (modelo.estado = "Cerrado"),
         modelo.comentario.push({
@@ -275,14 +275,31 @@ const listarCajas = async(req, res) => {
     const desde = req.query.desde || "2001-01-01";
     const hasta = req.query.hasta || now.format("YYYY-MM-DD");
 
+    const desde_paginacion = Number(req.query.desde_paginacion) || 0;
+
     try {
-        const cajas = await CajaDiario.find({ "apertura.fecha_apertura": { $gte: desde, $lte: hasta } },
-            "apertura.fecha_apertura cierre.fecha_cierre  cantidad_operaciones monto_total_apertura monto_total_operaciones estado monto_total_efectivo monto_total_operaciones"
-        ).sort({ "apertura.fecha_apertura": -1 });
+        // const cajas = await CajaDiario.find({ 
+        //     "apertura.fecha_apertura": { $gte: desde, $lte: hasta } },
+        //     "apertura.fecha_apertura cierre.fecha_cierre  cantidad_operaciones monto_total_apertura monto_total_operaciones estado monto_total_efectivo monto_total_operaciones"
+        // ).sort({ "apertura.fecha_apertura": -1 });
+
+        const [cajas, total] = await Promise.all([
+            CajaDiario.find({
+                    "apertura.fecha_apertura": { $gte: desde, $lte: hasta }
+                },
+                "apertura.fecha_apertura cierre.fecha_cierre  cantidad_operaciones monto_total_apertura monto_total_operaciones estado monto_total_efectivo monto_total_operaciones"
+            )
+            // .populate("persona", "nombre apellido_paterno apellido_materno documento_identidad")
+            .sort({ "apertura.fecha_apertura": -1 })
+            .skip(desde_paginacion)
+            .limit(10),
+            CajaDiario.find({ es_vigente: true, es_borrado: false }).countDocuments(),
+        ]);
 
         res.json({
             ok: true,
             cajas,
+            total,
         });
     } catch (error) {
         console.log(error);

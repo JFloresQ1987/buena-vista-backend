@@ -100,17 +100,35 @@ const getMenu = (rol) => {
             icono: 'mdi mdi-cart',
             submenu: [
                 { opcion: 'Pagar Producto', url: '/caja/pago/producto-caja' },
-                { opcion: 'Pagar Ahorro', url: 'caja/pago/ahorro-caja' },
+                { opcion: 'Pagar Ahorro', url: '/caja/pago/ahorro-caja' },
                 // { opcion: 'Confirmar pago de analistas', url: '/caja/pago/confirmar-pago-analista' },
                 { opcion: 'Realizar Ingresos - Egresos', url: '/caja/gestion/ingresos-egresos' },
                 // { opcion: 'Apertura de caja general', url: '/registro/gestion/cierre-caja' },
                 // { opcion: 'Apertura de caja individual', url: '/registro/gestion/cierre-caja' },
                 // { opcion: 'Cierre de caja general', url: '/registro/gestion/cierre-caja-general' },
                 { opcion: 'Cerrar Caja Individual', url: '/caja/pago/cierre-caja-individual' },
-                { opcion: 'Consultar Cajas Individuales', url: '/caja/pago/cajas-lista' },
+                // { opcion: 'Consultar Cajas Individuales', url: '/caja/pago/cajas-lista' },
                 { opcion: 'Gestionar Transacciones', url: '/caja/gestion/lista-recibo' },
+                // { opcion: 'Gestionar Transacciones', url: '/caja/gestion/lista-recibo' },
+                // { opcion: 'Gestionar Transacciones', url: '/caja/gestion/lista-recibo' },
                 // { opcion: 'Anular recibo', url: '/registro/gestion/cierre-caja' },
                 // { opcion: 'Duplicado de recibo', url: '/registro/gestion/cierre-caja' }
+            ]
+        });
+    }
+
+    if (rol.includes('Administrador') || rol.includes('Analista')) {
+        // menu[1].submenu.unshift({});
+        menu.push({
+            opcion: 'Reportes',
+            icono: 'mdi mdi-briefcase',
+            submenu: [
+                // { opcion: 'Ingresos y egresos', url: '/registro/gestion/caja-ingresos-egresos' },
+                // { opcion: 'Cierre de caja', url: '/registro/gestion/cierre-caja' }
+                { opcion: 'Consultar Cajas Individuales', url: '/caja/pago/cajas-lista' },
+                { opcion: 'Libro Diario - Ingresos', url: '/reporte/libro-diario/ingresos' },
+                { opcion: 'Libro Diario - Egresos', url: '/reporte/libro-diario/egresos' },
+                { opcion: 'Saldo de Créditos', url: '/reporte/analista/saldo-creditos' },
             ]
         });
     }

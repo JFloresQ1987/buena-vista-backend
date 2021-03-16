@@ -338,6 +338,7 @@ schema.method('toJSON', function() {
     object.monto_cuota_pagada = 0;
     object.monto_ahorro_voluntario = 0;
     object.monto_pago_mora = 0;
+    object.monto_mora = ingresos.monto_mora;
     return object;
 })
 

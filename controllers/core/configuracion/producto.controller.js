@@ -6,11 +6,22 @@ const Producto = require('../../../models/core/configuracion/producto.model');
 
 const listar = async(req, res) => {
 
+    const es_todo = req.params.es_todo;
     const es_prestamo = req.params.es_prestamo;
+
+    // console.log(es_todo)
+    // console.log(es_prestamo)
 
     try {
 
-        const lista = await Producto.find({ "es_prestamo": es_prestamo, "es_borrado": false })
+        // const lista = await Producto.find({ "es_prestamo": es_prestamo, "es_borrado": false })
+
+        let lista = [];
+
+        if (es_todo === 'true')
+            lista = await Producto.find({ /*"es_vigente": true, */ "es_borrado": false })
+        else
+            lista = await Producto.find({ "es_prestamo": es_prestamo /*, "es_vigente": true*/ , "es_borrado": false })
 
         res.json({
             ok: true,

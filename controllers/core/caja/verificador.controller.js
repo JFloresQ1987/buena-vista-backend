@@ -8,11 +8,13 @@ const requestIp = require("request-ip");
 const e = require("cors");
 
 const verificarTotalRecibo = async(req, res = response) => {
-    const id_usuario_sesion = req.header("id_usuario_sesion"); // "5f8236bedd1aaa4dc4109589"; //
+    const id_usuario_sesion = req.header("id_usuario_sesion"); // "5f8236bedd1aaa4dc4109589"; //    
+    const local_atencion = req.header("local_atencion");
     const ip = requestIp.getClientIp(req).replace("::ffff:", ""); // "192.168.0.10"; //
 
     const caja = await Caja.findOne({
         ip: ip,
+        local_atencion: local_atencion,
         usuario: id_usuario_sesion,
         es_vigente: true,
         es_borrado: false,
@@ -25,11 +27,15 @@ const verificarTotalRecibo = async(req, res = response) => {
         es_borrado: false,
     });
 
-    const operaciones = await Operaciones.find({ "diario.caja_diario": cajaDiario._id, "recibo.estado": "Vigente" },
-        "recibo.monto_total producto es_ingreso concepto"
+    const operaciones = await Operaciones.find({
+            "diario.caja_diario": cajaDiario._id,
+            "recibo.estado": "Vigente"
+        },
+        "recibo.numero recibo.monto_total producto es_ingreso concepto"
     );
 
     let control = true;
+    let listaRecibosError = [];
     let listaMontoError = [];
     let listaReciboMontoTotalError = [];
 
@@ -54,11 +60,15 @@ const verificarTotalRecibo = async(req, res = response) => {
         } else {
             monto;
         }
-        if (e.concepto.detalle != undefined) {
-            e.recibo.monto_total = monto;
+
+        // if (e.concepto.detalle != undefined) {
+        if (e.concepto.descripcion != undefined) {
+            // e.recibo.monto_total = monto;
+            monto = e.recibo.monto_total;
         }
 
         if (e.recibo.monto_total != monto) {
+            listaRecibosError.push(e.recibo.numero);
             listaMontoError.push(monto);
             listaReciboMontoTotalError.push(e.recibo.monto_total);
             control = false;
@@ -68,7 +78,7 @@ const verificarTotalRecibo = async(req, res = response) => {
     if (!control) {
         return res.json({
             ok: false,
-            msg: `La suma de los montos ${listaMontoError}, no coinciden con el monto total ${listaReciboMontoTotalError}`,
+            msg: `La suma de los montos ${listaMontoError}, no coinciden con el monto total ${listaReciboMontoTotalError}, recibos: ${listaRecibosError}`,
             listaMontoError,
         });
     }
@@ -101,6 +111,7 @@ const verificarIntegridadRecibo = async(req, res = response) => {
             "diario.caja_diario": cajaDiario._id,
             "es_ingreso": true,
             // "recibo.estado": "Vigente",
+            "es_borrado": false,
         },
         "recibo.numero"
     );
@@ -109,6 +120,7 @@ const verificarIntegridadRecibo = async(req, res = response) => {
             "diario.caja_diario": cajaDiario._id,
             "es_ingreso": false,
             // "recibo.estado": "Vigente",
+            "es_borrado": false,
         },
         "recibo.numero"
     );

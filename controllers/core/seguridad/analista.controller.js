@@ -9,7 +9,8 @@ const listar = async(req, res = response) => {
     const desde = Number(req.query.desde) || 0;
     const [analistas, total] = await Promise.all([
         Analista.find({ es_borrado: false, es_vigente: true },
-            "descripcion producto usuario es_bloqueado es_vigente"
+            "codigo descripcion productos usuario es_bloqueado es_vigente"
+            // "codigo descripcion producto usuario es_bloqueado es_vigente"
         )
         .populate({
             path: "usuario",
@@ -18,7 +19,8 @@ const listar = async(req, res = response) => {
                 path: "persona",
                 select: "nombre apellido_paterno apellido_materno",
             },
-        }).populate("producto", "_id descripcion")
+        })
+        // .populate("producto", "_id descripcion")
         .skip(desde)
         .limit(10),
         Analista.find({ es_borrado: false }).countDocuments()
@@ -34,14 +36,20 @@ const crear = async(req, res = response) => {
     try {
         const { usuario, comentario } = req.body;
         const now = dayjs();
-        const model = await Analista.findOne({ usuario });
+        // const model = await Analista.findOne({ usuario });
         /* if (model) {
           return res.json({
             ok: false,
             msg: "El analista ya esta creado",
           });
         } */
+
+        // console.log(req.body.productos)
+
         const analista = new Analista(req.body);
+
+        // analista.productos = req.body.productos;
+
         analista.comentario = [{
             tipo: "Nuevo",
             usuario: req.header("id_usuario_sesion"),
@@ -50,12 +58,18 @@ const crear = async(req, res = response) => {
             fecha: now.format("DD/MM/YYYY hh:mm:ss a"),
             comentario,
         }, ];
+
+        // console.log(analista)
+
         await analista.save();
         return res.json({
             ok: true,
             msg: "Analista creado correctamente",
         });
-    } catch (err) {
+    } catch (error) {
+
+        logger.logError(req, error);
+
         res.status(500).json({
             ok: false,
             msg: "Error inesperado",
@@ -100,21 +114,25 @@ const actualizar = async(req, res = response) => {
                 msg: "Error al actualizar los datos",
             });
         }
+
+        // console.log(req.body.productos)
+
         analista.codigo = req.body.codigo;
         analista.descripcion = req.body.descripcion;
-        analista.producto = req.body.producto;
+        // analista.producto = req.body.producto;
+        analista.productos = req.body.productos;
         analista.local_atencion = req.body.local_atencion;
         analista.usuario = req.body.usuario;
-        analista.nombre_usuario = req.body.nombre_usuario,
-            analista.documento_identidad_usuario = req.body.documento_identidad_usuario,
-            analista.comentario.push({
-                tipo: "Editado",
-                idusuario: req.header("id_usuario_sesion"),
-                usuario: req.header("usuario_sesion"),
-                nombre: req.header("nombre_sesion"),
-                fecha: now.format("DD/MM/YYYY hh:mm:ss a"),
-                comentario,
-            });
+        analista.nombre_usuario = req.body.nombre_usuario;
+        analista.documento_identidad_usuario = req.body.documento_identidad_usuario;
+        analista.comentario.push({
+            tipo: "Editado",
+            idusuario: req.header("id_usuario_sesion"),
+            usuario: req.header("usuario_sesion"),
+            nombre: req.header("nombre_sesion"),
+            fecha: now.format("DD/MM/YYYY hh:mm:ss a"),
+            comentario,
+        });
         await analista.save();
         return res.json({
             ok: true,
@@ -135,7 +153,7 @@ const getListaDesplegable = async(req, res = response) => {
 
     try {
 
-        const producto = req.params.producto;
+        // const producto = req.params.producto;
         const lista = await Analista.find({
             "es_vigente": true,
             "es_borrado": false
@@ -162,10 +180,11 @@ const getListaDesplegablexProducto = async(req, res = response) => {
 
         const producto = req.params.producto;
         const lista = await Analista.find({
-            "producto": producto,
+            "productos.producto": producto,
+            // "producto": producto,
             "es_vigente": true,
             "es_borrado": false
-        }, "id nombre_usuario");;
+        }, "id nombre_usuario");
         // const lista = await Analista.find({ "producto": producto, "es_vigente": true, "es_borrado": false }, "id")
         //     .populate({
         //         path: "usuario",

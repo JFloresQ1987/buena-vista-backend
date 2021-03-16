@@ -157,7 +157,7 @@ const actualizar = async(req, res = response) => {
         persona.apellido_materno = req.body.apellido_materno;
         persona.fecha_nacimiento = req.body.fecha_nacimiento;
         persona.ubigeo = {
-            cocigo: "101",
+            // codigo: "101",
             departamento: req.body.departamento,
             provincia: req.body.provincia,
             distrito: req.body.distrito,

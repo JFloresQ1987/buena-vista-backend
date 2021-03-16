@@ -74,13 +74,16 @@ const pagarProducto = async(data) => {
 
         for (let i = 0; i < cuota.pagos.length; i++) {
 
-            monto_gasto_pagado += cuota.pagos[i].ingresos.monto_gasto || 0;
-            monto_ahorro_inicial_pagado += cuota.pagos[i].ahorros.monto_ahorro_inicial || 0;
-            monto_ahorro_voluntario_pagado += cuota.pagos[i].ahorros.monto_ahorro_voluntario || 0;
-            monto_ahorro_programado_pagado += cuota.pagos[i].ahorros.monto_ahorro_programado || 0;
-            monto_amortizacion_capital_pagado += cuota.pagos[i].ingresos.monto_amortizacion_capital || 0;
-            monto_interes_pagado += cuota.pagos[i].ingresos.monto_interes || 0;
-            monto_mora_pagado += cuota.pagos[i].ingresos.monto_mora || 0;
+            if (cuota.pagos[i].es_vigente) {
+
+                monto_gasto_pagado += cuota.pagos[i].ingresos.monto_gasto || 0;
+                monto_ahorro_inicial_pagado += cuota.pagos[i].ahorros.monto_ahorro_inicial || 0;
+                monto_ahorro_voluntario_pagado += cuota.pagos[i].ahorros.monto_ahorro_voluntario || 0;
+                monto_ahorro_programado_pagado += cuota.pagos[i].ahorros.monto_ahorro_programado || 0;
+                monto_amortizacion_capital_pagado += cuota.pagos[i].ingresos.monto_amortizacion_capital || 0;
+                monto_interes_pagado += cuota.pagos[i].ingresos.monto_interes || 0;
+                monto_mora_pagado += cuota.pagos[i].ingresos.monto_mora || 0;
+            }
         }
 
         let monto_gasto_a_pagar = cuota.ingresos.monto_gasto - monto_gasto_pagado;
@@ -352,11 +355,11 @@ const pagarProducto = async(data) => {
         codigo: model_operacion_financiera.producto.codigo, //TODO verificar
         descripcion: model_operacion_financiera.producto.descripcion, //TODO verificar
         codigo_programacion: model_operacion_financiera.producto.codigo_programacion, //TODO verificar
-        descripcion_programacion: model_operacion_financiera.producto.descripcion_programacion, //TODO verificar
+        descripcion_programacion: model_operacion_financiera.producto.programacion, //TODO verificar
         persona: model_operacion_financiera.persona._id,
         nombre_persona: model_operacion_financiera.persona.apellido_paterno +
             ' ' + model_operacion_financiera.persona.apellido_materno +
-            ', ' + model_operacion_financiera.persona.nombre, //TODO verificar
+            ', ' + model_operacion_financiera.persona.nombre, //TODO verificar            
         documento_identidad_persona: model_operacion_financiera.persona.documento_identidad, //TODO verificar
         analista: model_operacion_financiera.analista._id, //TODO verificar
         nombre_analista: model_operacion_financiera.analista.nombre_usuario, //TODO verificar

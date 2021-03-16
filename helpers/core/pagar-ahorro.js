@@ -120,11 +120,11 @@ const pagarAhorro = async(data) => {
         .populate({
             path: "persona",
             select: "nombre apellido_paterno apellido_materno documento_identidad",
+        })
+        .populate({
+            path: "analista",
+            select: "usuario nombre_usuario documento_identidad_usuario"
         });
-    /*.populate({
-        path: "analista",
-        select: "usuario nombre_usuario documento_identidad_usuario"                
-    });*/
 
     // let analista;
 
@@ -167,9 +167,9 @@ const pagarAhorro = async(data) => {
             ' ' + model_operacion_financiera.persona.apellido_materno +
             ', ' + model_operacion_financiera.persona.nombre, //TODO verificar
         documento_identidad_persona: model_operacion_financiera.persona.documento_identidad, //TODO verificar
-        // analista: model_operacion_financiera.analista._id, //TODO verificar
-        // nombre_analista: model_operacion_financiera.analista.nombre_usuario, //TODO verificar
-        // documento_identidad_analista: model_operacion_financiera.analista.documento_identidad_usuario,
+        analista: model_operacion_financiera.analista._id, //TODO verificar
+        nombre_analista: model_operacion_financiera.analista.nombre_usuario, //TODO verificar
+        documento_identidad_analista: model_operacion_financiera.analista.documento_identidad_usuario,
         operacion_financiera: data.operacion_financiera,
 
         // persona: data.id_socio,

@@ -15,8 +15,26 @@ const schema = {
     producto: {
         type: Schema.Types.ObjectId,
         ref: "Producto",
-        required: true,
+        // required: true,
     },
+    productos: [{
+        // type: [Schema.Types.ObjectId],
+        // default: []
+
+        // type: {
+        producto: {
+            type: Schema.Types.ObjectId,
+            ref: 'Producto'
+        },
+        codigo: {
+            type: String,
+            default: ''
+        },
+        descripcion: {
+            type: String,
+            default: ''
+        }
+    }],
     local_atencion: {
         type: String,
         // required: true,

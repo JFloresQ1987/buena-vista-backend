@@ -12,7 +12,9 @@ const {
     pagar_operacion_financiera_por_analista,
     confirmar_pago_analista,
     crear_pagar_ahorro,
-    pagar_ahorro
+    pagar_ahorro,
+    listar_libro_diario,
+    retirar_ahorros_operacion_financiera,
 } = require("../../../controllers/core/caja/operacion-financiera-pago.controller");
 
 const router = Router();
@@ -21,6 +23,12 @@ router.get(
     "/listar/:id_operacion_financiera",
     validarJWT,
     listar_operaciones_financieras_detalle_vigentes
+);
+
+router.get(
+    "/listar-libro-diario/:tipo",
+    validarJWT,
+    listar_libro_diario
 );
 
 router.get(
@@ -83,5 +91,6 @@ router.post(
 router.put("/confirmar-pago-analista/:analista", [validarJWT], confirmar_pago_analista);
 router.post("/crear-pagar-ahorro", [validarJWT], crear_pagar_ahorro);
 router.post("/pagar-ahorro", [validarJWT], pagar_ahorro);
+router.put("/retirar-ahorros/:id", [validarJWT], retirar_ahorros_operacion_financiera);
 
 module.exports = router;
