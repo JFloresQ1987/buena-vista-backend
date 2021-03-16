@@ -101,6 +101,7 @@ const getMenu = (rol) => {
             submenu: [
                 { opcion: 'Pagar Producto', url: '/caja/pago/producto-caja' },
                 { opcion: 'Pagar Ahorro', url: '/caja/pago/ahorro-caja' },
+                { opcion: 'Retirar Ahorros Producto', url: '/caja/retiro/producto-retiro-ahorros' },
                 // { opcion: 'Confirmar pago de analistas', url: '/caja/pago/confirmar-pago-analista' },
                 { opcion: 'Realizar Ingresos - Egresos', url: '/caja/gestion/ingresos-egresos' },
                 // { opcion: 'Apertura de caja general', url: '/registro/gestion/cierre-caja' },

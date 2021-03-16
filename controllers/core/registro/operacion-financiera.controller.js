@@ -1,4 +1,5 @@
 const { response } = require('express');
+const mongoose = require('mongoose');
 const dayjs = require('dayjs');
 const logger = require('../../../helpers/logger');
 const { getMessage } = require('../../../helpers/messages');
@@ -89,6 +90,7 @@ const listar_operaciones_financieras = async(req, res) => {
                 "producto.es_prestamo": es_prestamo,
                 "estado": { $in: estado },
                 // "estado": { $in: ["Previgente", "Vigente"] },
+                "es_vigente": true,
                 "es_borrado": false
             })
             .populate({
@@ -147,121 +149,128 @@ const listar_operaciones_financieras = async(req, res) => {
     }
 }
 
-// const listar_operacion_financiera = async(req, res) => {
+const obtener_ahorros_producto_por_persona = async(req, res) => {
 
-//     // const { id } = req.body;
-//     const id_operacion_financiera = req.params.id_operacion_financiera;
+    try {
 
-//     try {
+        // console.log('entrooo 1111')
+        const id = mongoose.Types.ObjectId(req.params.id);
+        const estado = ["Pagado", "Previgente", "Vigente"];
+        const es_prestamo = true;
 
-//         const modelo = await OperacionFinanciera.findOne({ "_id": id_operacion_financiera, "es_borrado": false })
-//             .populate('producto.tipo', 'descripcion');
+        // console.log('entrooo')
 
-//         res.json({
-//             ok: true,
-//             modelo
-//         })
-//     } catch (error) {
+        const lista_productos = await OperacionFinanciera.find({
+                "persona": id,
+                "producto.es_prestamo": es_prestamo,
+                "estado": { $in: estado },
+                // "estado": { $in: ["Previgente", "Vigente"] },
+                "es_vigente": true,
+                "es_borrado": false
+            })
+            .populate({
+                path: 'producto.tipo',
+                // match: { es_prestamo: true },
+                select: 'descripcion'
+            })
+            .populate({
+                path: "analista",
+                select: "usuario",
+                populate: {
+                    path: "usuario",
+                    select: "persona",
+                    populate: {
+                        path: "persona",
+                        select: "nombre apellido_paterno apellido_materno",
+                    }
+                }
+            });
 
-//         console.log(error);
-//         res.status(500).json({
-//             ok: false,
-//             msg: 'Error inesperado.'
-//         });
-//     }
-// }
+        const lista_productos_con_ahorro = await OperacionFinancieraDetalle.aggregate(
+            [{
+                    $match: {
+                        "persona": id,
+                        // "estado": { $in: estado },
+                        "estado": "Pagado",
+                        "es_vigente": true,
+                        "es_borrado": false
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$operacion_financiera",
+                        // monto_ahorro_inicial: { $sum: { $subtract: ["$ahorros.monto_ahorro_inicial", "$ahorros.monto_retiro_ahorro_inicial"] } },
+                        // // monto_retiro_ahorro_inicial: { $sum: "$ahorros.monto_retiro_ahorro_inicial" },
+                        // monto_ahorro_voluntario: { $sum: ["$ahorros.monto_ahorro_voluntario", "$ahorros.monto_retiro_ahorro_voluntario"] },
+                        // // monto_retiro_ahorro_voluntario: { $sum: "$ahorros.monto_retiro_ahorro_voluntario" },
+                        // monto_ahorro_programado: { $sum: ["$ahorros.monto_ahorro_programado", "$ahorros.monto_retiro_ahorro_programado"] },
+                        // // monto_retiro_ahorro_programado: { $sum: "$ahorros.monto_retiro_ahorro_programado" }
 
-// const listar_operaciones_financieras_por_analista = async(req, res) => {
+                        monto_ahorro_inicial: { $sum: "$ahorros.monto_ahorro_inicial" },
+                        monto_retiro_ahorro_inicial: { $sum: "$ahorros.monto_retiro_ahorro_inicial" },
+                        monto_ahorro_voluntario: { $sum: "$ahorros.monto_ahorro_voluntario" },
+                        monto_retiro_ahorro_voluntario: { $sum: "$ahorros.monto_retiro_ahorro_voluntario" },
+                        monto_ahorro_programado: { $sum: "$ahorros.monto_ahorro_programado" },
+                        monto_retiro_ahorro_programado: { $sum: "$ahorros.monto_retiro_ahorro_programado" }
+                    }
+                },
+                {
+                    $addFields: {
+                        "total_monto_ahorro_inicial": { $subtract: ["$monto_ahorro_inicial", "$monto_retiro_ahorro_inicial"] },
+                        "total_monto_ahorro_voluntario": { $subtract: ["$monto_ahorro_voluntario", "$monto_retiro_ahorro_voluntario"] },
+                        "total_monto_ahorro_programado": { $subtract: ["$monto_ahorro_programado", "$monto_retiro_ahorro_programado"] },
+                    }
+                },
+                {
+                    $match: {
+                        $or: [
+                            { "total_monto_ahorro_inicial": { "$gt": 0 } },
+                            { "total_monto_ahorro_voluntario": { "$gt": 0 } },
+                            { "total_monto_ahorro_programado": { "$gt": 0 } },
+                        ]
+                    }
+                }
+            ]
+        );
 
-//     // const { id } = req.body;
-//     const id_usuario = req.header('id_usuario_sesion');
+        // console.log(lista_productos_con_ahorro[0]._id) //5fd3f1a2b5a618297005c5b2
+        // console.log(lista_productos)
 
-//     // const id_analista = req.params.id_analista;
+        // const dd = lista_productos_con_ahorro[0]._id;
 
-//     try {
+        const lista = lista_productos.filter(pro =>
+            lista_productos_con_ahorro.some(li => pro._id == (li._id).toString())
+            // pro._id == dd.toString()
+        );
 
-//         const analista = await Analista.findOne({ 'usuario': id_usuario });
 
-//         //TODO: verificar estado vigente en el producto
-//         let lista = [];
 
-//         if (analista)
-//             lista = await OperacionFinanciera.find({
-//                 "analista": analista.id,
-//                 "estado": { $in: ["Vigente"] },
-//                 "es_borrado": false
-//             });
-//         // .populate('producto.tipo', 'descripcion');
+        // console.log(lista_productos_con_ahorro)
+        // console.log(lista)
 
-//         res.json({
-//             ok: true,
-//             lista
-//         })
-//     } catch (error) {
+        // const ahorros = {
+        //     monto_ahorro_inicial: modelo[0].monto_ahorro_inicial - modelo[0].monto_retiro_ahorro_inicial,
+        //     monto_ahorro_voluntario: modelo[0].monto_ahorro_voluntario - modelo[0].monto_retiro_ahorro_voluntario,
+        //     monto_ahorro_programado: modelo[0].monto_ahorro_programado - modelo[0].monto_retiro_ahorro_programado
+        // };
 
-//         console.log(error);
-//         res.status(500).json({
-//             ok: false,
-//             msg: 'Error inesperado.'
-//         });
-//     }
-// }
+        // console.log(ahorros)
 
-// const cambiar_analista = async(req, res = response) => {
+        return res.json({
+            ok: true,
+            // ahorros,
+            lista,
+        });
+    } catch (error) {
 
-//     const id = req.params.id;
+        logger.logError(req, error);
 
-//     const now = dayjs();
-
-//     operacion_financiera.comentario = [
-//       {
-//         tipo: "Nuevo",
-//         id_usuario: req.header("id_usuario_sesion"),
-//         usuario: req.header("usuario_sesion"),
-//         nombre: req.header("nombre_sesion"),
-//         fecha: now.format("DD/MM/YYYY hh:mm:ss a"),
-//         comentario,
-//       },
-//     ];
-
-//     const modelo = await operacion_financiera.save(opts);
-
-//     let operacion_financiera_detalle;
-
-//     // operacion_financiera_detalle = new OperacionFinancieraDetalle(detalle[i]);
-
-//     for (let i = 0; i < detalle.length; i++) {
-
-//       operacion_financiera_detalle = new OperacionFinancieraDetalle(detalle[i]);
-//       operacion_financiera_detalle.operacion_financiera = modelo.id;
-//       operacion_financiera_detalle.persona = modelo.persona;
-
-//       await operacion_financiera_detalle.save(opts);
-//     }
-
-//     await session.commitTransaction();
-//     session.endSession();
-
-//     logger.report.info("Transaccion Ok.");
-
-//     return res.json({
-//       ok: true,
-//       msg: "Transaccion Ok.",
-//     });
-//   } catch (error) {
-//     await session.abortTransaction();
-//     session.endSession();
-
-//     console.log(error);
-
-//     logger.report.error("Transaccion NO Ok.");
-
-//     return res.status(500).json({
-//       ok: false,
-//       msg: "Transaccion NO Ok.",
-//     });
-//   }
-// };
+        return res.status(500).json({
+            ok: false,
+            msg: getMessage('msgError500')
+        });
+    }
+}
 
 // const listar_operaciones_financieras = async (req, res) => {
 //   // const { id } = req.body;
@@ -549,5 +558,7 @@ module.exports = {
     listar_operaciones_financieras_por_analista,
     cambiar_analista,
     anular,
-    congelar_descongelar
+    congelar_descongelar,
+    // listar_operaciones_financieras_para_retiro_ahorros
+    obtener_ahorros_producto_por_persona
 }

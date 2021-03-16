@@ -132,8 +132,14 @@ const obtener_ahorros = async(req, res) => {
         // console.log(tt)
 
         const modelo = await OperacionFinancieraDetalle.aggregate(
-            [
-                { $match: { operacion_financiera: id /*, estado: "Pendiente"*/ , es_vigente: true, es_borrado: false } },
+            [{
+                    $match: {
+                        operacion_financiera: id,
+                        estado: "Pagado",
+                        es_vigente: true,
+                        es_borrado: false
+                    }
+                },
                 {
                     $group: {
                         _id: "$operacion_financiera",
@@ -173,10 +179,91 @@ const obtener_ahorros = async(req, res) => {
     }
 }
 
+// const obtener_ahorros_producto_por_persona = async(req, res) => {
+
+//     try {
+
+//         const id = mongoose.Types.ObjectId(req.params.id);
+//         // const estado = ["Pagado", "Previgente", "Vigente"];
+
+//         const lista = await OperacionFinancieraDetalle.aggregate(
+//             [{
+//                     $match: {
+//                         "persona": id,
+//                         // "estado": { $in: estado },
+//                         "estado": "Pagado",
+//                         "es_vigente": true,
+//                         "es_borrado": false
+//                     }
+//                 },
+//                 {
+//                     $group: {
+//                         _id: "$operacion_financiera",
+//                         // monto_ahorro_inicial: { $sum: { $subtract: ["$ahorros.monto_ahorro_inicial", "$ahorros.monto_retiro_ahorro_inicial"] } },
+//                         // // monto_retiro_ahorro_inicial: { $sum: "$ahorros.monto_retiro_ahorro_inicial" },
+//                         // monto_ahorro_voluntario: { $sum: ["$ahorros.monto_ahorro_voluntario", "$ahorros.monto_retiro_ahorro_voluntario"] },
+//                         // // monto_retiro_ahorro_voluntario: { $sum: "$ahorros.monto_retiro_ahorro_voluntario" },
+//                         // monto_ahorro_programado: { $sum: ["$ahorros.monto_ahorro_programado", "$ahorros.monto_retiro_ahorro_programado"] },
+//                         // // monto_retiro_ahorro_programado: { $sum: "$ahorros.monto_retiro_ahorro_programado" }
+
+//                         monto_ahorro_inicial: { $sum: "$ahorros.monto_ahorro_inicial" },
+//                         monto_retiro_ahorro_inicial: { $sum: "$ahorros.monto_retiro_ahorro_inicial" },
+//                         monto_ahorro_voluntario: { $sum: "$ahorros.monto_ahorro_voluntario" },
+//                         monto_retiro_ahorro_voluntario: { $sum: "$ahorros.monto_retiro_ahorro_voluntario" },
+//                         monto_ahorro_programado: { $sum: "$ahorros.monto_ahorro_programado" },
+//                         monto_retiro_ahorro_programado: { $sum: "$ahorros.monto_retiro_ahorro_programado" }
+//                     }
+//                 },
+//                 {
+//                     $addFields: {
+//                         "total_monto_ahorro_inicial": { $subtract: ["$monto_ahorro_inicial", "$monto_retiro_ahorro_inicial"] },
+//                         "total_monto_ahorro_voluntario": { $subtract: ["$monto_ahorro_voluntario", "$monto_retiro_ahorro_voluntario"] },
+//                         "total_monto_ahorro_programado": { $subtract: ["$monto_ahorro_programado", "$monto_retiro_ahorro_programado"] },
+//                     }
+//                 },
+//                 {
+//                     $match: {
+//                         $or: [
+//                             { "total_monto_ahorro_inicial": { "$gt": 0 } },
+//                             { "total_monto_ahorro_voluntario": { "$gt": 0 } },
+//                             { "total_monto_ahorro_programado": { "$gt": 0 } },
+//                         ]
+//                     }
+//                 }
+//             ]
+//         )
+
+//         console.log(lista)
+
+//         // const ahorros = {
+//         //     monto_ahorro_inicial: modelo[0].monto_ahorro_inicial - modelo[0].monto_retiro_ahorro_inicial,
+//         //     monto_ahorro_voluntario: modelo[0].monto_ahorro_voluntario - modelo[0].monto_retiro_ahorro_voluntario,
+//         //     monto_ahorro_programado: modelo[0].monto_ahorro_programado - modelo[0].monto_retiro_ahorro_programado
+//         // };
+
+//         // console.log(ahorros)
+
+//         return res.json({
+//             ok: true,
+//             // ahorros,
+//             lista,
+//         });
+//     } catch (error) {
+
+//         logger.logError(req, error);
+
+//         return res.status(500).json({
+//             ok: false,
+//             msg: getMessage('msgError500')
+//         });
+//     }
+// }
+
 module.exports = {
     listar_operaciones_financieras_detalle,
     obtener_operacion_financiera_detalle,
     actualizar_operacion_financiera_detalle,
     operacion_financiera_detalle_baja,
-    obtener_ahorros
+    obtener_ahorros,
+    // obtener_ahorros_producto_por_persona
 };
