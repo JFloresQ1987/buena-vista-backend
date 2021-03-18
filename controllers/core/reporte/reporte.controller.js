@@ -321,7 +321,8 @@ const consultar_saldo_credito = async(req, res) => {
         })
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "reporte.controller.js -> consultar_saldo_credito";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,

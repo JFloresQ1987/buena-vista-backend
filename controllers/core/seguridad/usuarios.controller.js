@@ -74,7 +74,7 @@ const crear = async(req, res = response) => {
                 msg: "El usuario ya esta registrado.",
             });
 
-        persona.save();
+        await persona.save();
 
         usuario = {
             usuario: persona.documento_identidad,
@@ -96,7 +96,8 @@ const crear = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "usuarios.controller.js -> crear";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -125,7 +126,8 @@ const getUsuario = async(req, res) => {
         }
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "usuarios.controller.js -> getUsuario";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -183,7 +185,8 @@ const actualizar = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "usuarios.controller.js -> actualizar";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -216,7 +219,8 @@ const cambiarClaveAdministrador = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "usuarios.controller.js -> cambiarClaveAdministrador";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -251,7 +255,8 @@ const cambiarClaveUsuario = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "usuarios.controller.js -> cambiarClaveUsuario";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -283,7 +288,8 @@ const cambiarVigencia = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "usuarios.controller.js -> cambiarVigencia";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,

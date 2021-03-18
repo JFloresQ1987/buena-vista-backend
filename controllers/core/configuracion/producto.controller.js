@@ -29,7 +29,8 @@ const listar = async(req, res) => {
         })
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "producto.controller.js -> listar";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -53,7 +54,8 @@ const listar_programacion = async(req, res) => {
         })
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "producto.controller.js -> listar_programacion";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,

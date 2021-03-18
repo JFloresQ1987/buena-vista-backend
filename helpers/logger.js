@@ -16,6 +16,7 @@ const logger = createLogger({
             level: 'debug',
             format: format.combine(format.simple())
         })
+
     ]
 });
 
@@ -34,7 +35,7 @@ const logRequest = async(req) => {
     );
 };
 
-const logError = async(req, error) => {
+const logError = async(controller, req, error) => {
 
     const header = {
         date: fecha,
@@ -45,7 +46,13 @@ const logError = async(req, error) => {
     };
 
     logger.error(
-        `{ 'Date': '${header.date}', 'Message': { 'tipo': 'ERROR', 'Host': '${header.host}', 'Origin': '${header.origin}', 'Endpoint': '${header.referer}', 'UserAgent': '${header.userAgent}', 'Error': '${error}' } }`
+        `{ 'Date': '${header.date}',` +
+        ` 'Host': '${header.host}',` +
+        ` 'Origin': '${header.origin}',` +
+        ` 'Endpoint': '${header.referer}',` +
+        ` 'UserAgent': '${header.userAgent}',` +
+        ` 'Controller': '${controller}',` +
+        ` 'Error': '${error}' }`
     );
 };
 

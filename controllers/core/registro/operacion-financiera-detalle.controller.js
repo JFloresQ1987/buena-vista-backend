@@ -27,7 +27,8 @@ const listar_operaciones_financieras_detalle = async(req, res) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-detalle.controller.js -> listar_operaciones_financieras_detalle";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -48,7 +49,8 @@ const obtener_operacion_financiera_detalle = async(req, res) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-detalle.controller.js -> obtener_operacion_financiera_detalle";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -80,7 +82,8 @@ const actualizar_operacion_financiera_detalle = async(req, res) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-detalle.controller.js -> actualizar_operacion_financiera_detalle";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -106,7 +109,8 @@ const operacion_financiera_detalle_baja = async(req, res) => {
 
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-detalle.controller.js -> operacion_financiera_detalle_baja";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -170,7 +174,8 @@ const obtener_ahorros = async(req, res) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-detalle.controller.js -> obtener_ahorros";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,

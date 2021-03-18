@@ -72,7 +72,8 @@ const actualizar = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "personas.controller.js -> actualizar";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -121,7 +122,8 @@ const crear = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "personas.controller.js -> crear";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -144,7 +146,8 @@ const buscar_por_documento_identidad = async(req, res) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "personas.controller.js -> buscar_por_documento_identidad";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -164,7 +167,8 @@ const buscar_id = async(req, res) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "personas.controller.js -> buscar_id";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -193,7 +197,8 @@ const buscar_por_nombre = async(req, res) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "personas.controller.js -> buscar_por_nombre";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -225,7 +230,8 @@ const buscar_por_apellido = async(req, res) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "personas.controller.js -> buscar_por_apellido";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -256,7 +262,8 @@ const buscar_por_apellido_mat = async(req, res) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "personas.controller.js -> buscar_por_apellido_mat";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,

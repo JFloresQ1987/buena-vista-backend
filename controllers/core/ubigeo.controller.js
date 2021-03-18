@@ -24,7 +24,8 @@ const crear = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "ubigeo.controller.js -> crear";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -46,6 +47,10 @@ const listarProvinciasxDepartamento = async(req, res = response) => {
             provincias,
         });
     } catch (e) {
+
+        const controller = "ubigeo.controller.js -> listarProvinciasxDepartamento";
+        logger.logError(controller, req, error);
+
         res.status(500).json({
             ok: false,
             msg: e.message,
@@ -68,6 +73,10 @@ const listarDistritosxProvincia = async(req, res = response) => {
             }
         });
     } catch (e) {
+
+        const controller = "ubigeo.controller.js -> listarDistritosxProvincia";
+        logger.logError(controller, req, error);
+
         res.status(500).json({
             ok: false,
             msg: e.message,

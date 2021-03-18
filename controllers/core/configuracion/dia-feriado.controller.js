@@ -19,7 +19,8 @@ const listar_solo_fechas_feriado = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "dia-feriado.controller.js -> listar_solo_fechas_feriado";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,

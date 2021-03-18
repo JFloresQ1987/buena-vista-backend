@@ -75,7 +75,8 @@ const listar_operaciones_financieras_detalle_vigentes = async(req, res) => {
         })
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-pago.controller.js -> listar_operaciones_financieras_detalle_vigentes";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -93,12 +94,22 @@ const listar = async(req, res) => {
 
     try {
 
+        // console.log('entroo')
+
         const caja = await Caja.findOne({
             ip: ip,
             usuario: usuario,
             es_vigente: true,
             es_borrado: false,
         });
+
+        if (!caja)
+            return res.status(400).json({
+                ok: false,
+                msg: "Estación de trabajo y/o usuario no habilitados para hacer caja.",
+            });
+        // console.log(caja)
+        // console.log(analista)
 
         let lista = [];
 
@@ -141,7 +152,8 @@ const listar = async(req, res) => {
         })
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-pago.controller.js -> listar";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -220,7 +232,8 @@ const listar_libro_diario = async(req, res) => {
         })
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-pago.controller.js -> listar_libro_diario";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -458,7 +471,8 @@ const desembolsar_operacion_financiera = async(req, res) => {
 
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-pago.controller.js -> desembolsar_operacion_financiera";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -571,7 +585,8 @@ const pagar_operacion_financiera = async(req, res) => {
         })
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-pago.controller.js -> pagar_operacion_financiera";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -754,7 +769,8 @@ const registrarIngresoEgreso = async(req, res = response) => {
         })
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-pago.controller.js -> registrarIngresoEgreso";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -793,7 +809,7 @@ const anular_recibo = async(req, res = response) => {
             comentario: comentario
         });
 
-        modelo.save();
+        await modelo.save();
 
         // const modelo = new PagoOperacionFinanciera(req.body);
 
@@ -842,7 +858,8 @@ const anular_recibo = async(req, res = response) => {
 
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-pago.controller.js -> anular_recibo";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -967,7 +984,8 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
 
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-pago.controller.js -> pagar_operacion_financiera_por_analista";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -1054,7 +1072,8 @@ const confirmar_pago_analista = async(req, res = response) => {
 
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-pago.controller.js -> confirmar_pago_analista";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -1299,7 +1318,8 @@ const crear_pagar_ahorro = async(req, res) => {
         // await session.abortTransaction();
         // session.endSession();
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-pago.controller.js -> crear_pagar_ahorro";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -1470,7 +1490,8 @@ const pagar_ahorro = async(req, res) => {
         })
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-pago.controller.js -> pagar_ahorro";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -1825,7 +1846,8 @@ const retirar_ahorros_operacion_financiera = async(req, res) => {
 
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera-pago.controller.js -> retirar_ahorros_operacion_financiera";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,

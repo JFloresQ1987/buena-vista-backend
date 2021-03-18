@@ -68,7 +68,8 @@ const crear = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "analista.controller.js -> crear";
+        logger.logError(controller, req, error);
 
         res.status(500).json({
             ok: false,
@@ -93,7 +94,8 @@ const getAnalista = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "analista.controller.js -> getAnalista";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -140,7 +142,8 @@ const actualizar = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "analista.controller.js -> actualizar";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -165,7 +168,8 @@ const getListaDesplegable = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "analista.controller.js -> getListaDesplegable";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -202,7 +206,8 @@ const getListaDesplegablexProducto = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "analista.controller.js -> getListaDesplegablexProducto";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,

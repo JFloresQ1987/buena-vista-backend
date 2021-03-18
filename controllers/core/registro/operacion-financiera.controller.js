@@ -67,7 +67,8 @@ const crear = async(req, res = response) => {
         // console.log(error)
 
         // logger.report.error('Transaccion NO Ok.');
-        logger.logError(req, error);
+        const controller = "operacion-financiera.controller.js -> crear";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -140,7 +141,8 @@ const listar_operaciones_financieras = async(req, res) => {
         })
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera.controller.js -> listar_operaciones_financieras";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -156,6 +158,7 @@ const obtener_ahorros_producto_por_persona = async(req, res) => {
         // console.log('entrooo 1111')
         const id = mongoose.Types.ObjectId(req.params.id);
         const estado = ["Pagado", "Previgente", "Vigente"];
+        // const estado_detalle = ["Pagado", "Vigente"];
         const es_prestamo = true;
 
         // console.log('entrooo')
@@ -191,7 +194,8 @@ const obtener_ahorros_producto_por_persona = async(req, res) => {
                     $match: {
                         "persona": id,
                         // "estado": { $in: estado },
-                        "estado": "Pagado",
+                        // "estado": "Pagado",
+                        "estado": { $in: ["Pagado", "Vigente"] },
                         "es_vigente": true,
                         "es_borrado": false
                     }
@@ -263,7 +267,8 @@ const obtener_ahorros_producto_por_persona = async(req, res) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera.controller.js -> obtener_ahorros_producto_por_persona";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -342,7 +347,8 @@ const listar_operacion_financiera = async(req, res) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera.controller.js -> listar_operacion_financiera";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -383,7 +389,8 @@ const listar_operaciones_financieras_por_analista = async(req, res) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera.controller.js -> listar_operaciones_financieras_por_analista";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -404,6 +411,9 @@ const cambiar_analista = async(req, res = response) => {
         modelo.analista = analista;
         // modelo.comentario.push();
 
+        // console.log('analista', analista)
+        // console.log(modelo)
+
         modelo.comentario.push({
             tipo: "Editado",
             id_usuario: req.header("id_usuario_sesion"),
@@ -413,16 +423,17 @@ const cambiar_analista = async(req, res = response) => {
             comentario: comentario,
         });
 
-        modelo.save();
+        await modelo.save();
 
         return res.json({
             ok: true,
             // recibo: 'Anulación satisfactoriamente.',
-            msg: "Se cambio analista satisfactoriamente.",
+            msg: "Se cambió analista satisfactoriamente.",
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera.controller.js -> cambiar_analista";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -466,7 +477,7 @@ const anular = async(req, res = response) => {
             comentario: comentario,
         });
 
-        modelo.save();
+        await modelo.save();
 
         await OperacionFinancieraDetalle.updateMany({ operacion_financiera: id, es_borrado: false }, { estado: "Anulado" });
 
@@ -496,7 +507,8 @@ const anular = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera.controller.js -> anular";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -532,7 +544,7 @@ const congelar_descongelar = async(req, res = response) => {
             comentario: comentario
         });
 
-        modelo.save();
+        await modelo.save();
 
         return res.json({
             ok: true,
@@ -542,7 +554,8 @@ const congelar_descongelar = async(req, res = response) => {
 
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "operacion-financiera.controller.js -> congelar_descongelar";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,

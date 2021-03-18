@@ -163,7 +163,8 @@ const cerrarCaja = async(req, res = response) => {
         //     ok: false,
         //     msg: "Hable con el Admin!!!!!!!!",
         // });
-        logger.logError(req, error);
+        const controller = "caja-diario.controller.js -> cerrarCaja";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -263,9 +264,17 @@ const cargarCaja = async(req, res) => {
             }
         );
     } catch (error) {
-        res.status(500).json({
+        // res.status(500).json({
+        //     ok: false,
+        //     msg: error,
+        // });
+
+        const controller = "caja-diario.controller.js -> cargarCaja";
+        logger.logError(controller, req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: error,
+            msg: getMessage('msgError500')
         });
     }
 };
@@ -302,10 +311,18 @@ const listarCajas = async(req, res) => {
             total,
         });
     } catch (error) {
-        console.log(error);
-        res.json({
+        // console.log(error);
+        // res.json({
+        //     ok: false,
+        //     msg: "Hable con el Admin!",
+        // });
+
+        const controller = "caja-diario.controller.js -> listarCajas";
+        logger.logError(controller, req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: "Hable con el Admin!",
+            msg: getMessage('msgError500')
         });
     }
 };
@@ -337,10 +354,18 @@ const listarCajasPorFecha = async(req, res) => {
             cajasFecha,
         });
     } catch (error) {
-        console.log(error);
-        res.json({
+        // console.log(error);
+        // res.json({
+        //     ok: false,
+        //     msg: "Hable con el Admin!",
+        // });
+
+        const controller = "caja-diario.controller.js -> listarCajasPorFecha";
+        logger.logError(controller, req, error);
+
+        return res.status(500).json({
             ok: false,
-            msg: "Hable con el Admin!",
+            msg: getMessage('msgError500')
         });
     }
 };

@@ -16,7 +16,8 @@ const getListaDesplegable = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "grupo-bancomunal.controller.js -> getListaDesplegable";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,

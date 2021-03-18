@@ -39,7 +39,8 @@ const crear = async(req, res = response) => {
         });
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "caja.controller.js -> crear";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -113,7 +114,8 @@ const actualizar = async(req, res = response) => {
         })
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "caja.controller.js -> actualizar";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
@@ -135,7 +137,8 @@ const buscar_caja = async(req, res) => {
         })
     } catch (error) {
 
-        logger.logError(req, error);
+        const controller = "caja.controller.js -> buscar_caja";
+        logger.logError(controller, req, error);
 
         return res.status(500).json({
             ok: false,
