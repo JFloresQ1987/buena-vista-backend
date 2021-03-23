@@ -15,6 +15,7 @@ const {
     pagar_ahorro,
     listar_libro_diario,
     retirar_ahorros_operacion_financiera,
+    listar_recibos_previgentes,
 } = require("../../../controllers/core/caja/operacion-financiera-pago.controller");
 
 const router = Router();
@@ -23,6 +24,12 @@ router.get(
     "/listar/:id_operacion_financiera",
     validarJWT,
     listar_operaciones_financieras_detalle_vigentes
+);
+
+router.get(
+    "/listar-recibos-previgentes/:analista",
+    validarJWT,
+    listar_recibos_previgentes
 );
 
 router.get(

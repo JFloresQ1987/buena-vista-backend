@@ -50,26 +50,38 @@ const crear = async(req, res = response) => {
 };
 
 const listar = async(req, res) => {
-    const cajas = await Caja.find({ es_borrado: false })
-        .populate({
-            path: "usuario",
-            select: "persona usuario",
-            populate: { path: "persona", select: "nombre apellido_paterno apellido_materno" }
+
+    try {
+        const cajas = await Caja.find({ es_borrado: false })
+            .populate({
+                path: "usuario",
+                select: "persona usuario",
+                populate: { path: "persona", select: "nombre apellido_paterno apellido_materno" }
+            });
+
+        const total = await Caja.find({ es_borrado: false }).countDocuments();
+
+        res.json({
+            ok: true,
+            cajas,
+            total,
         });
 
-    const total = await Caja.find({ es_borrado: false }).countDocuments();
+    } catch (error) {
 
-    res.json({
-        ok: true,
-        cajas,
-        total,
-    });
+        const controller = "caja.controller.js -> listar";
+        logger.logError(controller, req, error);
+
+        return res.status(500).json({
+            ok: false,
+            msg: getMessage('msgError500')
+        });
+    }
 };
 
 const actualizar = async(req, res = response) => {
 
     const id = req.params.id;
-
     const { comentario } = req.body;
 
     try {

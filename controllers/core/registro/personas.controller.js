@@ -7,12 +7,25 @@ const Ubigeo = require('../../../models/core/ubigeo.model');
 
 const listar = async(req, res) => {
 
-    const modelo = await Persona.find({ "es_borrado": false });
+    try {
 
-    res.json({
-        ok: true,
-        modelo
-    })
+        const modelo = await Persona.find({ "es_borrado": false });
+
+        res.json({
+            ok: true,
+            modelo
+        })
+
+    } catch (error) {
+
+        const controller = "personas.controller.js -> listar";
+        logger.logError(controller, req, error);
+
+        return res.status(500).json({
+            ok: false,
+            msg: getMessage('msgError500')
+        });
+    }
 }
 
 
@@ -273,38 +286,51 @@ const buscar_por_apellido_mat = async(req, res) => {
 };
 
 const datos_persona_reporte = async(req, res) => {
-    const id = req.params.id;
-    const persona = await Persona.findById(
-        id,
-        "apellido_paterno apellido_materno nombre documento_identidad ubigeo domicilio numero_celular"
-    );
-    u = {};
-    const ubigeo = await Ubigeo.findById(persona.ubigeo.departamento);
-    u["departamento"] = ubigeo.departamento;
-    ubigeo.provincias.forEach((p) => {
-        if (String(p._id) === String(persona.ubigeo.provincia)) {
-            u["provincia"] = p.provincia;
-            p.distritos.forEach((d) => {
-                if (String(d._id) === String(persona.ubigeo.distrito)) {
-                    u["distrito"] = d.distrito;
-                }
-            });
-        }
-    });
 
-    const model = {
-        numero_celular: persona.numero_celular,
-        nombre: persona.nombre,
-        documento_identidad: persona.documento_identidad,
-        domicilio: persona.domicilio,
-        apellido_paterno: persona.apellido_paterno,
-        apellido_materno: persona.apellido_materno,
-        ubigeo: u
+    try {
+        const id = req.params.id;
+        const persona = await Persona.findById(
+            id,
+            "apellido_paterno apellido_materno nombre documento_identidad ubigeo domicilio numero_celular"
+        );
+        u = {};
+        const ubigeo = await Ubigeo.findById(persona.ubigeo.departamento);
+        u["departamento"] = ubigeo.departamento;
+        ubigeo.provincias.forEach((p) => {
+            if (String(p._id) === String(persona.ubigeo.provincia)) {
+                u["provincia"] = p.provincia;
+                p.distritos.forEach((d) => {
+                    if (String(d._id) === String(persona.ubigeo.distrito)) {
+                        u["distrito"] = d.distrito;
+                    }
+                });
+            }
+        });
+
+        const model = {
+            numero_celular: persona.numero_celular,
+            nombre: persona.nombre,
+            documento_identidad: persona.documento_identidad,
+            domicilio: persona.domicilio,
+            apellido_paterno: persona.apellido_paterno,
+            apellido_materno: persona.apellido_materno,
+            ubigeo: u
+        }
+        return res.json({
+            ok: true,
+            persona: model,
+        });
+
+    } catch (error) {
+
+        const controller = "personas.controller.js -> datos_persona_reporte";
+        logger.logError(controller, req, error);
+
+        return res.status(500).json({
+            ok: false,
+            msg: getMessage('msgError500')
+        });
     }
-    return res.json({
-        ok: true,
-        persona: model,
-    });
 };
 
 module.exports = {

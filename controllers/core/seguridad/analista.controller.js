@@ -6,30 +6,43 @@ const { getMessage } = require('../../../helpers/messages');
 const Analista = require("../../../models/core/seguridad/analista.model");
 
 const listar = async(req, res = response) => {
-    const desde = Number(req.query.desde) || 0;
-    const [analistas, total] = await Promise.all([
-        Analista.find({ es_borrado: false, es_vigente: true },
-            "codigo descripcion productos usuario es_bloqueado es_vigente"
-            // "codigo descripcion producto usuario es_bloqueado es_vigente"
-        )
-        .populate({
-            path: "usuario",
-            select: "rol persona usuario",
-            populate: {
-                path: "persona",
-                select: "nombre apellido_paterno apellido_materno",
-            },
-        })
-        // .populate("producto", "_id descripcion")
-        .skip(desde)
-        .limit(10),
-        Analista.find({ es_borrado: false }).countDocuments()
-    ])
-    res.json({
-        ok: true,
-        analistas,
-        total
-    });
+
+    try {
+        const desde = Number(req.query.desde) || 0;
+        const [analistas, total] = await Promise.all([
+            Analista.find({ es_borrado: false, es_vigente: true },
+                "codigo descripcion productos usuario es_bloqueado es_vigente"
+                // "codigo descripcion producto usuario es_bloqueado es_vigente"
+            )
+            .populate({
+                path: "usuario",
+                select: "rol persona usuario",
+                populate: {
+                    path: "persona",
+                    select: "nombre apellido_paterno apellido_materno",
+                },
+            })
+            // .populate("producto", "_id descripcion")
+            .skip(desde)
+            .limit(10),
+            Analista.find({ es_borrado: false }).countDocuments()
+        ])
+        res.json({
+            ok: true,
+            analistas,
+            total
+        });
+
+    } catch (error) {
+
+        const controller = "analista.controller.js -> listar";
+        logger.logError(controller, req, error);
+
+        return res.status(500).json({
+            ok: false,
+            msg: getMessage('msgError500')
+        });
+    }
 };
 
 const crear = async(req, res = response) => {

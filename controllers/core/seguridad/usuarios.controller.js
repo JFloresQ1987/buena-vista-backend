@@ -7,41 +7,67 @@ const Usuario = require("../../../models/core/seguridad/usuario.model");
 const Persona = require("../../../models/core/registro/persona.model");
 
 const listar = async(req, res) => {
-    const desde = Number(req.query.desde) || 0;
-    //const modelo = await Usuario.find({ "es_borrado": false }, 'usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente')
 
-    const [usuarios, total] = await Promise.all([
-        Usuario.find({
-                es_vigente: true,
-                es_borrado: false
-            },
-            "usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente rol"
-        )
-        .populate("persona", "nombre apellido_paterno apellido_materno documento_identidad")
-        .sort({ persona: -1 })
-        .skip(desde)
-        .limit(10),
-        Usuario.find({ es_vigente: true, es_borrado: false }).countDocuments(),
-    ]);
+    try {
+        const desde = Number(req.query.desde) || 0;
+        //const modelo = await Usuario.find({ "es_borrado": false }, 'usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente')
 
-    res.json({
-        ok: true,
-        usuarios,
-        total,
-    });
+        const [usuarios, total] = await Promise.all([
+            Usuario.find({
+                    es_vigente: true,
+                    es_borrado: false
+                },
+                "usuario debe_cambiar_clave_inicio_sesion es_bloqueado es_vigente rol"
+            )
+            .populate("persona", "nombre apellido_paterno apellido_materno documento_identidad")
+            .sort({ persona: -1 })
+            .skip(desde)
+            .limit(10),
+            Usuario.find({ es_vigente: true, es_borrado: false }).countDocuments(),
+        ]);
+
+        res.json({
+            ok: true,
+            usuarios,
+            total,
+        });
+
+    } catch (error) {
+
+        const controller = "usuarios.controller.js -> listar";
+        logger.logError(controller, req, error);
+
+        return res.status(500).json({
+            ok: false,
+            msg: getMessage('msgError500')
+        });
+    }
 };
 
 const listarxRol = async(req, res = response) => {
-    const id = req.params.id;
-    const usuarios = await Usuario.find({
-        es_borrado: false,
-        es_vigente: true,
-        rol: { $in: id },
-    }).populate("persona", "nombre apellido_paterno apellido_materno documento_identidad");
-    return res.json({
-        ok: true,
-        usuarios,
-    });
+
+    try {
+        const id = req.params.id;
+        const usuarios = await Usuario.find({
+            es_borrado: false,
+            es_vigente: true,
+            rol: { $in: id },
+        }).populate("persona", "nombre apellido_paterno apellido_materno documento_identidad");
+        return res.json({
+            ok: true,
+            usuarios,
+        });
+
+    } catch (error) {
+
+        const controller = "usuarios.controller.js -> listarxRol";
+        logger.logError(controller, req, error);
+
+        return res.status(500).json({
+            ok: false,
+            msg: getMessage('msgError500')
+        });
+    }
 };
 
 const crear = async(req, res = response) => {

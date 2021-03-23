@@ -6,11 +6,23 @@ const Ubigeo = require("../../models/core/ubigeo.model");
 const mongoose = require("mongoose");
 
 const listarDepartamentos = async(req, res = response) => {
-    const departamentos = await Ubigeo.find({}, "departamento _id");
-    res.json({
-        ok: true,
-        departamentos,
-    });
+
+    try {
+        const departamentos = await Ubigeo.find({}, "departamento _id");
+        res.json({
+            ok: true,
+            departamentos,
+        });
+    } catch (e) {
+
+        const controller = "ubigeo.controller.js -> listarDepartamentos";
+        logger.logError(controller, req, error);
+
+        res.status(500).json({
+            ok: false,
+            msg: e.message,
+        });
+    }
 };
 
 const crear = async(req, res = response) => {

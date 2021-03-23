@@ -10,7 +10,7 @@ const PagoConcepto = require("../../../models/core/configuracion/pago-concepto.m
 const Usuario = require("../../../models/core/seguridad/usuario.model");
 const Analista = require("../../../models/core/seguridad/analista.model");
 const Caja = require("../../../models/core/seguridad/caja.model");
-// const CajaDiario = require('../../../models/core/caja/caja-diario.model');
+const CajaDiario = require('../../../models/core/caja/caja-diario.model');
 // const Caja = require('../../../models/core/seguridad/caja.model');
 // const dayjs = require('dayjs');
 // const RequestIp = require('@supercharge/request-ip')
@@ -91,6 +91,9 @@ const listar = async(req, res) => {
     const usuario = req.params.usuario;
     const analista = req.params.analista;
     const ip = requestIp.getClientIp(req).replace("::ffff:", "");
+    const fecha = dayjs().format('YYYY-MM-DD');
+
+    // fecha: now.format('DD/MM/YYYY hh:mm:ss a')
 
     try {
 
@@ -108,6 +111,15 @@ const listar = async(req, res) => {
                 ok: false,
                 msg: "Estación de trabajo y/o usuario no habilitados para hacer caja.",
             });
+
+        const caja_diario = await CajaDiario.findOne({ caja: id, "apertura.fecha_apertura": fecha });
+        if (!caja_diario)
+            return res.status(400).json({
+                ok: false,
+                msg: "No existe caja diario aperturado.",
+            });
+
+
         // console.log(caja)
         // console.log(analista)
 
@@ -116,7 +128,8 @@ const listar = async(req, res) => {
         if (analista === '0') {
 
             lista = await PagoOperacionFinanciera.find({
-                    "diario.caja": caja.id,
+                    // "diario.caja": caja.id,
+                    "diario.caja_diario": caja_diario.id,
                     // "recibo.serie": caja.serie,
                     "es_vigente": true,
                     "es_borrado": false
@@ -127,7 +140,8 @@ const listar = async(req, res) => {
 
             lista = await PagoOperacionFinanciera.find({
                     // "comentario.[0].id_usuario": analista,
-                    "recibo.serie": caja.serie,
+                    // "recibo.serie": caja.serie,
+                    "diario.caja_diario": caja_diario.id,
                     "producto.analista": analista,
                     "recibo.estado": "Previgente",
                     // "comentario": { $elemMatch: { "id_usuario": analista } },
@@ -138,6 +152,133 @@ const listar = async(req, res) => {
                 // .sort({ "_id": -1 });
                 .sort({ $natural: -1 });
         }
+
+        // const lista = await PagoOperacionFinanciera.find({
+        //         "es_vigente": true,
+        //         "es_borrado": false
+        //     })
+        //     // .sort({ "_id": -1 });
+        //     .sort({ $natural: -1 });
+
+        res.json({
+            ok: true,
+            lista
+        })
+    } catch (error) {
+
+        const controller = "operacion-financiera-pago.controller.js -> listar";
+        logger.logError(controller, req, error);
+
+        return res.status(500).json({
+            ok: false,
+            msg: getMessage('msgError500')
+        });
+    }
+}
+
+const listar_recibos_previgentes = async(req, res) => {
+
+    // const { analista } = req.body;
+    // const usuario = req.params.usuario;
+    const analista = req.params.analista;
+    // const ip = requestIp.getClientIp(req).replace("::ffff:", "");
+    const fecha_apertura = dayjs().format('YYYY-MM-DD');
+    const local_atencion = req.header("local_atencion");
+
+    // fecha: now.format('DD/MM/YYYY hh:mm:ss a')
+
+    try {
+
+        // console.log(fecha_apertura)
+
+        const caja = await Caja.findOne({
+            // ip: data.ip,
+            // usuario: data.id_usuario_sesion,
+            local_atencion: local_atencion,
+            es_caja_principal: true,
+            es_vigente: true,
+            es_borrado: false,
+        });
+
+        // const caja = await Caja.findOne({
+        //     ip: ip,
+        //     usuario: usuario,
+        //     es_vigente: true,
+        //     es_borrado: false,
+        // });
+
+        if (!caja)
+            return res.status(400).json({
+                ok: false,
+                msg: "Estación de trabajo y/o usuario no habilitados para hacer caja.",
+            });
+
+        const caja_diario = await CajaDiario.findOne({
+                "caja": caja.id,
+                "apertura.fecha_apertura": fecha_apertura,
+                "es_vigente": true,
+                "es_borrado": false,
+            })
+            // .where("apertura.fecha_apertura")
+            // .ne(fecha_apertura)
+            .sort({ $natural: -1 });
+
+        // const caja_diario = await CajaDiario.findOne({ caja: id, "apertura.fecha_apertura": fecha });
+        if (!caja_diario)
+            return res.status(400).json({
+                ok: false,
+                msg: "No existe caja diario aperturado.",
+            });
+
+
+        // console.log(caja)
+        // console.log(caja_diario.id)
+
+        const lista = await PagoOperacionFinanciera.find({
+                // "comentario.[0].id_usuario": analista,
+                // "recibo.serie": caja.serie,
+                "diario.caja_diario": caja_diario.id,
+                "producto.analista": analista,
+                "recibo.estado": "Previgente",
+                // "comentario": { $elemMatch: { "id_usuario": analista } },
+                // "comentario": { "id_usuario": analista },
+                "es_vigente": true,
+                "es_borrado": false
+            })
+            // .sort({ "_id": -1 });
+            .sort({ $natural: -1 });
+
+        // console.log(lista)
+
+        // let lista = [];
+
+        // if (analista === '0') {
+
+        //     lista = await PagoOperacionFinanciera.find({
+        //             // "diario.caja": caja.id,
+        //             "diario.caja_diario": caja_diario.id,
+        //             // "recibo.serie": caja.serie,
+        //             "es_vigente": true,
+        //             "es_borrado": false
+        //         })
+        //         // .sort({ "_id": -1 });
+        //         .sort({ $natural: -1 });
+        // } else {
+
+        //     lista = await PagoOperacionFinanciera.find({
+        //             // "comentario.[0].id_usuario": analista,
+        //             // "recibo.serie": caja.serie,
+        //             "diario.caja_diario": caja_diario.id,
+        //             "producto.analista": analista,
+        //             "recibo.estado": "Previgente",
+        //             // "comentario": { $elemMatch: { "id_usuario": analista } },
+        //             // "comentario": { "id_usuario": analista },
+        //             "es_vigente": true,
+        //             "es_borrado": false
+        //         })
+        //         // .sort({ "_id": -1 });
+        //         .sort({ $natural: -1 });
+        // }
 
         // const lista = await PagoOperacionFinanciera.find({
         //         "es_vigente": true,
@@ -901,10 +1042,14 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
             es_masivo: true
         };
 
+        // console.log(lista)
+
         const resultado_validacion = await validarPago(data_validacion);
 
+        // console.log(resultado_validacion)
+
         if (!resultado_validacion.ok)
-            return res.status(404).json(resultado_validacion)
+            return res.status(400).json(resultado_validacion)
 
         // const data = {
         //     data_validacion: resultado_validacion,
@@ -937,6 +1082,8 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
             comentario: 'Pre pago realizado por analista'
         };
 
+        const ultimo_recibo = parseInt(resultado_validacion.recibo.numero.split("-").pop());
+
         for (let i = 0; i < lista.length; i++) {
 
             const operacion_financiera = await OperacionFinanciera.findById(lista[i].operacion_financiera);
@@ -956,8 +1103,11 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
                 cuotas_procesada.push(cuotas[j]._id);
             }
 
-            const correlativo_recibo = parseInt(resultado_validacion.recibo.numero.split("-").pop()) + i;
+            const correlativo_recibo = ultimo_recibo + i;
+            // const correlativo_recibo = parseInt(resultado_validacion.recibo.numero.split("-").pop()) + i;
             resultado_validacion.recibo.numero = "I-" + correlativo_recibo.toString().padStart(8, "00000000");
+            // console.log("recibo", resultado_validacion.recibo.numero)
+            // console.log("correlativo_recibo", correlativo_recibo)
 
             // numero_recibo = parseInt(resultado_validacion.recibo.numero.split("-").pop()) + i;
 
@@ -972,6 +1122,8 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
                 es_masivo: true,
                 comentario: comentario
             };
+
+            // console.log(data)
 
             const resultado_pago = await pagarProducto(data);
         }
@@ -1870,4 +2022,5 @@ module.exports = {
     pagar_ahorro,
     listar_libro_diario,
     retirar_ahorros_operacion_financiera,
+    listar_recibos_previgentes,
 };
