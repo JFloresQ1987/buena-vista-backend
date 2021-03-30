@@ -112,7 +112,7 @@ const listar = async(req, res) => {
                 msg: "Estación de trabajo y/o usuario no habilitados para hacer caja.",
             });
 
-        const caja_diario = await CajaDiario.findOne({ caja: id, "apertura.fecha_apertura": fecha });
+        const caja_diario = await CajaDiario.findOne({ caja: caja.id, "apertura.fecha_apertura": fecha });
         if (!caja_diario)
             return res.status(400).json({
                 ok: false,
