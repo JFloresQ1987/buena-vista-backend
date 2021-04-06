@@ -1088,13 +1088,14 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
 
             const operacion_financiera = await OperacionFinanciera.findById(lista[i].operacion_financiera);
             const cuotas = await OperacionFinancieraDetalle.find({
-                // 'operacion_financiera': new ObjectId(operacion_financiera.operacion_financiera),
-                'operacion_financiera': lista[i].operacion_financiera,
-                // "operacion_financiera": "5f852f40f1ba56266499fbb3",
-                "estado": { $in: ["Pendiente", "Amortizado"] },
-                "es_vigente": true,
-                "es_borrado": false
-            }, '_id');
+                    // 'operacion_financiera': new ObjectId(operacion_financiera.operacion_financiera),
+                    'operacion_financiera': lista[i].operacion_financiera,
+                    // "operacion_financiera": "5f852f40f1ba56266499fbb3",
+                    "estado": { $in: ["Pendiente", "Amortizado"] },
+                    "es_vigente": true,
+                    "es_borrado": false
+                }, '_id')
+                .sort({ "numero_cuota": 1 });
 
             let cuotas_procesada = [];
 

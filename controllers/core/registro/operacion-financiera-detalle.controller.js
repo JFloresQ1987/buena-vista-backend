@@ -18,6 +18,45 @@ const listar_operaciones_financieras_detalle = async(req, res) => {
             es_vigente: true,
         }).sort({ numero_cuota: 1 });
 
+        // for (let i = 0; i < lista.length; i++) {
+
+        //     let monto_gasto_pagado = 0;
+        //     let monto_ahorro_inicial_pagado = 0;
+        //     let monto_ahorro_voluntario_pagado = 0;
+        //     let monto_ahorro_programado_pagado = 0;
+        //     let monto_amortizacion_capital_pagado = 0;
+        //     let monto_interes_pagado = 0;
+        //     let monto_mora_pagado = 0;
+
+        //     for (let j = 0; j < lista[i].pagos.length; j++) {
+
+        //         if (lista[i].pagos[j].es_vigente) {
+
+        //             monto_gasto_pagado += lista[i].pagos[j].ingresos.monto_gasto || 0;
+        //             monto_ahorro_inicial_pagado += lista[i].pagos[j].ahorros.monto_ahorro_inicial || 0;
+        //             monto_ahorro_voluntario_pagado += lista[i].pagos[j].ahorros.monto_ahorro_voluntario || 0;
+        //             monto_ahorro_programado_pagado += lista[i].pagos[j].ahorros.monto_ahorro_programado || 0;
+        //             monto_amortizacion_capital_pagado += lista[i].pagos[j].ingresos.monto_amortizacion_capital || 0;
+        //             monto_interes_pagado += lista[i].pagos[j].ingresos.monto_interes || 0;
+        //             monto_mora_pagado += lista[i].pagos[j].ingresos.monto_mora || 0;
+        //         }
+        //     }
+
+        //     // lista[i].ingresos.monto_gasto -= monto_gasto_pagado;
+        //     // lista[i].ahorros.monto_ahorro_inicial -= monto_ahorro_inicial_pagado;
+        //     // lista[i].ahorros.monto_ahorro_voluntario -= monto_ahorro_voluntario_pagado;
+        //     // lista[i].ahorros.monto_ahorro_programado -= monto_ahorro_programado_pagado;
+        //     // lista[i].ingresos.monto_amortizacion_capital -= monto_amortizacion_capital_pagado;
+        //     // lista[i].ingresos.monto_mora -= monto_mora_pagado;
+        //     // lista[i].ingresos.monto_interes -= monto_interes_pagado;
+
+        //     lista[i].monto_cuota_pagada = (monto_gasto_pagado +
+        //         monto_ahorro_inicial_pagado +
+        //         monto_amortizacion_capital_pagado +
+        //         monto_interes_pagado +
+        //         monto_ahorro_programado_pagado).toFixed(2);
+        // }
+
         // console.log(id_operacion_financiera)
         // console.log(lista)
 

@@ -305,6 +305,7 @@ schema.method('toJSON', function() {
         // monto_ahorro_programado,
         ingresos,
         ahorros,
+        pagos,
         // monto_gasto,
         // monto_ahorro_inicial,
         ...object
@@ -335,10 +336,31 @@ schema.method('toJSON', function() {
     object.monto_cuota_2 = (ingresos.monto_gasto + ahorros.monto_ahorro_inicial +
         ingresos.monto_amortizacion_capital + ingresos.monto_interes + ahorros.monto_ahorro_programado);
     object.monto_ahorro_programado_2 = ahorros.monto_ahorro_programado;
+
     object.monto_cuota_pagada = 0;
     object.monto_ahorro_voluntario = 0;
+
+    for (let j = 0; j < pagos.length; j++) {
+
+        if (pagos[j].es_vigente) {
+
+            object.monto_cuota_pagada += pagos[j].ingresos.monto_gasto || 0;
+            object.monto_cuota_pagada += pagos[j].ahorros.monto_ahorro_inicial || 0;
+            // object.monto_cuota_pagada += pagos[j].ahorros.monto_ahorro_voluntario || 0;
+            object.monto_cuota_pagada += pagos[j].ahorros.monto_ahorro_programado || 0;
+            object.monto_cuota_pagada += pagos[j].ingresos.monto_amortizacion_capital || 0;
+            object.monto_cuota_pagada += pagos[j].ingresos.monto_interes || 0;
+            // object.monto_cuota_pagada += pagos[j].ingresos.monto_mora || 0;
+
+            object.monto_ahorro_voluntario = pagos[j].ahorros.monto_ahorro_voluntario || 0;
+        }
+    }
+
+    object.monto_cuota_pagada = object.monto_cuota_pagada.toFixed(2);
+
+    object.monto_ahorro_voluntario = object.monto_ahorro_voluntario.toFixed(2);
     object.monto_pago_mora = 0;
-    object.monto_mora = ingresos.monto_mora;
+    object.monto_mora = ingresos.monto_mora.toFixed(2);
     return object;
 })
 
