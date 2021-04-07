@@ -95,13 +95,21 @@ const pagarProducto = async(data) => {
         let monto_interes_a_pagar = cuota.ingresos.monto_interes - monto_interes_pagado;
         let monto_mora_a_pagar = cuota.ingresos.monto_mora - monto_mora_pagado;
 
-        const monto_total_cuota_a_pagar = monto_gasto_a_pagar +
+        const monto_total_cuota_a_pagar = (monto_gasto_a_pagar +
             monto_ahorro_inicial_a_pagar +
             monto_ahorro_voluntario_a_pagar +
             monto_ahorro_programado_a_pagar +
             monto_amortizacion_capital_a_pagar +
             monto_interes_a_pagar +
-            monto_mora_a_pagar
+            monto_mora_a_pagar).toFixed(2);
+
+        // const monto_total_cuota_a_pagar = monto_gasto_a_pagar +
+        //     monto_ahorro_inicial_a_pagar +
+        //     monto_ahorro_voluntario_a_pagar +
+        //     monto_ahorro_programado_a_pagar +
+        //     monto_amortizacion_capital_a_pagar +
+        //     monto_interes_a_pagar +
+        //     monto_mora_a_pagar
 
         if (monto_total_cuota_a_pagar <= monto_recibido_actual) {
 
@@ -292,31 +300,33 @@ const pagarProducto = async(data) => {
 
             //const ultima_cuota_pendiente = await OperacionFinancieraDetalle.findOne({ "operacion_financiera": data.operacion_financiera, "estado": { $in: ["Pendiente", "Amortizado"] }, "es_vigente": true, "es_borrado": false });
 
-            const ultima_cuota_pendiente = await OperacionFinancieraDetalle.aggregate(
-                [{
-                        $match: {
-                            "operacion_financiera": new ObjectId(data.operacion_financiera),
-                            // "estado": { $in: ["Pendiente", "Amortizado"] },
-                            "es_vigente": true,
-                            "es_borrado": false
-                        }
-                    },
-                    {
-                        $group: {
-                            _id: "$operacion_financiera",
-                            //maxTotalAmount: { $max: { $multiply: [ "$price", "$quantity" ] } },
-                            cuota: { $max: "$numero_cuota" }
-                        }
-                    }
-                ]
-            )
+            // const ultima_cuota_pendiente = await OperacionFinancieraDetalle.aggregate(
+            //     [{
+            //             $match: {
+            //                 "operacion_financiera": new ObjectId(data.operacion_financiera),
+            //                 // "estado": { $in: ["Pendiente", "Amortizado"] },
+            //                 "es_vigente": true,
+            //                 "es_borrado": false
+            //             }
+            //         },
+            //         {
+            //             $group: {
+            //                 _id: "$operacion_financiera",
+            //                 //maxTotalAmount: { $max: { $multiply: [ "$price", "$quantity" ] } },
+            //                 cuota: { $max: "$numero_cuota" }
+            //             }
+            //         }
+            //     ]
+            // )
 
             const monto_pendiente_residuo = (monto_gasto_a_pagar + monto_ahorro_inicial_a_pagar +
                 monto_ahorro_voluntario_a_pagar + monto_ahorro_programado_a_pagar +
                 monto_amortizacion_capital_a_pagar + monto_interes_a_pagar +
                 monto_mora_a_pagar) - monto_total;
 
-            if (ultima_cuota_pendiente[0].cuota == cuota.numero_cuota && monto_pendiente_residuo.toFixed(2) == 0) cuota.estado = 'Pagado';
+            if (monto_pendiente_residuo.toFixed(2) == 0) cuota.estado = 'Pagado';
+
+            // if (ultima_cuota_pendiente[0].cuota == cuota.numero_cuota && monto_pendiente_residuo.toFixed(2) == 0) cuota.estado = 'Pagado';
         }
 
         if (cuota.numero_cuota === 0 && cuota.estado === 'Pagado')

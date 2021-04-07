@@ -154,6 +154,7 @@ const consultar_saldo_credito = async(req, res) => {
             let monto_retiro = 0;
             let monto_saldo_capital = 0;
             let monto_saldo_interes = 0;
+            let monto_saldo_ahorro_programado = 0;
             let monto_saldo_neto = 0;
             let monto_saldo_liquidado = 0;
 
@@ -176,17 +177,25 @@ const consultar_saldo_credito = async(req, res) => {
                     // let monto_cuota_pagada = 0;                    
 
                     monto_amortizacion += (cuotas[j].estado === 'Pagado') ?
-                        ((cuotas[j].ingresos.monto_amortizacion_capital || 0) + (cuotas[j].ingresos.monto_interes || 0)) :
+                        ((cuotas[j].ingresos.monto_amortizacion_capital || 0) +
+                            (cuotas[j].ingresos.monto_interes || 0)) :
                         0;
-                    monto_ahorro += (cuotas[j].ahorros.monto_ahorro_voluntario || 0);
+                    monto_ahorro += (cuotas[j].estado === 'Pagado') ?
+                        ((cuotas[j].ahorros.monto_ahorro_voluntario || 0) +
+                            (cuotas[j].ahorros.monto_ahorro_programado || 0)) :
+                        0;
                     monto_retiro += (cuotas[j].ahorros.monto_retiro_ahorro_inicial || 0) +
-                        (cuotas[j].ahorros.monto_retiro_ahorro_voluntario || 0);
+                        (cuotas[j].ahorros.monto_retiro_ahorro_voluntario || 0) +
+                        (cuotas[j].ahorros.monto_retiro_ahorro_programado || 0);
                     // monto_ahorro += cuota.monto_ahorro_voluntario + cuota.monto_ahorro_programado;
                     monto_saldo_capital += (cuotas[j].estado === 'Pendiente' || cuotas[j].estado === 'Amortizado') ?
                         (cuotas[j].ingresos.monto_amortizacion_capital || 0) :
                         0;
                     monto_saldo_interes += (cuotas[j].estado === 'Pendiente' || cuotas[j].estado === 'Amortizado') ?
                         (cuotas[j].ingresos.monto_interes || 0) :
+                        0;
+                    monto_saldo_ahorro_programado += (cuotas[j].estado === 'Pendiente' || cuotas[j].estado === 'Amortizado') ?
+                        (cuotas[j].ahorros.monto_ahorro_programado || 0) :
                         0;
 
                     if (cuotas[j].estado === 'Amortizado') {
@@ -197,13 +206,18 @@ const consultar_saldo_credito = async(req, res) => {
 
                             if (cuotas[j].pagos[k].es_vigente) {
 
+                                // console.log(cuotas[j].pagos[k].ahorros.monto_ahorro_programado)
+
                                 monto_amortizacion += (cuotas[j].pagos[k].ingresos.monto_amortizacion_capital || 0) +
                                     (cuotas[j].pagos[k].ingresos.monto_interes || 0);
-                                monto_ahorro += (cuotas[j].pagos[k].ahorros.monto_ahorro_voluntario || 0);
+                                monto_ahorro += (cuotas[j].pagos[k].ahorros.monto_ahorro_voluntario || 0) +
+                                    (cuotas[j].pagos[k].ahorros.monto_ahorro_programado || 0);
                                 monto_retiro += (cuotas[j].pagos[k].ahorros.monto_retiro_ahorro_inicial || 0) +
-                                    (cuotas[j].pagos[k].ahorros.monto_retiro_ahorro_voluntario || 0);
+                                    (cuotas[j].pagos[k].ahorros.monto_retiro_ahorro_voluntario || 0) +
+                                    (cuotas[j].pagos[k].ahorros.monto_retiro_ahorro_programado || 0);
                                 monto_saldo_capital -= (cuotas[j].pagos[k].ingresos.monto_amortizacion_capital || 0);
                                 monto_saldo_interes -= (cuotas[j].pagos[k].ingresos.monto_interes || 0);
+                                monto_saldo_ahorro_programado -= (cuotas[j].pagos[k].ahorros.monto_ahorro_programado || 0);
                             }
                         }
 
@@ -212,9 +226,12 @@ const consultar_saldo_credito = async(req, res) => {
                 }
             }
 
+            // console.log(monto_saldo_ahorro_programado)
+
             // monto_ahorro+=item.monto_ahorro_inicial;
-            monto_saldo_neto = monto_saldo_capital + monto_saldo_interes;
-            monto_saldo_liquidado = monto_saldo_neto - (monto_ahorro - monto_retiro);
+            monto_saldo_neto = monto_saldo_capital + monto_saldo_interes + monto_saldo_ahorro_programado;
+            monto_saldo_liquidado = monto_saldo_capital + monto_saldo_interes - (monto_ahorro - monto_retiro);
+            // monto_saldo_liquidado = monto_saldo_neto - (monto_ahorro - monto_retiro);
 
             const persona = await Persona.findById(lista_operacion_financiera[i].persona,
                 "nombre apellido_paterno apellido_materno"
