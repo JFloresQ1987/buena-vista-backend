@@ -319,7 +319,8 @@ schema.method('toJSON', function() {
     object.monto_interes = Math.round(ingresos.monto_interes * 100) / 100;
     // object.monto_ahorro_programado = monto_ahorro_programado;
     object.monto_cuota = (ingresos.monto_gasto + ahorros.monto_ahorro_inicial +
-        ingresos.monto_amortizacion_capital + ingresos.monto_interes + ahorros.monto_ahorro_programado).toFixed(2);
+        ingresos.monto_amortizacion_capital + ingresos.monto_interes +
+        ahorros.monto_ahorro_programado + ingresos.monto_mora).toFixed(2);
     // object.monto_cuota = (ingresos.monto_gasto + ahorros.monto_ahorro_inicial +
     //     Math.ceil((ingresos.monto_amortizacion_capital + ingresos.monto_interes + ahorros.monto_ahorro_programado) * 10) / 10).toFixed(2);
 
@@ -334,11 +335,15 @@ schema.method('toJSON', function() {
     object.monto_amortizacion_capital_2 = ingresos.monto_amortizacion_capital;
     object.monto_interes_2 = ingresos.monto_interes;
     object.monto_cuota_2 = (ingresos.monto_gasto + ahorros.monto_ahorro_inicial +
-        ingresos.monto_amortizacion_capital + ingresos.monto_interes + ahorros.monto_ahorro_programado);
+        ingresos.monto_amortizacion_capital + ingresos.monto_interes +
+        ahorros.monto_ahorro_programado).toFixed(2);
     object.monto_ahorro_programado_2 = ahorros.monto_ahorro_programado;
 
     object.monto_cuota_pagada = 0;
     object.monto_ahorro_voluntario = 0;
+    object.monto_pago_mora = 0;
+
+    // console.log(pagos)
 
     for (let j = 0; j < pagos.length; j++) {
 
@@ -352,14 +357,22 @@ schema.method('toJSON', function() {
             object.monto_cuota_pagada += pagos[j].ingresos.monto_interes || 0;
             // object.monto_cuota_pagada += pagos[j].ingresos.monto_mora || 0;
 
-            object.monto_ahorro_voluntario = pagos[j].ahorros.monto_ahorro_voluntario || 0;
+            object.monto_ahorro_voluntario += pagos[j].ahorros.monto_ahorro_voluntario || 0;
+            // console.log(pagos[j].ingresos.monto_mora)
+            object.monto_pago_mora += pagos[j].ingresos.monto_mora || 0;
+            // console.log(object.monto_pago_mora)
+
+
+
         }
     }
+
+    // console.log(pagos[j].ingresos.monto_mora)
 
     object.monto_cuota_pagada = object.monto_cuota_pagada.toFixed(2);
 
     object.monto_ahorro_voluntario = object.monto_ahorro_voluntario.toFixed(2);
-    object.monto_pago_mora = 0;
+    object.monto_pago_mora = object.monto_pago_mora.toFixed(2);
     object.monto_mora = ingresos.monto_mora.toFixed(2);
     return object;
 })

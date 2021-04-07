@@ -1,3 +1,4 @@
+const ObjectId = require('mongoose').Types.ObjectId;
 const Caja = require("../../models/core/seguridad/caja.model");
 const CajaDiario = require("../../models/core/caja/caja-diario.model");
 const OperacionFinanciera = require("../../models/core/registro/operacion-financiera.model");
@@ -288,6 +289,34 @@ const pagarProducto = async(data) => {
 
                 break;
             }
+
+            //const ultima_cuota_pendiente = await OperacionFinancieraDetalle.findOne({ "operacion_financiera": data.operacion_financiera, "estado": { $in: ["Pendiente", "Amortizado"] }, "es_vigente": true, "es_borrado": false });
+
+            const ultima_cuota_pendiente = await OperacionFinancieraDetalle.aggregate(
+                [{
+                        $match: {
+                            "operacion_financiera": new ObjectId(data.operacion_financiera),
+                            // "estado": { $in: ["Pendiente", "Amortizado"] },
+                            "es_vigente": true,
+                            "es_borrado": false
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: "$operacion_financiera",
+                            //maxTotalAmount: { $max: { $multiply: [ "$price", "$quantity" ] } },
+                            cuota: { $max: "$numero_cuota" }
+                        }
+                    }
+                ]
+            )
+
+            const monto_pendiente_residuo = (monto_gasto_a_pagar + monto_ahorro_inicial_a_pagar +
+                monto_ahorro_voluntario_a_pagar + monto_ahorro_programado_a_pagar +
+                monto_amortizacion_capital_a_pagar + monto_interes_a_pagar +
+                monto_mora_a_pagar) - monto_total;
+
+            if (ultima_cuota_pendiente[0].cuota == cuota.numero_cuota && monto_pendiente_residuo.toFixed(2) == 0) cuota.estado = 'Pagado';
         }
 
         if (cuota.numero_cuota === 0 && cuota.estado === 'Pagado')
