@@ -70,6 +70,19 @@ const getMenu = (rol) => {
         });
     }
 
+    // if (rol.includes('Administrador')) {
+    //     menu.push({
+    //         opcion: 'Reportes',
+    //         icono: 'mdi mdi-briefcase',
+    //         submenu: [
+    //             { opcion: 'Consultar Cajas Individuales', url: '/caja/pago/cajas-lista' },
+    //             // { opcion: 'Libro Diario - Ingresos', url: '/reporte/libro-diario/ingresos' },
+    //             // { opcion: 'Libro Diario - Egresos', url: '/reporte/libro-diario/egresos' },
+    //             { opcion: 'Saldo de Créditos', url: '/reporte/analista/saldo-creditos' },
+    //         ]
+    //     });
+    // }
+
     return menu;
 }
 

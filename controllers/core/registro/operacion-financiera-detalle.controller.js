@@ -178,7 +178,8 @@ const obtener_ahorros = async(req, res) => {
             [{
                     $match: {
                         operacion_financiera: id,
-                        estado: "Pagado",
+                        // estado: "Pagado",
+                        "estado": { $in: ["Pagado", "Vigente"] },
                         es_vigente: true,
                         es_borrado: false
                     }
