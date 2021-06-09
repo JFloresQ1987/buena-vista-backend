@@ -14,8 +14,8 @@ const pagarProducto = async(data) => {
     const recibo = data.data_validacion.recibo;
     const now = dayjs();
 
-    let monto_recibido_actual = data.monto_recibido;
-    let monto_ahorro_voluntario_actual = data.monto_ahorro_voluntario;
+    let monto_recibido_actual = Number(data.monto_recibido);
+    let monto_ahorro_voluntario_actual = Number(data.monto_ahorro_voluntario);
     let monto_total = 0;
     let monto_total_gasto = 0;
     let monto_total_ahorro_inicial = 0;
@@ -95,13 +95,13 @@ const pagarProducto = async(data) => {
         let monto_interes_a_pagar = cuota.ingresos.monto_interes - monto_interes_pagado;
         let monto_mora_a_pagar = cuota.ingresos.monto_mora - monto_mora_pagado;
 
-        const monto_total_cuota_a_pagar = (monto_gasto_a_pagar +
+        const monto_total_cuota_a_pagar = Number((monto_gasto_a_pagar +
             monto_ahorro_inicial_a_pagar +
             monto_ahorro_voluntario_a_pagar +
             monto_ahorro_programado_a_pagar +
             monto_amortizacion_capital_a_pagar +
             monto_interes_a_pagar +
-            monto_mora_a_pagar).toFixed(2);
+            monto_mora_a_pagar).toFixed(2));
 
         // const monto_total_cuota_a_pagar = monto_gasto_a_pagar +
         //     monto_ahorro_inicial_a_pagar +
@@ -174,6 +174,11 @@ const pagarProducto = async(data) => {
         } else {
 
             cuota.estado = 'Amortizado';
+            let monto_cuota_a_pagar = monto_ahorro_voluntario_a_pagar + monto_mora_a_pagar +
+                monto_interes_a_pagar + monto_amortizacion_capital_a_pagar +
+                monto_ahorro_programado_a_pagar + monto_ahorro_inicial_a_pagar +
+                monto_gasto_a_pagar;
+            let monto_cuota_a_amortizar = 0;
 
             if (monto_recibido_actual >= 0.1) {
 
@@ -280,11 +285,18 @@ const pagarProducto = async(data) => {
                     }
                 });
 
-                monto_total += monto_gasto_a_amortizar + monto_ahorro_inicial_a_amortizar +
+                monto_cuota_a_amortizar = monto_gasto_a_amortizar + monto_ahorro_inicial_a_amortizar +
                     // monto_ahorro_voluntario_a_amortizar + monto_total_cuota +
                     monto_ahorro_voluntario_a_amortizar + monto_ahorro_programado_a_amortizar +
                     monto_amortizacion_capital_a_amortizar + monto_interes_a_amortizar +
-                    monto_mora_a_amortizar; // + parseInt(monto_ahorro_voluntario);
+                    monto_mora_a_amortizar;
+
+                // monto_total += monto_gasto_a_amortizar + monto_ahorro_inicial_a_amortizar +
+                //     // monto_ahorro_voluntario_a_amortizar + monto_total_cuota +
+                //     monto_ahorro_voluntario_a_amortizar + monto_ahorro_programado_a_amortizar +
+                //     monto_amortizacion_capital_a_amortizar + monto_interes_a_amortizar +
+                //     monto_mora_a_amortizar; // + parseInt(monto_ahorro_voluntario);
+                monto_total += monto_cuota_a_amortizar;
 
                 monto_total_gasto += monto_gasto_a_amortizar;
                 monto_total_ahorro_inicial += monto_ahorro_inicial_a_amortizar;
@@ -319,12 +331,14 @@ const pagarProducto = async(data) => {
             //     ]
             // )
 
-            const monto_pendiente_residuo = (monto_gasto_a_pagar + monto_ahorro_inicial_a_pagar +
-                monto_ahorro_voluntario_a_pagar + monto_ahorro_programado_a_pagar +
-                monto_amortizacion_capital_a_pagar + monto_interes_a_pagar +
-                monto_mora_a_pagar) - monto_total;
+            // const monto_pendiente_residuo = (monto_gasto_a_pagar + monto_ahorro_inicial_a_pagar +
+            //     monto_ahorro_voluntario_a_pagar + monto_ahorro_programado_a_pagar +
+            //     monto_amortizacion_capital_a_pagar + monto_interes_a_pagar +
+            //     monto_mora_a_pagar) - monto_total;
 
-            if (monto_pendiente_residuo.toFixed(2) == 0) cuota.estado = 'Pagado';
+            const monto_pendiente_residuo = monto_cuota_a_pagar - monto_cuota_a_amortizar;
+
+            if (Number(monto_pendiente_residuo.toFixed(2)) == 0) cuota.estado = 'Pagado';
 
             // if (ultima_cuota_pendiente[0].cuota == cuota.numero_cuota && monto_pendiente_residuo.toFixed(2) == 0) cuota.estado = 'Pagado';
         }
@@ -361,8 +375,6 @@ const pagarProducto = async(data) => {
                                 }
                             }*/
         });
-
-    // console.log(model_operacion_financiera)
 
     // const producto = await Producto.findById(model_operacion_financiera.producto.tipo);
     // const persona = await Persona.findById(model_operacion_financiera.persona);
