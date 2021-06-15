@@ -38,6 +38,7 @@ const getMenu = (rol) => {
             icono: 'mdi mdi-gauge',
             submenu: [
                 { opcion: 'Registrar Recaudación', url: '/analista/gestion/producto-pre-pago' },
+                { opcion: 'Registrar Recaudación de Ahorros', url: '/analista/gestion/ahorro-pre-pago' },
             ]
         });
     }

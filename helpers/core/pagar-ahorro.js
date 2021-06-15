@@ -142,8 +142,10 @@ const pagarAhorro = async(data) => {
         estado: 'Abierto'
     };
 
+
     modelo.recibo = {
-        estado: 'Vigente',
+        // estado: 'Vigente',
+        estado: data.es_masivo ? 'Previgente' : 'Vigente',
         local_atencion: recibo.local_atencion,
         documento_identidad_cajero: data.data_validacion.documento_identidad_cajero, //TODO verificar
         serie: recibo.serie,

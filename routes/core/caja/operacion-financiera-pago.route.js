@@ -10,6 +10,7 @@ const {
     desembolsar_operacion_financiera,
     anular_recibo,
     pagar_operacion_financiera_por_analista,
+    pagar_ahorro_por_analista,
     confirmar_pago_analista,
     crear_pagar_ahorro,
     pagar_ahorro,
@@ -93,6 +94,23 @@ router.post(
         validarCampos,
     ],
     pagar_operacion_financiera_por_analista
+);
+
+router.post(
+    "/pre-pagar-ahorro-por-analista", [
+        validarJWT,
+        // check('documento_identidad', 'El documento de identidad es obligatorio').notEmpty(),
+        // check('nombre', 'El nombre es obligatorio').notEmpty(),
+        // check('apellido_paterno', 'El apellido paterno es obligatorio').notEmpty(),
+        // check('apellido_materno', 'El apellido materno es obligatorio').notEmpty(),
+        // check('fecha_nacimiento', 'La fecha de nacimiento es obligatorio').notEmpty(),
+        // check('es_masculino', 'La fecha de nacimiento es obligatorio').notEmpty(),
+        // check('domicilio', 'El domicilio es obligatorio').notEmpty(),
+        // check('referencia_domicilio', 'La referencia del domicilio es obligatorio').notEmpty(),
+        // check('comentario', 'El comentario es obligatorio').notEmpty(),
+        validarCampos,
+    ],
+    pagar_ahorro_por_analista
 );
 
 router.put("/confirmar-pago-analista/:analista", [validarJWT], confirmar_pago_analista);

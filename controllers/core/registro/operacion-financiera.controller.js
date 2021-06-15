@@ -195,7 +195,7 @@ const obtener_ahorros_producto_por_persona = async(req, res) => {
                         "persona": id,
                         // "estado": { $in: estado },
                         // "estado": "Pagado",
-                        "estado": { $in: ["Pagado", "Vigente"] },
+                        "estado": { $in: ["Pagado", "Vigente", "Amortizado"] },
                         "es_vigente": true,
                         "es_borrado": false
                     }

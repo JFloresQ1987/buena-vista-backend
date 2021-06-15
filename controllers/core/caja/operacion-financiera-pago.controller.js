@@ -1079,7 +1079,7 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
             usuario: req.header('usuario_sesion'),
             nombre: req.header('nombre_sesion'),
             fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
-            comentario: 'Pre pago realizado por analista'
+            comentario: 'Pre pago de producto realizado por analista'
         };
 
         const ultimo_recibo = parseInt(resultado_validacion.recibo.numero.split("-").pop());
@@ -1138,6 +1138,148 @@ const pagar_operacion_financiera_por_analista = async(req, res = response) => {
     } catch (error) {
 
         const controller = "operacion-financiera-pago.controller.js -> pagar_operacion_financiera_por_analista";
+        logger.logError(controller, req, error);
+
+        return res.status(500).json({
+            ok: false,
+            msg: getMessage('msgError500')
+        });
+    }
+}
+
+const pagar_ahorro_por_analista = async(req, res = response) => {
+
+    // const { id_operacion_financiera } = req.body;
+    const id_usuario_sesion = req.header('id_usuario_sesion');
+    const local_atencion = req.header("local_atencion");
+    const ip = requestIp.getClientIp(req).replace('::ffff:', '');
+    const now = dayjs();
+
+    // const {
+    //     lista
+    // } = req.body;
+
+    const {
+        // operacion_financiera,
+        // monto_ahorro_voluntario,
+        // monto_recibido,
+        // cuotas,
+        // id_socio,
+        // documento_identidad_socio,
+        // nombres_apellidos_socio
+        lista
+    } = req.body;
+
+    try {
+
+        const data_validacion = {
+            ip: ip,
+            id_usuario_sesion: id_usuario_sesion,
+            local_atencion: local_atencion,
+            es_ingreso: true,
+            es_masivo: true
+        };
+
+        // console.log(lista)
+
+        const resultado_validacion = await validarPago(data_validacion);
+
+        // console.log(resultado_validacion)
+
+        if (!resultado_validacion.ok)
+            return res.status(400).json(resultado_validacion)
+
+        // const data = {
+        //     data_validacion: resultado_validacion,
+        //     monto_recibido: monto_recibido,
+        //     monto_ahorro_voluntario: monto_ahorro_voluntario,
+        //     modelo_pago_operacion_financiera: req.body,
+        //     cuotas: cuotas,
+        //     id_socio: id_socio,
+        //     operacion_financiera: operacion_financiera
+        // };
+
+        // const recibo = resultado_validacion.recibo;
+
+        // const resultado_pago = await pagarProducto(data);
+
+        // // const operaion_financiera = req.params.id;
+        // const now = dayjs();
+        // const {
+        //     lista
+        // } = req.body;
+
+        // try {
+
+        const comentario = {
+            tipo: 'Nuevo',
+            id_usuario: req.header('id_usuario_sesion'),
+            usuario: req.header('usuario_sesion'),
+            nombre: req.header('nombre_sesion'),
+            fecha: now.format('DD/MM/YYYY hh:mm:ss a'),
+            comentario: 'Pre pago de ahorro realizado por analista'
+        };
+
+        const ultimo_recibo = parseInt(resultado_validacion.recibo.numero.split("-").pop());
+
+        // console.log(lista)
+
+        for (let i = 0; i < lista.length; i++) {
+
+            const operacion_financiera = await OperacionFinanciera.findById(lista[i].operacion_financiera);
+            // const cuotas = await OperacionFinancieraDetalle.find({
+            //         // 'operacion_financiera': new ObjectId(operacion_financiera.operacion_financiera),
+            //         'operacion_financiera': lista[i].operacion_financiera,
+            //         // "operacion_financiera": "5f852f40f1ba56266499fbb3",
+            //         "estado": { $in: ["Pendiente", "Amortizado"] },
+            //         "es_vigente": true,
+            //         "es_borrado": false
+            //     }, '_id')
+            //     .sort({ "numero_cuota": 1 });
+
+            // let cuotas_procesada = [];
+
+            // for (let j = 0; j < cuotas.length; j++) {
+
+            //     cuotas_procesada.push(cuotas[j]._id);
+            // }
+
+            const correlativo_recibo = ultimo_recibo + i;
+            // const correlativo_recibo = parseInt(resultado_validacion.recibo.numero.split("-").pop()) + i;
+            resultado_validacion.recibo.numero = "I-" + correlativo_recibo.toString().padStart(8, "00000000");
+            // console.log("recibo", resultado_validacion.recibo.numero)
+            // console.log("correlativo_recibo", correlativo_recibo)
+
+            // numero_recibo = parseInt(resultado_validacion.recibo.numero.split("-").pop()) + i;
+
+
+            const data = {
+                data_validacion: resultado_validacion,
+                monto_recibido: lista[i].monto_recibido,
+                // monto_ahorro_voluntario: lista[i].monto_ahorro_voluntario,
+                // modelo_pago_operacion_financiera: req.body,
+                // cuotas: cuotas_procesada,
+                id_socio: operacion_financiera.persona,
+                operacion_financiera: lista[i].operacion_financiera,
+                es_masivo: true,
+                es_ingreso: true,
+                comentario: comentario
+            };
+
+            // console.log(data)
+
+            const resultado_pago = await pagarAhorro(data);
+        }
+
+        return res.json({
+            ok: true,
+            // recibo: 'Anulación satisfactoriamente.',
+            msg: 'Se registró satisfactoriamente.'
+        });
+
+    } catch (error) {
+
+        const controller = "operacion-financiera-pago.controller.js -> pagar_ahorro_por_analista";
         logger.logError(controller, req, error);
 
         return res.status(500).json({
@@ -1373,7 +1515,7 @@ const crear_pagar_ahorro = async(req, res) => {
             // cuota: cuota,
             id_socio: modelo.persona,
             operacion_financiera: modelo.id,
-            // es_masivo: false,
+            es_masivo: true,
             es_ingreso: true,
             comentario: comentario_2
         };
@@ -1548,7 +1690,7 @@ const pagar_ahorro = async(req, res) => {
             // cuota: cuota,
             id_socio: id_socio,
             operacion_financiera: operacion_financiera,
-            // es_masivo: false,
+            es_masivo: false,
             es_ingreso: es_ingreso,
             comentario: comentario
         };
@@ -2018,6 +2160,7 @@ module.exports = {
     desembolsar_operacion_financiera,
     anular_recibo,
     pagar_operacion_financiera_por_analista,
+    pagar_ahorro_por_analista,
     confirmar_pago_analista,
     crear_pagar_ahorro,
     pagar_ahorro,
