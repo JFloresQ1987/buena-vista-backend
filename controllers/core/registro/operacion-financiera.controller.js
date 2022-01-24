@@ -451,6 +451,7 @@ const anular = async(req, res = response) => {
 
         const pago = await PagoOperacionFinanciera.findOne({
             "producto.operacion_financiera": id,
+            "recibo.estado": "Vigente",
             es_vigente: true,
             es_borrado: false,
         });
